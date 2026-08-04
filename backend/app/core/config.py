@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "SUPER_SECRET_FINTECH_KEY_XAI_2026_IDEA_LAB"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 24 hours
     
-    BASE_DIR: str = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    BASE_DIR: str = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
     DATABASE_URL: str = f"sqlite:///{os.path.join(BASE_DIR, 'loan_advisor.db')}"
     
     MODEL_PATH: str = os.path.join(BASE_DIR, "ml_engine", "artifacts", "model.joblib")

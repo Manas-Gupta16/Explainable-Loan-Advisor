@@ -1,0 +1,53 @@
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+from passlib.context import CryptContext
+from jose import jwt
+import datetime
+
+from backend.app.db.database import get_db
+from backend.app.db.models import User
+from backend.app.schemas.loan import UserCreate, UserLogin, UserResponse, Token
+from backend.app.core.config import settings
+
+router = APIRouter(prefix="/auth", tags=["Authentication"])
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def hash_password(password: str) -> str:
+    return pwd_context.hash(password)
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    return pwd_context.verify(plain_password, hashed_password)
+
+def create_access_token(data: dict):
+    to_encode = data.copy()
+    expire = datetime.datetime.utcnow() + datetime.timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, settings.SECRET_KEY, algorithm="HS256")
+
+@router.post("/register", response_model=Token)
+def register(user_in: UserCreate, db: Session = Depends(get_db)):
+    existing = db.query(User).filter(User.email == user_in.email).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="User with this email already exists.")
+
+    user = User(
+        email=user_in.email,
+        full_name=user_in.full_name,
+        hashed_password=hash_password(user_in.password),
+        role=user_in.role or "CUSTOMER"
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    token = create_access_token({"sub": str(user.id), "role": user.role})
+    return Token(access_token=token, user=UserResponse.from_orm(user))
+
+@router.post("/login", response_model=Token)
+def login(credentials: UserLogin, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == credentials.email).first()
+    if not user or not verify_password(credentials.password, user.hashed_password):
+        raise HTTPException(status_code=401, detail="Invalid email or password.")
+
+    token = create_access_token({"sub": str(user.id), "role": user.role})
+    return Token(access_token=token, user=UserResponse.from_orm(user))

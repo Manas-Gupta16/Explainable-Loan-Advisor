@@ -1,10 +1,10 @@
 {
   "metrics": {
-    "accuracy": 0.894,
-    "precision": 0.8961038961038961,
-    "recall": 0.8771186440677966,
-    "f1_score": 0.8865096359743041,
-    "roc_auc": 0.9657606253210067
+    "accuracy": 0.883,
+    "precision": 0.880085653104925,
+    "recall": 0.8707627118644068,
+    "f1_score": 0.8753993610223643,
+    "roc_auc": 0.9567202747817154
   },
   "feature_names": [
     "cibil_score",
@@ -38,5 +38,5 @@
     5000,
     14
   ],
-  "model_type": "XGBoostClassifier"
+  "model_type": "RandomForestClassifier"
 }

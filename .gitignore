@@ -13,6 +13,7 @@ ENV/
 *.db
 *.sqlite3
 *.log
+.pytest_cache/
 
 # Environment variables
 .env

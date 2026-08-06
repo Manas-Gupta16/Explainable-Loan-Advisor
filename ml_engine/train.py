@@ -5,7 +5,13 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
-from xgboost import XGBClassifier
+try:
+    from xgboost import XGBClassifier
+    HAS_XGBOOST = True
+except Exception:
+    HAS_XGBOOST = False
+
+from sklearn.ensemble import RandomForestClassifier
 
 from ml_engine.data.loader import load_and_normalize_dataset
 from ml_engine.data.generate_dataset import generate_loan_dataset
@@ -34,20 +40,31 @@ def train_model():
         X_processed, y, test_size=0.2, random_state=42, stratify=y
     )
 
-    print(f"Training XGBoost Model on {len(X_train)} samples with {X_train.shape[1]} features...")
+    model_type = 'XGBoostClassifier'
+    if HAS_XGBOOST:
+        try:
+            scale_pos_weight = (len(y_train) - sum(y_train)) / max(sum(y_train), 1)
+            model = XGBClassifier(
+                n_estimators=150,
+                max_depth=5,
+                learning_rate=0.05,
+                scale_pos_weight=scale_pos_weight,
+                random_state=42,
+                eval_metric='logloss'
+            )
+            model.fit(X_train, y_train)
+        except Exception as e:
+            print(f"XGBoost runtime load failed: {e}. Falling back to RandomForestClassifier...")
+            model = RandomForestClassifier(n_estimators=150, max_depth=8, random_state=42, class_weight='balanced')
+            model.fit(X_train, y_train)
+            model_type = 'RandomForestClassifier'
+    else:
+        print("XGBoost library unavailable. Training RandomForestClassifier fallback...")
+        model = RandomForestClassifier(n_estimators=150, max_depth=8, random_state=42, class_weight='balanced')
+        model.fit(X_train, y_train)
+        model_type = 'RandomForestClassifier'
 
-    scale_pos_weight = (len(y_train) - sum(y_train)) / max(sum(y_train), 1)
-
-    model = XGBClassifier(
-        n_estimators=150,
-        max_depth=5,
-        learning_rate=0.05,
-        scale_pos_weight=scale_pos_weight,
-        random_state=42,
-        eval_metric='logloss'
-    )
-
-    model.fit(X_train, y_train)
+    print(f"Trained {model_type} on {len(X_train)} samples with {X_train.shape[1]} features...")
 
     # Evaluate
     y_pred = model.predict(X_test)
@@ -77,7 +94,7 @@ def train_model():
         'metrics': metrics,
         'feature_names': preprocessor.feature_names,
         'dataset_shape': df.shape,
-        'model_type': 'XGBoostClassifier'
+        'model_type': model_type
     }
     with open(metadata_path, 'w') as f:
         json.dump(metadata, f, indent=2)

@@ -1,22 +1,24 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from passlib.context import CryptContext
-from jose import jwt
 import datetime
-
+import bcrypt
+from jose import jwt
 from backend.app.db.database import get_db
 from backend.app.db.models import User
 from backend.app.schemas.loan import UserCreate, UserLogin, UserResponse, Token
 from backend.app.core.config import settings
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    pwd_bytes = password.encode('utf-8')[:72]
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(pwd_bytes, salt).decode('utf-8')
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+    pwd_bytes = plain_password.encode('utf-8')[:72]
+    hashed_bytes = hashed_password.encode('utf-8')
+    return bcrypt.checkpw(pwd_bytes, hashed_bytes)
 
 def create_access_token(data: dict):
     to_encode = data.copy()

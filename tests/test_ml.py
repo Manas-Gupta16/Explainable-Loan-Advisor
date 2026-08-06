@@ -32,6 +32,8 @@ class TestMLEngine(unittest.TestCase):
         base_dir = os.path.dirname(os.path.dirname(__file__))
         model_path = os.path.join(base_dir, 'ml_engine', 'artifacts', 'model.joblib')
         preprocessor_path = os.path.join(base_dir, 'ml_engine', 'artifacts', 'preprocessor.joblib')
+        if not os.path.exists(model_path) or not os.path.exists(preprocessor_path):
+            train_model()
         
         manager = XAIExplainerManager(model_path, preprocessor_path)
         sample_input = {

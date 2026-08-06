@@ -13,7 +13,7 @@ router = APIRouter(prefix="/customer", tags=["Customer Portal"])
 
 @router.post("/apply", response_model=Dict[str, Any])
 def submit_application(app_in: LoanApplicationCreate, user_id: int = 1, db: Session = Depends(get_db)):
-    input_dict = app_in.dict()
+    input_dict = app_in.model_dump()
 
     # 1. Run ML Inference
     prob, risk_tier, status = ml_service.predict_risk(input_dict)
@@ -60,7 +60,7 @@ def submit_application(app_in: LoanApplicationCreate, user_id: int = 1, db: Sess
 @router.post("/sandbox")
 def run_sandbox_simulation(app_in: LoanApplicationCreate):
     """Real-time parametric sandbox simulation for interactive sliders."""
-    input_dict = app_in.dict()
+    input_dict = app_in.model_dump()
     prob, risk_tier, status = ml_service.predict_risk(input_dict)
     bank_recs = evaluate_bank_recommendations(input_dict, prob)
     shap_data = ml_service.get_shap_explanation(input_dict)
@@ -84,7 +84,7 @@ def get_application_details(app_id: int, db: Session = Depends(get_db)):
     dice_data = json.loads(xai.dice_roadmap) if xai and xai.dice_roadmap else {}
 
     return {
-        "application": LoanApplicationResponse.from_orm(app_obj),
+        "application": LoanApplicationResponse.model_validate(app_obj),
         "shap_explanation": shap_data,
         "dice_roadmap": dice_data
     }

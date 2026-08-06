@@ -19,7 +19,7 @@ def get_applicant_queue(
         query = query.filter(LoanApplication.status == status_filter.upper())
 
     applications = query.order_by(LoanApplication.created_at.desc()).all()
-    return [LoanApplicationResponse.from_orm(app) for app in applications]
+    return [LoanApplicationResponse.model_validate(app) for app in applications]
 
 @router.post("/decision/{app_id}")
 def update_loan_decision(app_id: int, decision: DecisionUpdate, db: Session = Depends(get_db)):
@@ -40,5 +40,5 @@ def update_loan_decision(app_id: int, decision: DecisionUpdate, db: Session = De
 
     return {
         "message": f"Application {app_id} status updated to {decision.status}",
-        "application": LoanApplicationResponse.from_orm(app_obj)
+        "application": LoanApplicationResponse.model_validate(app_obj)
     }

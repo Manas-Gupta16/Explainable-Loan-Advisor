@@ -1,5 +1,5 @@
 import os
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Explainable Loan Advisor & Risk System"
@@ -16,7 +16,6 @@ class Settings(BaseSettings):
     PREPROCESSOR_PATH: str = os.path.join(BASE_DIR, "ml_engine", "artifacts", "preprocessor.joblib")
     METADATA_PATH: str = os.path.join(BASE_DIR, "ml_engine", "artifacts", "metadata.json")
 
-    class Config:
-        case_sensitive = True
+    model_config = SettingsConfigDict(case_sensitive=True)
 
 settings = Settings()

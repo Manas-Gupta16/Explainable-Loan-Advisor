@@ -151,8 +151,17 @@ Navigate to `http://127.0.0.1:8000/docs` to test endpoints via Swagger UI.
 | `POST` | `/api/v1/auth/login` | Authenticate user and issue JWT token |
 | `POST` | `/api/v1/customer/apply` | Submit application, run risk prediction, compute bank matches & XAI |
 | `POST` | `/api/v1/customer/sandbox` | Real-time parametric slider simulation without persisting data |
+| `POST` | `/api/v1/customer/coach-advice` | LLM-powered personalized conversational advice & 30-90-180 day milestones |
+| `POST` | `/api/v1/customer/upload-documents/{id}` | OCR extraction on pay stubs / tax forms with fraud discrepancy check |
+| `GET`  | `/api/v1/customer/document-status/{id}` | Retrieve document extraction logs and fraud risk score |
+| `POST` | `/api/v1/customer/open-banking/connect` | Connect Open Banking feed, compute Monthly Free Cash Flow & DSCR |
+| `POST` | `/api/v1/customer/stress-test` | Simulate macroeconomic shocks (rate hike, inflation surge, stagflation) |
 | `GET`  | `/api/v1/bank/queue` | Retrieve all applicant requests for underwriter review |
 | `POST` | `/api/v1/bank/decision/{id}` | Underwriter manual approval/rejection decision with notes |
+| `GET`  | `/api/v1/bank/fairness-audit` | ECOA compliance audit (Disparate Impact Ratio, Four-Fifths rule, Equalized Odds) |
+| `GET`  | `/api/v1/bank/model-monitoring` | Population Stability Index (PSI) data drift & concept drift health check |
+| `POST` | `/api/v1/bank/trigger-retrain` | Trigger automated model retraining and metric recalibration pipeline |
+| `POST` | `/api/v1/bank/stress-test-batch` | Simulate macro shocks across the entire underwriting portfolio |
 | `GET`  | `/api/v1/xai/shap/{id}` | Fetch SHAP feature contribution breakdown for an application |
 | `GET`  | `/api/v1/xai/dice/{id}` | Fetch DiCE counterfactual approval roadmap |
 
@@ -160,3 +169,4 @@ Navigate to `http://127.0.0.1:8000/docs` to test endpoints via Swagger UI.
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+

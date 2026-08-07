@@ -47,6 +47,9 @@ class LoanApplication(Base):
 
     applicant = relationship("User", back_populates="applications")
     xai_logs = relationship("XAILog", back_populates="application", uselist=False)
+    doc_verifications = relationship("DocumentVerification", back_populates="application")
+    open_banking_profiles = relationship("OpenBankingProfile", back_populates="application")
+    stress_test_logs = relationship("StressTestLog", back_populates="application")
 
 class BankCriteria(Base):
     __tablename__ = "bank_criteria"
@@ -69,3 +72,77 @@ class XAILog(Base):
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     application = relationship("LoanApplication", back_populates="xai_logs")
+
+class DocumentVerification(Base):
+    __tablename__ = "document_verifications"
+
+    id = Column(Integer, primary_key=True, index=True)
+    application_id = Column(Integer, ForeignKey("loan_applications.id"), nullable=False)
+    document_type = Column(String, default="PAY_SLIP")  # PAY_SLIP, TAX_FORM_16, BANK_STATEMENT
+    file_name = Column(String, nullable=False)
+    extracted_monthly_income = Column(Float, nullable=True)
+    declared_monthly_income = Column(Float, nullable=False)
+    extracted_employer = Column(String, nullable=True)
+    extracted_tax_id = Column(String, nullable=True)
+    discrepancy_ratio = Column(Float, default=0.0)
+    verification_status = Column(String, default="VERIFIED")  # VERIFIED, SUSPECT_MISMATCH, FRAUD_FLAGGED
+    fraud_risk_score = Column(Float, default=0.0)  # 0.0 to 1.0
+    audit_notes = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+    application = relationship("LoanApplication", back_populates="doc_verifications")
+
+class OpenBankingProfile(Base):
+    __tablename__ = "open_banking_profiles"
+
+    id = Column(Integer, primary_key=True, index=True)
+    application_id = Column(Integer, ForeignKey("loan_applications.id"), nullable=False)
+    account_number_mask = Column(String, default="XXXX-XXXX-8921")
+    avg_monthly_inflow = Column(Float, nullable=False)
+    avg_monthly_outflow = Column(Float, nullable=False)
+    monthly_free_cashflow = Column(Float, nullable=False)
+    debt_service_coverage_ratio = Column(Float, nullable=False)  # DSCR
+    salary_credit_stability_index = Column(Float, default=1.0)  # 0.0 to 1.0
+    cashflow_quality_grade = Column(String, default="PRIME")  # PRIME, MODERATE, STRESSED
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+    application = relationship("LoanApplication", back_populates="open_banking_profiles")
+
+class FairnessAuditLog(Base):
+    __tablename__ = "fairness_audit_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    audit_timestamp = Column(DateTime, default=datetime.datetime.utcnow)
+    disparate_impact_ratio = Column(Float, nullable=False)
+    demographic_parity_diff = Column(Float, nullable=False)
+    equalized_odds_diff = Column(Float, nullable=False)
+    four_fifths_rule_compliant = Column(String, default="PASSED")  # PASSED or VIOLATED
+    protected_attribute = Column(String, default="gender")
+    detailed_metrics_json = Column(Text, nullable=True)
+
+class ModelMonitoringLog(Base):
+    __tablename__ = "model_monitoring_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    batch_timestamp = Column(DateTime, default=datetime.datetime.utcnow)
+    batch_size = Column(Integer, nullable=False)
+    overall_psi = Column(Float, nullable=False)  # Population Stability Index
+    drift_status = Column(String, default="HEALTHY")  # HEALTHY, MODERATE_DRIFT, CRITICAL_RETRAIN_REQUIRED
+    drift_details_json = Column(Text, nullable=True)
+
+class StressTestLog(Base):
+    __tablename__ = "stress_test_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    application_id = Column(Integer, ForeignKey("loan_applications.id"), nullable=False)
+    scenario_name = Column(String, nullable=False)  # RATE_HIKE, INFLATION_SURGE, INCOME_SHOCK, STAGFLATION
+    simulated_interest_rate_delta = Column(Float, default=0.0)
+    simulated_inflation_cost_delta = Column(Float, default=0.0)
+    simulated_income_shock_pct = Column(Float, default=0.0)
+    baseline_approval_prob = Column(Float, nullable=False)
+    stressed_approval_prob = Column(Float, nullable=False)
+    stressed_dti_ratio = Column(Float, nullable=False)
+    resilience_grade = Column(String, default="RESILIENT")  # RESILIENT, VULNERABLE, HIGH_DEFAULT_RISK
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+    application = relationship("LoanApplication", back_populates="stress_test_logs")

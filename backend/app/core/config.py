@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     
     MODEL_PATH: str = os.path.join(BASE_DIR, "ml_engine", "artifacts", "model.joblib")
     PREPROCESSOR_PATH: str = os.path.join(BASE_DIR, "ml_engine", "artifacts", "preprocessor.joblib")
+    CONFORMAL_PATH: str = os.path.join(BASE_DIR, "ml_engine", "artifacts", "conformal.joblib")
     METADATA_PATH: str = os.path.join(BASE_DIR, "ml_engine", "artifacts", "metadata.json")
 
     model_config = SettingsConfigDict(case_sensitive=True)

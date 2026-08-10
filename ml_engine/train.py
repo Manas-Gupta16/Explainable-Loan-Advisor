@@ -82,6 +82,12 @@ def train_model():
     for k, v in metrics.items():
         print(f"  {k.upper()}: {v:.4f}")
 
+    from ml_engine.conformal import ConformalPredictor
+    conformal_predictor = ConformalPredictor(model=model, preprocessor=preprocessor)
+    conformal_predictor.calibrate(X_test, y_test)
+    conformal_path = os.path.join(artifacts_dir, 'conformal.joblib')
+    conformal_predictor.save(conformal_path)
+
     # Save artifacts
     model_path = os.path.join(artifacts_dir, 'model.joblib')
     preprocessor_path = os.path.join(artifacts_dir, 'preprocessor.joblib')
@@ -94,7 +100,8 @@ def train_model():
         'metrics': metrics,
         'feature_names': preprocessor.feature_names,
         'dataset_shape': df.shape,
-        'model_type': model_type
+        'model_type': model_type,
+        'has_conformal_calibrator': True
     }
     with open(metadata_path, 'w') as f:
         json.dump(metadata, f, indent=2)

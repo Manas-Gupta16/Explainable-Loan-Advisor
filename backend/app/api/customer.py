@@ -4,8 +4,14 @@ from sqlalchemy.orm import Session
 from typing import List, Dict, Any
 
 from backend.app.db.database import get_db
-from backend.app.db.models import LoanApplication, XAILog
-from backend.app.schemas.loan import LoanApplicationCreate, LoanApplicationResponse, BankRecommendation
+from backend.app.db.models import LoanApplication, XAILog, StressTestLog
+from backend.app.schemas.loan import (
+    LoanApplicationCreate, 
+    LoanApplicationResponse, 
+    BankRecommendation,
+    ConformalPredictionRequest,
+    ConformalPredictionResponse
+)
 from backend.app.services.ml_service import ml_service
 from backend.app.services.bank_service import evaluate_bank_recommendations
 
@@ -306,4 +312,46 @@ def run_macro_stress_test(test_in: StressTestRequest, db: Session = Depends(get_
         db.commit()
 
     return StressTestResponse(**res)
+
+@router.post("/conformal-predict", response_model=ConformalPredictionResponse)
+def evaluate_conformal_uncertainty(
+    req: ConformalPredictionRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    Computes calibrated prediction sets (Gamma^alpha) and epistemic uncertainty
+    quantification at user-specified confidence level (e.g. 95%).
+    """
+    from backend.app.services.conformal_service import conformal_service
+    
+    if req.loan_input:
+        input_dict = req.loan_input.model_dump()
+    elif req.application_id:
+        app_obj = db.query(LoanApplication).filter(LoanApplication.id == req.application_id).first()
+        if not app_obj:
+            raise HTTPException(status_code=404, detail="Application not found.")
+        input_dict = {
+            'cibil_score': app_obj.cibil_score,
+            'applicant_income': app_obj.applicant_income,
+            'coapplicant_income': app_obj.coapplicant_income,
+            'loan_amount': app_obj.loan_amount,
+            'loan_tenure_months': app_obj.loan_tenure_months,
+            'existing_debts': app_obj.existing_debts,
+            'credit_card_utilization': app_obj.credit_card_utilization,
+            'delinquent_lines_2yrs': app_obj.delinquent_lines_2yrs,
+            'credit_history_years': app_obj.credit_history_years,
+            'employment_status': app_obj.employment_status,
+            'education': app_obj.education,
+            'home_ownership': app_obj.home_ownership,
+            'loan_purpose': app_obj.loan_purpose
+        }
+    else:
+        raise HTTPException(status_code=400, detail="Must provide either loan_input or application_id.")
+
+    result = conformal_service.evaluate_uncertainty(
+        input_dict=input_dict,
+        confidence_level=req.confidence_level
+    )
+    return ConformalPredictionResponse(**result)
+
 

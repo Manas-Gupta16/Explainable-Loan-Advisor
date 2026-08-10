@@ -214,3 +214,38 @@ class StressTestResponse(BaseModel):
     resilience_grade: str  # "HIGHLY_RESILIENT", "MODERATELY_VULNERABLE", "HIGH_DEFAULT_RISK"
     stress_verdict_notes: str
 
+# --- Conformal Prediction & Epistemic Uncertainty Schemas ---
+class CalibratedInterval(BaseModel):
+    lower_bound: float
+    upper_bound: float
+    interval_width: float
+
+class ConformalMetrics(BaseModel):
+    p_value_rejected: float
+    p_value_approved: float
+    confidence: float
+    credibility: float
+    epistemic_uncertainty_score: float
+    ood_z_score_max: float
+    is_out_of_distribution: bool
+
+class ConformalTriage(BaseModel):
+    category: str  # "CONFIDENT_APPROVAL", "CONFIDENT_REJECTION", "BORDERLINE_UNCERTAIN", "OUT_OF_DISTRIBUTION"
+    recommendation: str
+    requires_human_override: bool
+
+class ConformalPredictionRequest(BaseModel):
+    loan_input: Optional[LoanApplicationCreate] = None
+    application_id: Optional[int] = None
+    confidence_level: float = Field(default=0.95, ge=0.50, le=0.99)
+
+class ConformalPredictionResponse(BaseModel):
+    point_probability: float
+    confidence_level: float
+    calibrated_interval: CalibratedInterval
+    conformal_prediction_set: List[int]
+    conformal_set_labels: List[str]
+    metrics: ConformalMetrics
+    triage: ConformalTriage
+
+

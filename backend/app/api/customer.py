@@ -354,4 +354,78 @@ def evaluate_conformal_uncertainty(
     )
     return ConformalPredictionResponse(**result)
 
+@router.get("/applications/{app_id}/dossier-pdf")
+def download_customer_adverse_action_dossier(
+    app_id: int,
+    db: Session = Depends(get_db)
+):
+    """
+    Downloads customer copy of Adverse Action Notice / XAI Loan Decision Report in PDF format.
+    """
+    from fastapi.responses import Response
+    from backend.app.services.conformal_service import conformal_service
+    from backend.app.services.fairness_service import fairness_service
+    from backend.app.services.pdf_dossier_service import pdf_dossier_service
+
+    app_obj = db.query(LoanApplication).filter(LoanApplication.id == app_id).first()
+    if not app_obj:
+        raise HTTPException(status_code=404, detail="Loan Application not found.")
+
+    xai = db.query(XAILog).filter(XAILog.application_id == app_id).first()
+    shap_data = json.loads(xai.shap_data) if xai and xai.shap_data else None
+    dice_data = json.loads(xai.dice_roadmap) if xai and xai.dice_roadmap else None
+
+    app_dict = {
+        'id': app_obj.id,
+        'user_id': app_obj.user_id,
+        'cibil_score': app_obj.cibil_score,
+        'applicant_income': app_obj.applicant_income,
+        'coapplicant_income': app_obj.coapplicant_income,
+        'loan_amount': app_obj.loan_amount,
+        'loan_tenure_months': app_obj.loan_tenure_months,
+        'existing_debts': app_obj.existing_debts,
+        'credit_card_utilization': app_obj.credit_card_utilization,
+        'delinquent_lines_2yrs': app_obj.delinquent_lines_2yrs,
+        'credit_history_years': app_obj.credit_history_years,
+        'employment_status': app_obj.employment_status,
+        'education': app_obj.education,
+        'home_ownership': app_obj.home_ownership,
+        'loan_purpose': app_obj.loan_purpose,
+        'approval_probability': app_obj.approval_probability or 0.5,
+        'risk_tier': app_obj.risk_tier or "MEDIUM_RISK",
+        'status': app_obj.status or "PENDING",
+        'recommended_bank': app_obj.recommended_bank or "Apex National Bank",
+        'officer_notes': app_obj.officer_notes,
+        'created_at': app_obj.created_at.strftime('%Y-%m-%d %H:%M:%S UTC') if app_obj.created_at else None
+    }
+
+    try:
+        conformal_data = conformal_service.evaluate_uncertainty(app_dict, confidence_level=0.95)
+    except Exception:
+        conformal_data = None
+
+    try:
+        fairness_data = fairness_service.audit_fairness()
+    except Exception:
+        fairness_data = None
+
+    pdf_bytes = pdf_dossier_service.generate_dossier_pdf(
+        application_data=app_dict,
+        conformal_data=conformal_data,
+        shap_data=shap_data,
+        dice_data=dice_data,
+        fairness_data=fairness_data
+    )
+
+    filename = f"loan_decision_dossier_{app_id}.pdf"
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f"inline; filename={filename}",
+            "X-Application-ID": str(app_id)
+        }
+    )
+
+
 

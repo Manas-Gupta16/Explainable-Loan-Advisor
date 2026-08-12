@@ -248,4 +248,66 @@ class ConformalPredictionResponse(BaseModel):
     metrics: ConformalMetrics
     triage: ConformalTriage
 
+# --- Causal Directed Acyclic Graph (DAG) Recourse Schemas ---
+class CausalNode(BaseModel):
+    id: str
+    name: str
+    type: str  # "ACTIONABLE_EXOGENOUS", "ENDOGENOUS_IMMEDIATE", "ENDOGENOUS_LAGGED", "TARGET_OUTCOME"
+    unit: str
+
+class CausalEdge(BaseModel):
+    source: str
+    target: str
+    mechanism: str
+    lag_days: int
+
+class CausalGraph(BaseModel):
+    nodes: List[CausalNode]
+    edges: List[CausalEdge]
+
+class CausalPhaseImpact(BaseModel):
+    credit_utilization: str
+    dti_ratio: str
+    cibil_score: int
+
+class CausalPhase(BaseModel):
+    phase_id: int
+    timeline_days: str
+    milestone_title: str
+    direct_actions: List[str]
+    structural_impact: CausalPhaseImpact
+    estimated_approval_prob: float
+    status_verdict: str
+
+class CausalLever(BaseModel):
+    lever_id: str
+    name: str
+    action: str
+    feasibility: str
+    marginal_prob_gain: float
+    projected_cibil_boost: int
+    projected_dti_reduction_pct: float
+    resulting_probability: float
+
+class CausalRecourseRequest(BaseModel):
+    loan_input: Optional[LoanApplicationCreate] = None
+    application_id: Optional[int] = None
+    target_probability: float = Field(default=0.75, ge=0.50, le=0.99)
+    max_horizon_days: int = Field(default=90, ge=30, le=365)
+
+class CausalRecourseResponse(BaseModel):
+    initial_status: str
+    baseline_probability: float
+    target_probability: float
+    final_projected_probability: Optional[float] = None
+    total_probability_gain: Optional[float] = None
+    projected_cibil_gain: Optional[int] = None
+    is_recourse_needed: bool
+    horizon_days: Optional[int] = None
+    phases: List[CausalPhase]
+    causal_levers_ranked: List[CausalLever]
+    structural_causal_graph: Optional[Dict[str, Any]] = None
+    summary: Optional[str] = None
+
+
 

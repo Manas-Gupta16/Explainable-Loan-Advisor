@@ -292,5 +292,48 @@ def download_regulatory_compliance_dossier(
         }
     )
 
+@router.get("/applications/{app_id}/causal-trajectory", response_model=Dict[str, Any])
+def get_applicant_causal_recourse_trajectory(
+    app_id: int,
+    target_probability: float = Query(0.75, ge=0.50, le=0.99),
+    max_horizon_days: int = Query(90, ge=30, le=365),
+    db: Session = Depends(get_db)
+):
+    """Underwriter inspection of 3-phase temporal causal recourse trajectory and sensitivity ranking."""
+    from backend.app.services.causal_service import causal_service
+
+    app_obj = db.query(LoanApplication).filter(LoanApplication.id == app_id).first()
+    if not app_obj:
+        raise HTTPException(status_code=404, detail="Loan Application not found.")
+
+    input_dict = {
+        'cibil_score': app_obj.cibil_score,
+        'applicant_income': app_obj.applicant_income,
+        'coapplicant_income': app_obj.coapplicant_income,
+        'loan_amount': app_obj.loan_amount,
+        'loan_tenure_months': app_obj.loan_tenure_months,
+        'existing_debts': app_obj.existing_debts,
+        'credit_card_utilization': app_obj.credit_card_utilization,
+        'delinquent_lines_2yrs': app_obj.delinquent_lines_2yrs,
+        'credit_history_years': app_obj.credit_history_years,
+        'employment_status': app_obj.employment_status,
+        'education': app_obj.education,
+        'home_ownership': app_obj.home_ownership,
+        'loan_purpose': app_obj.loan_purpose
+    }
+
+    trajectory = causal_service.generate_causal_trajectory(
+        input_dict=input_dict,
+        target_probability=target_probability,
+        max_horizon_days=max_horizon_days
+    )
+
+    return {
+        "application_id": app_id,
+        "applicant_name": f"Customer #{app_obj.user_id}",
+        "trajectory": trajectory
+    }
+
+
 
 

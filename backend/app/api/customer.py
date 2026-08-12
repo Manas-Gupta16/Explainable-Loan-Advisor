@@ -10,7 +10,9 @@ from backend.app.schemas.loan import (
     LoanApplicationResponse, 
     BankRecommendation,
     ConformalPredictionRequest,
-    ConformalPredictionResponse
+    ConformalPredictionResponse,
+    CausalRecourseRequest,
+    CausalRecourseResponse
 )
 from backend.app.services.ml_service import ml_service
 from backend.app.services.bank_service import evaluate_bank_recommendations
@@ -426,6 +428,55 @@ def download_customer_adverse_action_dossier(
             "X-Application-ID": str(app_id)
         }
     )
+
+@router.post("/causal-recourse", response_model=CausalRecourseResponse)
+def compute_causal_recourse_trajectory(
+    req: CausalRecourseRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    Computes a realistic 3-phase temporal recourse trajectory along the Structural Causal DAG,
+    accounting for endogenous feature propagation and bureau reporting lags.
+    """
+    from backend.app.services.causal_service import causal_service
+
+    if req.loan_input:
+        input_dict = req.loan_input.model_dump()
+    elif req.application_id:
+        app_obj = db.query(LoanApplication).filter(LoanApplication.id == req.application_id).first()
+        if not app_obj:
+            raise HTTPException(status_code=404, detail="Application not found.")
+        input_dict = {
+            'cibil_score': app_obj.cibil_score,
+            'applicant_income': app_obj.applicant_income,
+            'coapplicant_income': app_obj.coapplicant_income,
+            'loan_amount': app_obj.loan_amount,
+            'loan_tenure_months': app_obj.loan_tenure_months,
+            'existing_debts': app_obj.existing_debts,
+            'credit_card_utilization': app_obj.credit_card_utilization,
+            'delinquent_lines_2yrs': app_obj.delinquent_lines_2yrs,
+            'credit_history_years': app_obj.credit_history_years,
+            'employment_status': app_obj.employment_status,
+            'education': app_obj.education,
+            'home_ownership': app_obj.home_ownership,
+            'loan_purpose': app_obj.loan_purpose
+        }
+    else:
+        raise HTTPException(status_code=400, detail="Must provide either loan_input or application_id.")
+
+    trajectory = causal_service.generate_causal_trajectory(
+        input_dict=input_dict,
+        target_probability=req.target_probability,
+        max_horizon_days=req.max_horizon_days
+    )
+    return CausalRecourseResponse(**trajectory)
+
+@router.get("/causal-graph", response_model=Dict[str, Any])
+def get_structural_causal_graph():
+    """Returns the Structural Causal Model (SCM) nodes, mechanism edges, and temporal lag structure."""
+    from backend.app.services.causal_service import causal_service
+    return causal_service.get_causal_graph()
+
 
 
 

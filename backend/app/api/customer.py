@@ -12,7 +12,10 @@ from backend.app.schemas.loan import (
     ConformalPredictionRequest,
     ConformalPredictionResponse,
     CausalRecourseRequest,
-    CausalRecourseResponse
+    CausalRecourseResponse,
+    BudgetRecourseRequest,
+    BudgetRecourseResponse,
+    BudgetFrontierPoint
 )
 from backend.app.services.ml_service import ml_service
 from backend.app.services.bank_service import evaluate_bank_recommendations
@@ -476,6 +479,92 @@ def get_structural_causal_graph():
     """Returns the Structural Causal Model (SCM) nodes, mechanism edges, and temporal lag structure."""
     from backend.app.services.causal_service import causal_service
     return causal_service.get_causal_graph()
+
+@router.post("/budget-recourse", response_model=BudgetRecourseResponse)
+def compute_budget_constrained_recourse(
+    req: BudgetRecourseRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    Solves mathematically optimal recourse via Sequential Least Squares Quadratic Programming (SLSQP),
+    strictly bounded by the borrower's monthly disposable cashflow surplus and feasibility limits.
+    """
+    from backend.app.services.budget_recourse_service import budget_recourse_service
+
+    if req.loan_input:
+        input_dict = req.loan_input.model_dump()
+    elif req.application_id:
+        app_obj = db.query(LoanApplication).filter(LoanApplication.id == req.application_id).first()
+        if not app_obj:
+            raise HTTPException(status_code=404, detail="Application not found.")
+        input_dict = {
+            'cibil_score': app_obj.cibil_score,
+            'applicant_income': app_obj.applicant_income,
+            'coapplicant_income': app_obj.coapplicant_income,
+            'loan_amount': app_obj.loan_amount,
+            'loan_tenure_months': app_obj.loan_tenure_months,
+            'existing_debts': app_obj.existing_debts,
+            'credit_card_utilization': app_obj.credit_card_utilization,
+            'delinquent_lines_2yrs': app_obj.delinquent_lines_2yrs,
+            'credit_history_years': app_obj.credit_history_years,
+            'employment_status': app_obj.employment_status,
+            'education': app_obj.education,
+            'home_ownership': app_obj.home_ownership,
+            'loan_purpose': app_obj.loan_purpose
+        }
+    else:
+        raise HTTPException(status_code=400, detail="Must provide either loan_input or application_id.")
+
+    result = budget_recourse_service.optimize_recourse(
+        input_dict=input_dict,
+        target_probability=req.target_probability,
+        horizon_months=req.horizon_months,
+        monthly_living_expenses=req.monthly_living_expenses,
+        max_surplus_allocation_pct=req.max_surplus_allocation_pct
+    )
+    return BudgetRecourseResponse(**result)
+
+@router.post("/budget-frontier", response_model=List[BudgetFrontierPoint])
+def get_pareto_budget_frontier(
+    req: BudgetRecourseRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    Generates Pareto Budget Frontier tradeoff curve:
+    Returns achievable approval probabilities across varying monthly commitment tiers ($100/mo -> $1500/mo).
+    """
+    from backend.app.services.budget_recourse_service import budget_recourse_service
+
+    if req.loan_input:
+        input_dict = req.loan_input.model_dump()
+    elif req.application_id:
+        app_obj = db.query(LoanApplication).filter(LoanApplication.id == req.application_id).first()
+        if not app_obj:
+            raise HTTPException(status_code=404, detail="Application not found.")
+        input_dict = {
+            'cibil_score': app_obj.cibil_score,
+            'applicant_income': app_obj.applicant_income,
+            'coapplicant_income': app_obj.coapplicant_income,
+            'loan_amount': app_obj.loan_amount,
+            'loan_tenure_months': app_obj.loan_tenure_months,
+            'existing_debts': app_obj.existing_debts,
+            'credit_card_utilization': app_obj.credit_card_utilization,
+            'delinquent_lines_2yrs': app_obj.delinquent_lines_2yrs,
+            'credit_history_years': app_obj.credit_history_years,
+            'employment_status': app_obj.employment_status,
+            'education': app_obj.education,
+            'home_ownership': app_obj.home_ownership,
+            'loan_purpose': app_obj.loan_purpose
+        }
+    else:
+        raise HTTPException(status_code=400, detail="Must provide either loan_input or application_id.")
+
+    frontier = budget_recourse_service.get_budget_frontier(
+        input_dict=input_dict,
+        horizon_months=req.horizon_months
+    )
+    return [BudgetFrontierPoint(**p) for p in frontier]
+
 
 
 

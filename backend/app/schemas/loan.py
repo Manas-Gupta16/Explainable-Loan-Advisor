@@ -309,5 +309,65 @@ class CausalRecourseResponse(BaseModel):
     structural_causal_graph: Optional[Dict[str, Any]] = None
     summary: Optional[str] = None
 
+# --- Budget-Constrained Recourse Optimization (AFRO) Schemas ---
+class CashflowProfile(BaseModel):
+    gross_monthly_income: float
+    net_monthly_income: float
+    monthly_debt_service: float
+    monthly_living_expenses: float
+    monthly_disposable_surplus: float
+    safe_monthly_allocation_cap: float
+
+class BudgetConstraints(BaseModel):
+    cumulative_budget_cap: float
+    monthly_disposable_surplus: float
+    monthly_required_allocation: float
+    surplus_utilization_pct: float
+
+class OptimizedActions(BaseModel):
+    debt_payoff_total: float
+    target_debt_balance: float
+    loan_downsize_amount: float
+    target_loan_amount: float
+    tenure_extension_months: int
+    target_tenure_months: int
+
+class EndogenousStateTrajectory(BaseModel):
+    projected_cibil_score: int
+    cibil_gain: int
+    projected_dti_ratio: str
+    projected_utilization: str
+
+class BudgetFrontierPoint(BaseModel):
+    allocation_pct: str
+    monthly_commitment: float
+    cumulative_cost: float
+    achievable_probability: float
+    projected_cibil: int
+    feasibility_score: float
+
+class BudgetRecourseRequest(BaseModel):
+    loan_input: Optional[LoanApplicationCreate] = None
+    application_id: Optional[int] = None
+    target_probability: float = Field(default=0.75, ge=0.50, le=0.99)
+    horizon_months: int = Field(default=6, ge=1, le=24)
+    monthly_living_expenses: Optional[float] = Field(default=None, ge=0)
+    max_surplus_allocation_pct: float = Field(default=0.60, ge=0.10, le=0.90)
+
+class BudgetRecourseResponse(BaseModel):
+    status: str
+    baseline_probability: float
+    target_probability: float
+    optimized_probability: float
+    probability_gain: Optional[float] = None
+    feasibility_index: float
+    horizon_months: int
+    budget_constraints: Optional[BudgetConstraints] = None
+    optimized_actions: Optional[OptimizedActions] = None
+    endogenous_state_trajectory: Optional[EndogenousStateTrajectory] = None
+    cashflow_profile: Optional[CashflowProfile] = None
+    summary: Optional[str] = None
+
+
 
 

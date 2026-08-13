@@ -334,6 +334,57 @@ def get_applicant_causal_recourse_trajectory(
         "trajectory": trajectory
     }
 
+@router.get("/applications/{app_id}/budget-recourse", response_model=Dict[str, Any])
+def get_applicant_budget_recourse_analysis(
+    app_id: int,
+    target_probability: float = Query(0.75, ge=0.50, le=0.99),
+    horizon_months: int = Query(6, ge=1, le=24),
+    max_surplus_allocation_pct: float = Query(0.60, ge=0.10, le=0.90),
+    db: Session = Depends(get_db)
+):
+    """Underwriter inspection of mathematically optimal, cashflow-bounded recourse and affordability score."""
+    from backend.app.services.budget_recourse_service import budget_recourse_service
+
+    app_obj = db.query(LoanApplication).filter(LoanApplication.id == app_id).first()
+    if not app_obj:
+        raise HTTPException(status_code=404, detail="Loan Application not found.")
+
+    input_dict = {
+        'cibil_score': app_obj.cibil_score,
+        'applicant_income': app_obj.applicant_income,
+        'coapplicant_income': app_obj.coapplicant_income,
+        'loan_amount': app_obj.loan_amount,
+        'loan_tenure_months': app_obj.loan_tenure_months,
+        'existing_debts': app_obj.existing_debts,
+        'credit_card_utilization': app_obj.credit_card_utilization,
+        'delinquent_lines_2yrs': app_obj.delinquent_lines_2yrs,
+        'credit_history_years': app_obj.credit_history_years,
+        'employment_status': app_obj.employment_status,
+        'education': app_obj.education,
+        'home_ownership': app_obj.home_ownership,
+        'loan_purpose': app_obj.loan_purpose
+    }
+
+    result = budget_recourse_service.optimize_recourse(
+        input_dict=input_dict,
+        target_probability=target_probability,
+        horizon_months=horizon_months,
+        max_surplus_allocation_pct=max_surplus_allocation_pct
+    )
+
+    frontier = budget_recourse_service.get_budget_frontier(
+        input_dict=input_dict,
+        horizon_months=horizon_months
+    )
+
+    return {
+        "application_id": app_id,
+        "applicant_name": f"Customer #{app_obj.user_id}",
+        "budget_recourse": result,
+        "pareto_budget_frontier": frontier
+    }
+
+
 
 
 

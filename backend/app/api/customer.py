@@ -15,7 +15,9 @@ from backend.app.schemas.loan import (
     CausalRecourseResponse,
     BudgetRecourseRequest,
     BudgetRecourseResponse,
-    BudgetFrontierPoint
+    BudgetFrontierPoint,
+    AccountAggregatorAnalysisRequest,
+    AccountAggregatorAnalysisResponse
 )
 from backend.app.services.ml_service import ml_service
 from backend.app.services.bank_service import evaluate_bank_recommendations
@@ -564,6 +566,56 @@ def get_pareto_budget_frontier(
         horizon_months=req.horizon_months
     )
     return [BudgetFrontierPoint(**p) for p in frontier]
+
+@router.post("/account-aggregator/analyze", response_model=AccountAggregatorAnalysisResponse)
+def analyze_account_aggregator_cashflow(
+    req: AccountAggregatorAnalysisRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    Analyzes bank statement transaction stream via Account Aggregator / Open Banking protocol:
+    Extracts NACH mandate bounce ratios, income volatility indices, and alternative credit scores.
+    """
+    from backend.app.services.open_banking_service import open_banking_service
+
+    if req.raw_transactions and len(req.raw_transactions) > 0:
+        raw_list = [t.model_dump() for t in req.raw_transactions]
+        analysis = open_banking_service.analyze_raw_transactions(
+            transactions=raw_list,
+            requested_loan_emi=req.requested_loan_emi
+        )
+        analysis["application_id"] = req.application_id
+        analysis["account_type"] = req.account_type
+        analysis["account_institution"] = "Account Aggregator Data Consent"
+        analysis["account_number_mask"] = "XXXX-XXXX-3891"
+    else:
+        # Fallback to simulated pull based on user profile or application_id
+        salary = req.monthly_salary
+        if req.application_id:
+            app_obj = db.query(LoanApplication).filter(LoanApplication.id == req.application_id).first()
+            if app_obj and app_obj.applicant_income:
+                salary = app_obj.applicant_income / 12.0
+
+        analysis = open_banking_service.analyze_account_transactions(
+            application_id=req.application_id or 1,
+            monthly_net_salary=salary,
+            existing_monthly_emi=req.requested_loan_emi
+        )
+
+    return AccountAggregatorAnalysisResponse(**analysis)
+
+@router.get("/account-aggregator/sample-stream", response_model=List[Dict[str, Any]])
+def get_sample_account_aggregator_stream(
+    account_type: str = "SALARIED_PRIME",
+    monthly_salary: float = 6500.0
+):
+    """Generates synthetic 6-month transaction feed for interactive testing."""
+    from backend.app.services.open_banking_service import open_banking_service
+    return open_banking_service.get_sample_stream(
+        account_type=account_type,
+        monthly_salary=monthly_salary
+    )
+
 
 
 

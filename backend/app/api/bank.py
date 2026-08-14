@@ -384,6 +384,34 @@ def get_applicant_budget_recourse_analysis(
         "pareto_budget_frontier": frontier
     }
 
+@router.get("/applications/{app_id}/cashflow-telemetry", response_model=Dict[str, Any])
+def get_applicant_cashflow_telemetry(
+    app_id: int,
+    db: Session = Depends(get_db)
+):
+    """Underwriter inspection of Account Aggregator cashflow telemetry, NACH bounces, and liquidity health."""
+    from backend.app.services.open_banking_service import open_banking_service
+
+    app_obj = db.query(LoanApplication).filter(LoanApplication.id == app_id).first()
+    if not app_obj:
+        raise HTTPException(status_code=404, detail="Loan Application not found.")
+
+    monthly_salary = (app_obj.applicant_income / 12.0) if app_obj.applicant_income else 5000.0
+    requested_emi = (app_obj.loan_amount / max(app_obj.loan_tenure_months or 36, 12)) if app_obj.loan_amount else 650.0
+
+    telemetry = open_banking_service.analyze_account_transactions(
+        application_id=app_id,
+        monthly_net_salary=monthly_salary,
+        existing_monthly_emi=requested_emi
+    )
+
+    return {
+        "application_id": app_id,
+        "applicant_name": f"Customer #{app_obj.user_id}",
+        "cashflow_telemetry": telemetry
+    }
+
+
 
 
 

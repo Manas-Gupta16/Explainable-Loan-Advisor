@@ -368,6 +368,58 @@ class BudgetRecourseResponse(BaseModel):
     cashflow_profile: Optional[CashflowProfile] = None
     summary: Optional[str] = None
 
+# --- Account Aggregator & Open Banking Volatility Schemas ---
+class TransactionItem(BaseModel):
+    date: str
+    description: str
+    amount: float
+    type: str  # "CREDIT" or "DEBIT"
+    category: Optional[str] = None
+    running_balance: Optional[float] = None
+
+class LiquidityMetrics(BaseModel):
+    avg_monthly_inflow: float
+    avg_monthly_outflow: float
+    net_monthly_cashflow: float
+    average_daily_balance: float
+    minimum_balance_floor: float
+
+class VolatilityIndices(BaseModel):
+    income_volatility_index: float
+    nach_mandate_bounce_count: int
+    nach_bounce_ratio: float
+    cashflow_dscr: float
+    discretionary_spend_ratio: float
+
+class SpendingBreakdown(BaseModel):
+    total_salary_inflows: float
+    total_loan_emi_debits: float
+    total_rent_utilities: float
+    total_discretionary: float
+
+class AccountAggregatorAnalysisRequest(BaseModel):
+    application_id: Optional[int] = None
+    account_type: str = "SALARIED_PRIME"  # "SALARIED_PRIME", "GIG_VOLATILE", "BOUNCE_STRESSED"
+    monthly_salary: float = Field(default=6500.0, gt=0)
+    requested_loan_emi: float = Field(default=650.0, gt=0)
+    raw_transactions: Optional[List[TransactionItem]] = None
+
+class AccountAggregatorAnalysisResponse(BaseModel):
+    application_id: Optional[int] = None
+    account_number_mask: Optional[str] = None
+    account_institution: Optional[str] = None
+    account_type: Optional[str] = None
+    analysis_period_months: float
+    total_transactions_analyzed: int
+    account_aggregator_score: int  # 300 to 900
+    cashflow_quality_tier: str     # "PRIME_CASHFLOW", "STABLE_CASHFLOW", "STRESSED_CASHFLOW"
+    cashflow_probability_uplift: float
+    liquidity_metrics: LiquidityMetrics
+    volatility_indices: VolatilityIndices
+    spending_breakdown: SpendingBreakdown
+    underwriting_flags: List[str]
+
+
 
 
 

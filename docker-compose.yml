@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  # Backend API & ML Inference Service
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: loan_advisor_backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - PYTHONUNBUFFERED=1
+      - DATABASE_URL=sqlite:///./loan_advisor.db
+    volumes:
+      - ./loan_advisor.db:/app/loan_advisor.db
+      - ./ml_engine/artifacts:/app/ml_engine/artifacts
+    networks:
+      - loan_advisor_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/docs"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Frontend Web Application (React + Nginx)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: loan_advisor_frontend
+    restart: unless-stopped
+    ports:
+      - "5173:80"
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - loan_advisor_network
+
+networks:
+  loan_advisor_network:
+    driver: bridge

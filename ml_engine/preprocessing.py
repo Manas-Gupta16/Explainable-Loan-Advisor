@@ -3,7 +3,6 @@ import joblib
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
-from sklearn.compose import ColumnTransformer
 from typing import Tuple, Dict, Any, List
 
 NUMERICAL_FEATURES = [
@@ -17,7 +16,8 @@ NUMERICAL_FEATURES = [
     'delinquent_lines_2yrs',
     'credit_history_years',
     'dti_ratio',
-    'loan_to_income_ratio'
+    'loan_to_income_ratio',
+    'foir_ratio'
 ]
 
 CATEGORICAL_FEATURES = [
@@ -29,8 +29,8 @@ CATEGORICAL_FEATURES = [
 
 class LoanPreprocessor:
     """
-    Production-grade preprocessing & feature engineering pipeline.
-    Handles feature extraction, scaling, and categorical encoding.
+    Production-grade preprocessing & feature engineering pipeline for Indian Retail Banking.
+    Handles feature extraction, FOIR / DTI calculation, scaling, and categorical encoding.
     """
     def __init__(self):
         self.scaler = StandardScaler()
@@ -39,16 +39,34 @@ class LoanPreprocessor:
         self.feature_names: List[str] = []
 
     def _engineer_features(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Derives financial domain ratios."""
+        """Derives Indian retail banking domain ratios (FOIR, DTI, LTI)."""
         df_copy = df.copy()
 
-        total_income = df_copy['applicant_income'] + df_copy['coapplicant_income']
+        # Handle potential missing or scalar values
+        app_inc = df_copy['applicant_income'] if 'applicant_income' in df_copy.columns else 0.0
+        coapp_inc = df_copy['coapplicant_income'] if 'coapplicant_income' in df_copy.columns else 0.0
+        debts = df_copy['existing_debts'] if 'existing_debts' in df_copy.columns else 0.0
+        loan_amt = df_copy['loan_amount'] if 'loan_amount' in df_copy.columns else 0.0
+        tenure = df_copy['loan_tenure_months'] if 'loan_tenure_months' in df_copy.columns else 36
+
+        total_income = app_inc + coapp_inc
         monthly_income = np.maximum(total_income / 12.0, 1.0)
-        monthly_debt = df_copy['existing_debts'] / 12.0
+        monthly_debt = debts / 12.0
+
+        # Estimated benchmark EMI at 10.5% APR
+        r = 10.5 / (12.0 * 100.0)
+        n = np.maximum(tenure, 1.0)
+        factor = (1.0 + r) ** n
+        estimated_emi = np.where(
+            factor > 1.0,
+            (loan_amt * r * factor) / np.maximum(factor - 1.0, 1e-6),
+            loan_amt / n
+        )
 
         # Derived Ratios
         df_copy['dti_ratio'] = np.round(monthly_debt / monthly_income, 4)
-        df_copy['loan_to_income_ratio'] = np.round(df_copy['loan_amount'] / np.maximum(total_income, 1.0), 4)
+        df_copy['loan_to_income_ratio'] = np.round(loan_amt / np.maximum(total_income, 1.0), 4)
+        df_copy['foir_ratio'] = np.round((monthly_debt + estimated_emi) / monthly_income, 4)
 
         return df_copy
 

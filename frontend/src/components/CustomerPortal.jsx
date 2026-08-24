@@ -1,92 +1,104 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { 
   Send, ShieldCheck, AlertTriangle, CheckCircle,
   RefreshCw, Layers, MapPin, PieChart, Sparkles,
   FileText, Download, Play, Pause, Volume2, Landmark,
-  TrendingDown, Gauge, FileCheck, BrainCircuit, GitCommit, UserCheck
+  TrendingDown, Gauge, FileCheck, BrainCircuit, GitCommit, UserCheck, CheckCircle2
 } from 'lucide-react';
+
+const formatINR = (val) => {
+  if (val === undefined || val === null || isNaN(val)) return '₹0';
+  if (val >= 10000000) return `₹${(val / 10000000).toFixed(2)} Cr`;
+  if (val >= 100000) return `₹${(val / 100000).toFixed(2)} L`;
+  return `₹${Number(val).toLocaleString('en-IN')}`;
+};
+
+const formatMonthlyINR = (annualVal) => {
+  const monthly = Math.round((annualVal || 0) / 12);
+  return `₹${monthly.toLocaleString('en-IN')}/mo`;
+};
 
 const PRESETS = [
   {
-    name: "Prime Tier-1 Applicant",
-    badge: "INSTANT APPROVAL",
+    name: "SBI Prime Salaried Executive",
+    badge: "INSTANT STP APPROVAL",
     badgeColor: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30",
     data: {
       cibil_score: 790,
-      applicant_income: 110000,
-      coapplicant_income: 25000,
-      loan_amount: 35000,
-      loan_tenure_months: 36,
-      existing_debts: 4000,
-      credit_card_utilization: 0.15,
+      applicant_income: 1500000, // ₹1.25 Lakhs/mo
+      coapplicant_income: 360000, // ₹30k/mo
+      loan_amount: 1200000, // ₹12 Lakhs
+      loan_tenure_months: 48,
+      existing_debts: 180000, // ₹15k/mo EMI
+      credit_card_utilization: 0.18,
       delinquent_lines_2yrs: 0,
       credit_history_years: 8.5,
       employment_status: 'Salaried',
-      education: 'Graduate',
+      education: 'Post Graduate',
       home_ownership: 'OWN',
       loan_purpose: 'Personal'
     }
   },
   {
-    name: "Subprime Gig Economy Worker",
-    badge: "ACTIONABLE RECOURSE",
+    name: "HDFC Near-Prime IT Professional",
+    badge: "FAST TRACK NEAR-PRIME",
     badgeColor: "text-[#d2ff00] bg-[#d2ff00]/10 border-[#d2ff00]/30",
     data: {
-      cibil_score: 640,
-      applicant_income: 48000,
+      cibil_score: 715,
+      applicant_income: 960000, // ₹80k/mo
       coapplicant_income: 0,
-      loan_amount: 22000,
-      loan_tenure_months: 48,
-      existing_debts: 12000,
-      credit_card_utilization: 0.55,
-      delinquent_lines_2yrs: 1,
-      credit_history_years: 3.5,
-      employment_status: 'Self-Employed',
+      loan_amount: 650000, // ₹6.5 Lakhs
+      loan_tenure_months: 36,
+      existing_debts: 144000, // ₹12k/mo EMI
+      credit_card_utilization: 0.28,
+      delinquent_lines_2yrs: 0,
+      credit_history_years: 5.0,
+      employment_status: 'Salaried',
       education: 'Graduate',
       home_ownership: 'RENT',
       loan_purpose: 'Personal'
     }
   },
   {
-    name: "Borderline Recourse Applicant",
-    badge: "PARETO SHIFT",
+    name: "Bajaj Finserv MSME Trader",
+    badge: "NBFC / PARETO RECOURSE",
     badgeColor: "text-amber-400 bg-amber-500/10 border-amber-500/30",
     data: {
-      cibil_score: 695,
-      applicant_income: 62000,
-      coapplicant_income: 10000,
-      loan_amount: 28000,
-      loan_tenure_months: 36,
-      existing_debts: 9500,
-      credit_card_utilization: 0.38,
+      cibil_score: 660,
+      applicant_income: 720000, // ₹60k/mo
+      coapplicant_income: 0,
+      loan_amount: 800000, // ₹8 Lakhs
+      loan_tenure_months: 48,
+      existing_debts: 216000, // ₹18k/mo EMI
+      credit_card_utilization: 0.42,
       delinquent_lines_2yrs: 0,
-      credit_history_years: 5.0,
-      employment_status: 'Salaried',
+      credit_history_years: 4.0,
+      employment_status: 'Self-Employed',
       education: 'Graduate',
-      home_ownership: 'MORTGAGE',
-      loan_purpose: 'Home'
+      home_ownership: 'RENT',
+      loan_purpose: 'Business'
     }
   },
   {
-    name: "Overleveraged DTI Rejection",
-    badge: "HIGH RISK DEFAULTER",
+    name: "High FOIR Overleveraged Defaulter",
+    badge: "HIGH DEFAULT RISK (78% FOIR)",
     badgeColor: "text-rose-400 bg-rose-500/10 border-rose-500/30",
     data: {
-      cibil_score: 560,
-      applicant_income: 38000,
+      cibil_score: 565,
+      applicant_income: 420000, // ₹35k/mo
       coapplicant_income: 0,
-      loan_amount: 45000,
+      loan_amount: 1500000, // ₹15 Lakhs
       loan_tenure_months: 24,
-      existing_debts: 26000,
-      credit_card_utilization: 0.88,
-      delinquent_lines_2yrs: 3,
-      credit_history_years: 2.0,
+      existing_debts: 240000, // ₹20k/mo EMI
+      credit_card_utilization: 0.85,
+      delinquent_lines_2yrs: 2,
+      credit_history_years: 2.5,
       employment_status: 'Salaried',
-      education: 'High School',
+      education: 'Undergraduate',
       home_ownership: 'RENT',
-      loan_purpose: 'Debt Consolidation'
+      loan_purpose: 'Personal'
     }
   }
 ];
@@ -106,20 +118,20 @@ export default function CustomerPortal() {
 
   // OCR state
   const [docType, setDocType] = useState('PAY_SLIP');
-  const [docFileName, setDocFileName] = useState('Google_Paystub_Nov2026.pdf');
+  const [docFileName, setDocFileName] = useState('TCS_Salary_Slip_Form16.pdf');
   const [declaredIncome, setDeclaredIncome] = useState(formData.applicant_income / 12);
   const [ocrResult, setOcrResult] = useState(null);
   const [ocrLoading, setOcrLoading] = useState(false);
 
-  // Open Banking state
-  const [selectedBank, setSelectedBank] = useState('Chase Bank');
+  // Account Aggregator (AA) state
+  const [selectedBank, setSelectedBank] = useState('State Bank of India (SBI)');
   const [openBankingResult, setOpenBankingResult] = useState(null);
   const [openBankingLoading, setOpenBankingLoading] = useState(false);
 
   // Stress Test state
   const [stressScenario, setStressScenario] = useState('COMBINED_STAGFLATION');
-  const [rateHike, setRateHike] = useState(2.5);
-  const [inflationCost, setInflationCost] = useState(5.0);
+  const [rateHike, setRateHike] = useState(2.0);
+  const [inflationCost, setInflationCost] = useState(6.0);
   const [incomeShock, setIncomeShock] = useState(10.0);
   const [stressResult, setStressResult] = useState(null);
   const [stressLoading, setStressLoading] = useState(false);
@@ -135,6 +147,19 @@ export default function CustomerPortal() {
   // PDF Dossier state
   const [pdfDownloading, setPdfDownloading] = useState(false);
 
+  // Derived live calculations for real-time form feedback
+  const monthlyApplicantIncome = Math.max(formData.applicant_income / 12, 1);
+  const totalMonthlyIncome = Math.max((formData.applicant_income + formData.coapplicant_income) / 12, 1);
+  const existingMonthlyEMI = formData.existing_debts / 12;
+
+  // Benchmark EMI at 10.5% rate
+  const benchmarkRate = 10.5 / (12 * 100);
+  const tenureN = formData.loan_tenure_months || 36;
+  const factorN = Math.pow(1 + benchmarkRate, tenureN);
+  const estimatedProposedEMI = factorN > 1 ? (formData.loan_amount * benchmarkRate * factorN) / (factorN - 1) : formData.loan_amount / tenureN;
+  const liveTotalObligations = existingMonthlyEMI + estimatedProposedEMI;
+  const liveFOIR = Math.round((liveTotalObligations / totalMonthlyIncome) * 100);
+
   const handleChange = (e) => {
     const { name, value, type } = e.target;
     setFormData(prev => ({
@@ -146,19 +171,19 @@ export default function CustomerPortal() {
   const handleApplyPreset = (preset) => {
     setFormData(preset.data);
     setDeclaredIncome(preset.data.applicant_income / 12);
+    evaluateApplication(preset.data);
   };
 
-  const handleSubmit = async (e) => {
-    if (e) e.preventDefault();
+  const evaluateApplication = async (dataToSubmit = formData) => {
     setLoading(true);
     setError(null);
 
     try {
-      const response = await axios.post('/api/v1/customer/apply', formData);
+      const response = await axios.post('/api/v1/customer/apply', dataToSubmit);
       setResult(response.data);
       // Auto trigger coach & conformal preview
-      fetchCoachAdvice(response.data);
-      fetchConformal(response.data);
+      fetchCoachAdvice(response.data, dataToSubmit);
+      fetchConformal(response.data, dataToSubmit);
     } catch (err) {
       console.error(err);
       setError('Failed to analyze loan application. Make sure backend server is running on port 8000.');
@@ -167,16 +192,26 @@ export default function CustomerPortal() {
     }
   };
 
+  const handleSubmit = (e) => {
+    if (e) e.preventDefault();
+    evaluateApplication(formData);
+  };
+
+  // Initial mount auto-evaluation
+  useEffect(() => {
+    evaluateApplication(PRESETS[0].data);
+  }, []);
+
   // 1. Fetch AI Coach
-  const fetchCoachAdvice = async (customResult) => {
+  const fetchCoachAdvice = async (customResult, currentForm = formData) => {
     const curResult = customResult || result;
     setCoachLoading(true);
     try {
       const payload = {
-        applicant_name: "Valued Applicant",
-        language: coachLanguage,
+        applicant_name: "Valued Borrower",
+        language: coachLanguage === 'Hindi' ? 'hi' : coachLanguage === 'Hinglish' ? 'hinglish' : 'en',
         application_id: curResult?.application_id || null,
-        loan_input: formData,
+        loan_input: currentForm,
         shap_data: curResult?.shap_explanation || null,
         dice_data: curResult?.dice_roadmap || null
       };
@@ -191,14 +226,14 @@ export default function CustomerPortal() {
 
   // 2. Play TTS Audio Simulation
   const handleToggleSpeech = () => {
-    if (!coachData?.audio_narration_script) return;
+    if (!coachData?.conversational_audio_script) return;
 
     if ('speechSynthesis' in window) {
       if (isPlayingAudio) {
         window.speechSynthesis.cancel();
         setIsPlayingAudio(false);
       } else {
-        const utterance = new SpeechSynthesisUtterance(coachData.audio_narration_script);
+        const utterance = new SpeechSynthesisUtterance(coachData.conversational_audio_script);
         utterance.rate = 1.0;
         utterance.pitch = 1.0;
         utterance.onend = () => setIsPlayingAudio(false);
@@ -220,7 +255,7 @@ export default function CustomerPortal() {
         document_type: docType,
         file_name: docFileName,
         declared_monthly_income: declaredIncome || formData.applicant_income / 12,
-        raw_text_content: `Employer: Meta Platforms Inc. Monthly Base Pay: $${Math.round((formData.applicant_income / 12) * 0.95)}. Tax ID: 94-2819281. YTD Earnings: $${formData.applicant_income}. Verified through ADP Payroll System.`
+        raw_text_content: `Employer: Tata Consultancy Services Ltd. Gross Salary: ₹${Math.round((formData.applicant_income / 12) * 1.15)}. Net Take Home Pay: ₹${Math.round((formData.applicant_income / 12))}. PAN: ABCDE1234F. EPFO Ref: 10092819281. Form 16 Verified with TRACES.`
       });
       setOcrResult(res.data);
     } catch (err) {
@@ -230,7 +265,7 @@ export default function CustomerPortal() {
     }
   };
 
-  // 4. Connect Open Banking
+  // 4. Connect Account Aggregator
   const handleConnectOpenBanking = async () => {
     setOpenBankingLoading(true);
     try {
@@ -242,7 +277,7 @@ export default function CustomerPortal() {
       });
       setOpenBankingResult(res.data);
     } catch (err) {
-      console.error("Open banking connection error:", err);
+      console.error("Account Aggregator connection error:", err);
     } finally {
       setOpenBankingLoading(false);
     }
@@ -269,11 +304,11 @@ export default function CustomerPortal() {
   };
 
   // 6. Conformal Prediction
-  const fetchConformal = async (customResult) => {
+  const fetchConformal = async (customResult, currentForm = formData) => {
     try {
       const res = await axios.post('/api/v1/customer/conformal-predict', {
         application_id: customResult?.application_id || result?.application_id || null,
-        loan_input: formData,
+        loan_input: currentForm,
         confidence_level: confidenceLevel
       });
       setConformalResult(res.data);
@@ -299,7 +334,7 @@ export default function CustomerPortal() {
     }
   };
 
-  // 8. Download Adverse Action PDF Dossier
+  // 8. Download RBI Compliance PDF Dossier
   const handleDownloadPdf = async () => {
     const appId = result?.application_id || 1;
     setPdfDownloading(true);
@@ -311,7 +346,7 @@ export default function CustomerPortal() {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `Loan_Decision_Dossier_App_${appId}.pdf`);
+      link.setAttribute('download', `LoanIQ_RBI_Compliance_Dossier_App_${appId}.pdf`);
       document.body.appendChild(link);
       link.click();
       link.parentNode.removeChild(link);
@@ -336,13 +371,13 @@ export default function CustomerPortal() {
         <div>
           <div className="inline-flex items-center gap-2 text-xs font-mono-tech text-[#d2ff00] mb-2">
             <span className="w-2 h-2 rounded-full bg-[#d2ff00] animate-ping" />
-            <span>● CUSTOMER RECOURSE & XAI INTELLIGENCE PORTAL</span>
+            <span>● INDIAN RETAIL BANKING XAI & RECOURSE PORTAL</span>
           </div>
           <h1 className="text-4xl font-black text-white tracking-tight">
-            Loan Evaluation & <span className="text-[#d2ff00]">Actionable Recourse</span>
+            Loan Underwriting & <span className="text-[#d2ff00]">Actionable Recourse</span>
           </h1>
           <p className="text-slate-400 text-sm mt-1 max-w-2xl font-light">
-            AI-driven credit assessment with multi-lender Pareto optimization, DiCE actionable counterfactuals, SHAP local importance, and full regulatory transparency.
+            Real-time AI credit assessment incorporating RBI underwriting guidelines, CIBIL bureau scoring (300-850), FOIR debt-burden metrics, multi-bank matching (SBI, HDFC, ICICI, Axis), and DiCE counterfactuals.
           </p>
         </div>
 
@@ -354,14 +389,14 @@ export default function CustomerPortal() {
               whileTap={{ scale: 0.97 }}
               onClick={handleDownloadPdf}
               disabled={pdfDownloading}
-              className="btn-lime text-xs font-bold py-2.5 px-4 shadow-[0_0_15px_rgba(210,255,0,0.25)] cursor-pointer"
+              className="btn-lime text-xs font-bold py-2.5 px-4 shadow-[0_0_15px_rgba(210,255,0,0.25)] cursor-pointer flex items-center gap-2"
             >
               {pdfDownloading ? (
                 <RefreshCw className="w-3.5 h-3.5 animate-spin" />
               ) : (
                 <Download className="w-3.5 h-3.5" />
               )}
-              <span>EXPORT ADVERSE ACTION PDF</span>
+              <span>EXPORT RBI COMPLIANCE PDF</span>
             </motion.button>
           )}
         </div>
@@ -373,7 +408,7 @@ export default function CustomerPortal() {
           <span className="text-[11px] font-mono-tech text-slate-400 flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5 text-[#d2ff00]" /> DEMO PROFILES (1-CLICK QUICK LOAD):
           </span>
-          <span className="text-[10px] font-mono-tech text-[#d2ff00]">PRE-CONFIGURED UNDERWRITING MATRICES</span>
+          <span className="text-[10px] font-mono-tech text-[#d2ff00]">AUTHENTIC INDIAN BANKING DATA</span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
           {PRESETS.map((p, idx) => (
@@ -386,7 +421,9 @@ export default function CustomerPortal() {
                 <span className="text-xs font-bold text-white group-hover:text-[#d2ff00] transition-colors">{p.name}</span>
               </div>
               <div className="flex items-center justify-between mt-1">
-                <span className="text-[10px] font-mono-tech text-slate-400">Score: {p.data.cibil_score} | ${p.data.loan_amount.toLocaleString()}</span>
+                <span className="text-[10px] font-mono-tech text-slate-400">
+                  CIBIL {p.data.cibil_score} | {formatINR(p.data.loan_amount)} ({p.data.loan_tenure_months}m)
+                </span>
                 <span className={`text-[9px] font-mono-tech px-1.5 py-0.5 rounded border ${p.badgeColor}`}>{p.badge}</span>
               </div>
             </button>
@@ -407,21 +444,36 @@ export default function CustomerPortal() {
             
             <div className="flex items-center justify-between border-b border-[#1e2a3d] pb-3">
               <h3 className="font-bold text-white text-sm flex items-center gap-2">
-                <UserCheck className="w-4 h-4 text-[#d2ff00]" /> Underwriting Parameters
+                <UserCheck className="w-4 h-4 text-[#d2ff00]" /> Underwriting Parameters (INR)
               </h3>
-              <span className="text-[10px] font-mono-tech text-slate-500">XGBOOST FEATURE VECTOR</span>
+              <span className="text-[10px] font-mono-tech text-[#d2ff00]">LIVE FOIR ENGINE</span>
+            </div>
+
+            {/* Live Affordability Banner */}
+            <div className="bg-[#0a0e17] p-3 rounded-xl border border-[#1e2a3d] grid grid-cols-2 gap-2 text-xs font-mono-tech">
+              <div>
+                <span className="text-slate-400 text-[10px] block">EST. MONTHLY EMI</span>
+                <span className="text-[#d2ff00] font-bold">₹{Math.round(estimatedProposedEMI).toLocaleString('en-IN')}/mo</span>
+              </div>
+              <div>
+                <span className="text-slate-400 text-[10px] block">PROPOSED FOIR</span>
+                <span className={`font-bold ${liveFOIR <= 45 ? 'text-emerald-400' : liveFOIR <= 55 ? 'text-amber-400' : 'text-rose-400'}`}>
+                  {liveFOIR}% {liveFOIR <= 45 ? '(Prime)' : liveFOIR <= 55 ? '(Moderate)' : '(High Risk)'}
+                </span>
+              </div>
             </div>
 
             {/* CIBIL Score Slider */}
             <div>
               <div className="flex justify-between text-xs mb-1">
-                <label className="text-slate-300 font-medium">CIBIL Credit Score</label>
+                <label className="text-slate-300 font-medium">TransUnion CIBIL Score</label>
                 <span className="font-mono-tech font-bold text-[#d2ff00] text-sm">{formData.cibil_score}</span>
               </div>
               <input
                 type="range"
                 min="300"
                 max="850"
+                step="5"
                 name="cibil_score"
                 value={formData.cibil_score}
                 onChange={handleChange}
@@ -429,18 +481,23 @@ export default function CustomerPortal() {
               />
               <div className="flex justify-between text-[10px] font-mono-tech text-slate-500 mt-1">
                 <span>300 (Subprime)</span>
-                <span>750 (Prime)</span>
-                <span>850 (Super Prime)</span>
+                <span>650 (Fair)</span>
+                <span>750+ (SBI/HDFC Prime)</span>
+                <span>850</span>
               </div>
             </div>
 
             {/* Incomes */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs text-slate-400 block mb-1">Applicant Income ($/yr)</label>
+                <label className="text-xs text-slate-400 block mb-1">
+                  Applicant Income (₹/yr)
+                  <span className="text-[#d2ff00] block text-[10px]">{formatMonthlyINR(formData.applicant_income)}</span>
+                </label>
                 <input
                   type="number"
                   name="applicant_income"
+                  step="25000"
                   value={formData.applicant_income}
                   onChange={handleChange}
                   className="cyber-input text-xs"
@@ -448,10 +505,14 @@ export default function CustomerPortal() {
               </div>
 
               <div>
-                <label className="text-xs text-slate-400 block mb-1">Co-Applicant Income ($)</label>
+                <label className="text-xs text-slate-400 block mb-1">
+                  Co-Applicant (₹/yr)
+                  <span className="text-slate-400 block text-[10px]">{formatMonthlyINR(formData.coapplicant_income)}</span>
+                </label>
                 <input
                   type="number"
                   name="coapplicant_income"
+                  step="20000"
                   value={formData.coapplicant_income}
                   onChange={handleChange}
                   className="cyber-input text-xs"
@@ -462,10 +523,14 @@ export default function CustomerPortal() {
             {/* Loan Amount & Tenure */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs text-slate-400 block mb-1">Requested Loan ($)</label>
+                <label className="text-xs text-slate-400 block mb-1">
+                  Requested Loan (₹)
+                  <span className="text-[#d2ff00] block text-[10px]">{formatINR(formData.loan_amount)}</span>
+                </label>
                 <input
                   type="number"
                   name="loan_amount"
+                  step="50000"
                   value={formData.loan_amount}
                   onChange={handleChange}
                   className="cyber-input text-xs"
@@ -485,7 +550,9 @@ export default function CustomerPortal() {
                   <option value={36}>36 Months (3 yrs)</option>
                   <option value={48}>48 Months (4 yrs)</option>
                   <option value={60}>60 Months (5 yrs)</option>
+                  <option value={84}>84 Months (7 yrs)</option>
                   <option value={120}>120 Months (10 yrs)</option>
+                  <option value={240}>240 Months (20 yrs Home)</option>
                 </select>
               </div>
             </div>
@@ -493,10 +560,14 @@ export default function CustomerPortal() {
             {/* Existing Debts & Utilization */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs text-slate-400 block mb-1">Existing Debts ($)</label>
+                <label className="text-xs text-slate-400 block mb-1">
+                  Existing EMIs (₹/yr)
+                  <span className="text-slate-400 block text-[10px]">{formatMonthlyINR(formData.existing_debts)}</span>
+                </label>
                 <input
                   type="number"
                   name="existing_debts"
+                  step="12000"
                   value={formData.existing_debts}
                   onChange={handleChange}
                   className="cyber-input text-xs"
@@ -504,12 +575,15 @@ export default function CustomerPortal() {
               </div>
 
               <div>
-                <label className="text-xs text-slate-400 block mb-1">Card Utilization</label>
+                <label className="text-xs text-slate-400 block mb-1">
+                  Card Utilization
+                  <span className="text-[#d2ff00] block text-[10px]">{(formData.credit_card_utilization * 100).toFixed(0)}%</span>
+                </label>
                 <input
                   type="number"
                   step="0.05"
-                  min="0"
-                  max="1"
+                  min="0.05"
+                  max="1.0"
                   name="credit_card_utilization"
                   value={formData.credit_card_utilization}
                   onChange={handleChange}
@@ -521,9 +595,11 @@ export default function CustomerPortal() {
             {/* Delinquencies & History */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs text-slate-400 block mb-1">Delinquent Lines (2yr)</label>
+                <label className="text-xs text-slate-400 block mb-1">Delinquent Lines (2yr DPD)</label>
                 <input
                   type="number"
+                  min="0"
+                  max="5"
                   name="delinquent_lines_2yrs"
                   value={formData.delinquent_lines_2yrs}
                   onChange={handleChange}
@@ -554,9 +630,9 @@ export default function CustomerPortal() {
                   onChange={handleChange}
                   className="cyber-input text-xs p-1.5"
                 >
-                  <option value="Salaried">Salaried</option>
-                  <option value="Self-Employed">Self-Employed</option>
-                  <option value="Business">Business</option>
+                  <option value="Salaried">Salaried (Corporate/Govt)</option>
+                  <option value="Self-Employed">Self-Employed / MSME</option>
+                  <option value="Business">Business Owner</option>
                   <option value="Unemployed">Unemployed</option>
                 </select>
               </div>
@@ -583,10 +659,11 @@ export default function CustomerPortal() {
                   onChange={handleChange}
                   className="cyber-input text-xs p-1.5"
                 >
-                  <option value="Personal">Personal</option>
-                  <option value="Home">Home</option>
-                  <option value="Auto">Auto</option>
-                  <option value="Debt Consolidation">Consolidation</option>
+                  <option value="Personal">Personal Loan</option>
+                  <option value="Home">Home Loan</option>
+                  <option value="Vehicle">Vehicle Loan</option>
+                  <option value="Education">Education Loan</option>
+                  <option value="Business">Business / MSME</option>
                 </select>
               </div>
             </div>
@@ -596,7 +673,7 @@ export default function CustomerPortal() {
               whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={loading}
-              className="btn-lime w-full justify-center py-3 mt-2 text-xs font-black tracking-wide cursor-pointer"
+              className="btn-lime w-full justify-center py-3 mt-2 text-xs font-black tracking-wide cursor-pointer flex items-center gap-2"
             >
               {loading ? (
                 <span className="flex items-center gap-2">
@@ -628,14 +705,8 @@ export default function CustomerPortal() {
               </div>
               <h3 className="text-xl font-black text-white">XAI Underwriting Engine Ready</h3>
               <p className="text-slate-400 text-xs max-w-md mt-2 font-light leading-relaxed">
-                Select a demo profile above or customize parameters on the left, then click <strong className="text-white">"Evaluate Eligibility & Recourse"</strong> to generate real-time SHAP attributions, DiCE approval roadmaps, and full audit logs.
+                Evaluating application with authentic Indian banking underwriting rules...
               </p>
-              <div className="mt-6 flex flex-wrap justify-center gap-2 text-[11px] font-mono-tech text-slate-500">
-                <span className="px-2.5 py-1 rounded bg-[#0a0e17] border border-[#1e2a3d]">XGBOOST 0.9658 AUC</span>
-                <span className="px-2.5 py-1 rounded bg-[#0a0e17] border border-[#1e2a3d]">SHAP TREE EXPLAINER</span>
-                <span className="px-2.5 py-1 rounded bg-[#0a0e17] border border-[#1e2a3d]">DiCE COUNTERFACTUALS</span>
-                <span className="px-2.5 py-1 rounded bg-[#0a0e17] border border-[#1e2a3d]">CONFORMAL QUANTIFICATION</span>
-              </div>
             </div>
           ) : (
             <div className="space-y-5">
@@ -647,11 +718,11 @@ export default function CustomerPortal() {
                     <span className="text-[10px] font-mono-tech text-[#d2ff00] uppercase tracking-widest block mb-1">
                       ESTIMATED APPROVAL PROBABILITY
                     </span>
-                    <div className="text-5xl sm:text-6xl font-black text-white tracking-tight">
+                    <div className="text-5xl sm:text-6xl font-black text-white tracking-tight font-mono-tech">
                       {(result.approval_probability * 100).toFixed(1)}%
                     </div>
-                    <div className="text-xs font-mono-tech text-slate-400 mt-1">
-                      Target Lender: <strong className="text-white">{result.bank_recommendations?.[0]?.bank_name || 'Apex National Bank'}</strong>
+                    <div className="text-xs font-mono-tech text-slate-300 mt-1">
+                      Recommended Lender: <strong className="text-[#d2ff00]">{result.bank_recommendations?.[0]?.bank_name || 'State Bank of India (SBI)'}</strong>
                     </div>
                   </div>
 
@@ -676,10 +747,10 @@ export default function CustomerPortal() {
                   <motion.div 
                     initial={{ width: 0 }}
                     animate={{ width: `${(result.approval_probability * 100).toFixed(1)}%` }}
-                    transition={{ duration: 1.0, ease: "easeOut" }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
                     className={`h-full rounded-full shadow-lg ${
                       result.approval_probability >= 0.7 ? 'bg-[#d2ff00] shadow-[0_0_20px_rgba(210,255,0,0.5)]' :
-                      result.approval_probability >= 0.4 ? 'bg-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.5)]' :
+                      result.approval_probability >= 0.45 ? 'bg-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.5)]' :
                       'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,0.5)]'
                     }`}
                   />
@@ -689,13 +760,13 @@ export default function CustomerPortal() {
               {/* Navigation Sub-Tabs */}
               <div className="flex items-center gap-1.5 overflow-x-auto pb-1 border-b border-[#1e2a3d] text-xs font-mono-tech">
                 {[
-                  { id: 'overview', label: 'PARETO & SHAP', icon: Layers },
-                  { id: 'coach', label: 'AI COACH & TTS', icon: Sparkles },
-                  { id: 'ocr', label: 'OCR FRAUD RADAR', icon: FileCheck },
-                  { id: 'openbanking', label: 'OPEN BANKING', icon: Landmark },
-                  { id: 'stresstest', label: 'MACRO STRESS', icon: TrendingDown },
+                  { id: 'overview', label: 'INDIAN BANKS & SHAP', icon: Layers },
+                  { id: 'coach', label: 'AI FINANCIAL COACH', icon: Sparkles },
+                  { id: 'ocr', label: 'DOC OCR & PAN', icon: FileCheck },
+                  { id: 'openbanking', label: 'ACCOUNT AGGREGATOR', icon: Landmark },
+                  { id: 'stresstest', label: 'RBI STRESS TEST', icon: TrendingDown },
                   { id: 'conformal', label: 'CONFORMAL BOUNDS', icon: Gauge },
-                  { id: 'causal', label: 'CAUSAL DAG', icon: GitCommit },
+                  { id: 'causal', label: 'CAUSAL RECOURSE', icon: GitCommit },
                 ].map((tab) => {
                   const Icon = tab.icon;
                   return (
@@ -727,12 +798,12 @@ export default function CustomerPortal() {
                   <div className="cyber-card p-5 bg-[#121824] border-[#1e2a3d] space-y-4">
                     <div className="flex items-center justify-between border-b border-[#1e2a3d] pb-3">
                       <h4 className="font-bold text-white text-sm flex items-center gap-2">
-                        <Layers className="w-4 h-4 text-[#d2ff00]" /> Multi-Lender Pareto Approval Frontier
+                        <Landmark className="w-4 h-4 text-[#d2ff00]" /> Indian Banks & NBFCs Underwriting Match
                       </h4>
-                      <span className="text-[10px] font-mono-tech text-slate-500">ML-PAF ENGINE</span>
+                      <span className="text-[10px] font-mono-tech text-slate-500">PARETO FRONTIER</span>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {result.bank_recommendations?.map((bank, i) => (
                         <div 
                           key={i}
@@ -749,16 +820,16 @@ export default function CustomerPortal() {
 
                           <div className="text-xs text-slate-400 space-y-1 font-mono-tech">
                             <div className="flex justify-between">
-                              <span>Interest Rate:</span>
-                              <strong className="text-white">{bank.base_interest_rate}%</strong>
+                              <span>Base Interest Rate:</span>
+                              <strong className="text-emerald-400">{bank.base_interest_rate}% APR</strong>
                             </div>
                             <div className="flex justify-between">
-                              <span>Est. Monthly EMI:</span>
-                              <strong className="text-[#d2ff00]">${bank.estimated_monthly_emi}</strong>
+                              <span>Estimated Monthly EMI:</span>
+                              <strong className="text-[#d2ff00]">₹{bank.estimated_monthly_emi.toLocaleString('en-IN')}/mo</strong>
                             </div>
                           </div>
 
-                          <div className="text-[10px] text-slate-500 font-light border-t border-[#1e2a3d] pt-1.5">
+                          <div className="text-[10px] text-slate-400 font-light border-t border-[#1e2a3d] pt-1.5">
                             {bank.reason}
                           </div>
                         </div>
@@ -779,7 +850,7 @@ export default function CustomerPortal() {
                       {result.shap_explanation?.top_features?.map((feat, idx) => (
                         <div key={idx} className="space-y-1 text-xs">
                           <div className="flex justify-between font-mono-tech">
-                            <span className="text-slate-300 font-medium">{feat.feature}</span>
+                            <span className="text-slate-300 font-medium">{feat.feature.replace(/_/g, ' ').toUpperCase()}</span>
                             <span className={feat.impact === 'POSITIVE' ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}>
                               {feat.impact === 'POSITIVE' ? '+' : ''}{feat.shap_value} ({feat.impact})
                             </span>
@@ -787,7 +858,7 @@ export default function CustomerPortal() {
 
                           <div className="h-2 w-full bg-[#0a0e17] rounded-full overflow-hidden">
                             <div 
-                              style={{ width: `${Math.min(Math.abs(feat.shap_value) * 120, 100)}%` }}
+                              style={{ width: `${Math.min(Math.abs(feat.shap_value) * 100, 100)}%` }}
                               className={`h-full rounded-full ${feat.impact === 'POSITIVE' ? 'bg-emerald-500' : 'bg-rose-500'}`}
                             />
                           </div>
@@ -803,7 +874,7 @@ export default function CustomerPortal() {
                         <h4 className="font-bold text-[#d2ff00] text-sm flex items-center gap-2">
                           <MapPin className="w-4 h-4 text-[#d2ff00]" /> DiCE Feasible Counterfactual Recourse
                         </h4>
-                        <span className="text-[10px] font-mono-tech text-slate-500">AFRO-DICE OPTIMIZER</span>
+                        <span className="text-[10px] font-mono-tech text-slate-500">ACTIONABLE RECOURSE</span>
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -814,8 +885,8 @@ export default function CustomerPortal() {
                           >
                             <span className="text-slate-400 text-[11px] uppercase">{change.feature || change.action}</span>
                             <div className="flex items-center justify-between mt-1">
-                              <span className="text-slate-500">Current: {change.original_value}</span>
-                              <span className="text-[#d2ff00] font-bold">Target: {change.target_value}</span>
+                              <span className="text-slate-500">Current: {change.original_value !== undefined ? change.original_value : 'N/A'}</span>
+                              <span className="text-[#d2ff00] font-bold">Target: {change.target_value !== undefined ? change.target_value : 'Recommended'}</span>
                             </div>
                           </div>
                         ))}
@@ -837,7 +908,7 @@ export default function CustomerPortal() {
                         <h4 className="font-bold text-white text-sm flex items-center gap-2">
                           <BrainCircuit className="w-4 h-4 text-[#d2ff00]" /> Conversational AI Financial Coach
                         </h4>
-                        <span className="text-[10px] font-mono-tech text-slate-500">LLM-POWERED EXPLAINABILITY ENGINE</span>
+                        <span className="text-[10px] font-mono-tech text-slate-500">MULTI-LINGUAL RECOURSE ENGINE</span>
                       </div>
 
                       <div className="flex items-center gap-2">
@@ -848,13 +919,11 @@ export default function CustomerPortal() {
                             setCoachLanguage(e.target.value);
                             fetchCoachAdvice();
                           }}
-                          className="cyber-input text-xs py-1 px-2.5 w-auto"
+                          className="cyber-input text-xs py-1 px-2.5 w-auto font-mono-tech"
                         >
                           <option value="English">English</option>
-                          <option value="Spanish">Spanish (Español)</option>
                           <option value="Hindi">Hindi (हिंदी)</option>
-                          <option value="French">French (Français)</option>
-                          <option value="German">German (Deutsch)</option>
+                          <option value="Hinglish">Hinglish</option>
                         </select>
 
                         {/* Regenerate Button */}
@@ -870,7 +939,7 @@ export default function CustomerPortal() {
 
                     {coachLoading ? (
                       <div className="p-8 text-center text-slate-400 font-mono-tech text-xs flex items-center justify-center gap-2">
-                        <RefreshCw className="w-4 h-4 animate-spin text-[#d2ff00]" /> Synthesizing personalized financial roadmap...
+                        <RefreshCw className="w-4 h-4 animate-spin text-[#d2ff00]" /> Synthesizing personalized Indian financial coaching roadmap...
                       </div>
                     ) : coachData ? (
                       <div className="space-y-4">
@@ -914,7 +983,7 @@ export default function CustomerPortal() {
                           </div>
                         </div>
 
-                        {/* Strengths & Bottlenecks */}
+                        {/* Strengths & Vulnerabilities */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <div className="bg-[#0a0e17] p-3.5 rounded-xl border border-emerald-500/20 space-y-2">
                             <span className="text-[10px] font-mono-tech text-emerald-400 font-bold flex items-center gap-1.5">
@@ -929,10 +998,10 @@ export default function CustomerPortal() {
 
                           <div className="bg-[#0a0e17] p-3.5 rounded-xl border border-rose-500/20 space-y-2">
                             <span className="text-[10px] font-mono-tech text-rose-400 font-bold flex items-center gap-1.5">
-                              <AlertTriangle className="w-3.5 h-3.5" /> IDENTIFIED RISK BOTTLENECKS
+                              <AlertTriangle className="w-3.5 h-3.5" /> KEY VULNERABILITIES
                             </span>
                             <ul className="text-xs text-slate-300 space-y-1 font-light list-disc list-inside">
-                              {coachData.risk_bottlenecks?.map((bot, idx) => (
+                              {coachData.key_vulnerabilities?.map((bot, idx) => (
                                 <li key={idx}>{bot}</li>
                               ))}
                             </ul>
@@ -940,30 +1009,24 @@ export default function CustomerPortal() {
                         </div>
 
                         {/* 30-90-180 Day Phased Milestones */}
-                        <div className="bg-[#0a0e17] p-4 rounded-xl border border-[#1e2a3d] space-y-3">
-                          <span className="text-[10px] font-mono-tech text-[#d2ff00] uppercase">30-90-180 DAY ACTION ROADMAP</span>
-                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono-tech">
-                            <div className="p-3 bg-[#121824] rounded-lg border border-[#1e2a3d]">
-                              <span className="text-[#d2ff00] font-bold block mb-1">Phase 1 (Day 1-30)</span>
-                              <p className="text-slate-300 text-[11px] font-sans font-light">{coachData.action_milestones?.phase_1_30_days}</p>
-                            </div>
-                            <div className="p-3 bg-[#121824] rounded-lg border border-[#1e2a3d]">
-                              <span className="text-[#d2ff00] font-bold block mb-1">Phase 2 (Day 31-90)</span>
-                              <p className="text-slate-300 text-[11px] font-sans font-light">{coachData.action_milestones?.phase_2_90_days}</p>
-                            </div>
-                            <div className="p-3 bg-[#121824] rounded-lg border border-[#1e2a3d]">
-                              <span className="text-[#d2ff00] font-bold block mb-1">Phase 3 (Day 91-180)</span>
-                              <p className="text-slate-300 text-[11px] font-sans font-light">{coachData.action_milestones?.phase_3_180_days}</p>
+                        {coachData.actionable_milestones && (
+                          <div className="bg-[#0a0e17] p-4 rounded-xl border border-[#1e2a3d] space-y-3">
+                            <span className="text-[10px] font-mono-tech text-[#d2ff00] uppercase">30-90-180 DAY ACTION ROADMAP</span>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono-tech">
+                              {coachData.actionable_milestones.map((m, idx) => (
+                                <div key={idx} className="p-3 bg-[#121824] rounded-lg border border-[#1e2a3d] space-y-1">
+                                  <span className="text-[#d2ff00] font-bold block">{m.phase.replace('_', ' ')}</span>
+                                  <span className="text-white text-[11px] block font-bold">{m.target_metric}</span>
+                                  <p className="text-slate-300 text-[11px] font-sans font-light">{m.action_instruction}</p>
+                                  <span className="text-emerald-400 text-[10px] block font-bold pt-1">{m.impact_boost}</span>
+                                </div>
+                              ))}
                             </div>
                           </div>
-                        </div>
+                        )}
 
                       </div>
-                    ) : (
-                      <div className="p-8 text-center text-slate-500 font-mono-tech text-xs">
-                        Click "Regenerate" to generate AI coach advice.
-                      </div>
-                    )}
+                    ) : null}
 
                   </div>
                 </div>
@@ -977,11 +1040,11 @@ export default function CustomerPortal() {
                     <div className="flex items-center justify-between border-b border-[#1e2a3d] pb-3">
                       <div>
                         <h4 className="font-bold text-white text-sm flex items-center gap-2">
-                          <FileCheck className="w-4 h-4 text-[#d2ff00]" /> OCR Document Income & Fraud Radar
+                          <FileCheck className="w-4 h-4 text-[#d2ff00]" /> Indian Document OCR & PAN Verification
                         </h4>
-                        <span className="text-[10px] font-mono-tech text-slate-500">PAYSTUB & TAX FORM DISCREPANCY VERIFIER</span>
+                        <span className="text-[10px] font-mono-tech text-slate-500">SALARY SLIP, FORM 16 & DISCREPANCY DETECTOR</span>
                       </div>
-                      <span className="text-[10px] font-mono-tech text-[#d2ff00]">OPTICAL EXTRACTION</span>
+                      <span className="text-[10px] font-mono-tech text-[#d2ff00]">RBI DIGITAL LENDING AUDIT</span>
                     </div>
 
                     {/* Upload / Test Controls */}
@@ -993,9 +1056,9 @@ export default function CustomerPortal() {
                           onChange={(e) => setDocType(e.target.value)}
                           className="cyber-input text-xs"
                         >
-                          <option value="PAY_SLIP">Pay Slip / Salary Slip</option>
-                          <option value="TAX_FORM_16">Tax Form 16 / W-2</option>
-                          <option value="BANK_STATEMENT">Bank Statement</option>
+                          <option value="PAY_SLIP">EPFO Pay Slip / Salary Slip</option>
+                          <option value="TAX_FORM_16">Form 16 / ITR-V</option>
+                          <option value="BANK_STATEMENT">Bank Statement (6 Months)</option>
                         </select>
                       </div>
 
@@ -1006,14 +1069,14 @@ export default function CustomerPortal() {
                           onChange={(e) => setDocFileName(e.target.value)}
                           className="cyber-input text-xs"
                         >
-                          <option value="Google_Paystub_Nov2026.pdf">Google LLC Paystub (Verified)</option>
-                          <option value="Freelance_1099_Audit.pdf">1099 Freelance Form (Minor Delta)</option>
-                          <option value="Altered_Fabricated_Stub.pdf">Altered Paystub (Fraud Suspect)</option>
+                          <option value="TCS_Salary_Slip_Form16.pdf">TCS Ltd Salary Slip (Verified)</option>
+                          <option value="Infosys_Paystub_Mismatch.pdf">Infosys Paystub (15% Variance)</option>
+                          <option value="Altered_Fraud_Statement.pdf">Fabricated PDF (Critical Fraud Flag)</option>
                         </select>
                       </div>
 
                       <div>
-                        <label className="text-[11px] text-slate-400 block mb-1">Declared Monthly ($)</label>
+                        <label className="text-[11px] text-slate-400 block mb-1">Declared Monthly (₹)</label>
                         <input
                           type="number"
                           value={declaredIncome}
@@ -1028,10 +1091,10 @@ export default function CustomerPortal() {
                       whileTap={{ scale: 0.98 }}
                       onClick={handleUploadDocument}
                       disabled={ocrLoading}
-                      className="btn-lime w-full justify-center text-xs py-2.5 font-bold cursor-pointer"
+                      className="btn-lime w-full justify-center text-xs py-2.5 font-bold cursor-pointer flex items-center gap-2"
                     >
                       {ocrLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
-                      RUN OCR EXTRACTION & FRAUD AUDIT
+                      RUN OCR EXTRACTION & PAN FRAUD AUDIT
                     </motion.button>
 
                     {/* OCR Output */}
@@ -1051,11 +1114,11 @@ export default function CustomerPortal() {
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono-tech">
                           <div>
                             <span className="text-slate-500 block text-[10px]">DECLARED MONTHLY</span>
-                            <span className="text-white font-bold">${ocrResult.declared_monthly_income?.toLocaleString()}</span>
+                            <span className="text-white font-bold">₹{ocrResult.declared_monthly_income?.toLocaleString('en-IN')}</span>
                           </div>
                           <div>
                             <span className="text-slate-500 block text-[10px]">OCR EXTRACTED</span>
-                            <span className="text-[#d2ff00] font-bold">${ocrResult.extracted_monthly_income?.toLocaleString()}</span>
+                            <span className="text-[#d2ff00] font-bold">₹{ocrResult.extracted_monthly_income?.toLocaleString('en-IN')}</span>
                           </div>
                           <div>
                             <span className="text-slate-500 block text-[10px]">DISCREPANCY</span>
@@ -1079,7 +1142,7 @@ export default function CustomerPortal() {
                 </div>
               )}
 
-              {/* Tab 4: Open Banking / Plaid Real-Time Cashflow */}
+              {/* Tab 4: Account Aggregator (AA) Real-Time Cashflow */}
               {activeTab === 'openbanking' && (
                 <div className="space-y-4">
                   <div className="cyber-card p-5 bg-[#121824] border-[#1e2a3d] space-y-4">
@@ -1087,26 +1150,26 @@ export default function CustomerPortal() {
                     <div className="flex items-center justify-between border-b border-[#1e2a3d] pb-3">
                       <div>
                         <h4 className="font-bold text-white text-sm flex items-center gap-2">
-                          <Landmark className="w-4 h-4 text-[#d2ff00]" /> Open Banking Real-Time Cashflow Intelligence
+                          <Landmark className="w-4 h-4 text-[#d2ff00]" /> RBI Sahamati Account Aggregator (AA) Telemetry
                         </h4>
-                        <span className="text-[10px] font-mono-tech text-slate-500">DIRECT API FINANCIAL FEED & DSCR METRICS</span>
+                        <span className="text-[10px] font-mono-tech text-slate-500">LIVE BANK STATEMENT ANALYZER & NACH BOUNCE DETECTOR</span>
                       </div>
-                      <span className="text-[10px] font-mono-tech text-[#d2ff00]">SECURE PLAID LINK</span>
+                      <span className="text-[10px] font-mono-tech text-[#d2ff00]">AA FRAMEWORK</span>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-[#0a0e17] p-4 rounded-xl border border-[#1e2a3d]">
                       <div>
-                        <label className="text-[11px] text-slate-400 block mb-1">Select Financial Institution</label>
+                        <label className="text-[11px] text-slate-400 block mb-1">Select Financial Entity (FIP)</label>
                         <select
                           value={selectedBank}
                           onChange={(e) => setSelectedBank(e.target.value)}
                           className="cyber-input text-xs"
                         >
-                          <option value="Chase Bank">JPMorgan Chase Bank, N.A.</option>
-                          <option value="Bank of America">Bank of America</option>
-                          <option value="Wells Fargo">Wells Fargo</option>
-                          <option value="Barclays">Barclays Financial</option>
-                          <option value="HDFC Bank">HDFC Bank Global</option>
+                          <option value="State Bank of India (SBI)">State Bank of India (SBI)</option>
+                          <option value="HDFC Bank">HDFC Bank Ltd</option>
+                          <option value="ICICI Bank">ICICI Bank Ltd</option>
+                          <option value="Axis Bank">Axis Bank Ltd</option>
+                          <option value="Bank of Baroda">Bank of Baroda</option>
                         </select>
                       </div>
 
@@ -1116,10 +1179,10 @@ export default function CustomerPortal() {
                           whileTap={{ scale: 0.98 }}
                           onClick={handleConnectOpenBanking}
                           disabled={openBankingLoading}
-                          className="btn-lime w-full justify-center text-xs py-2.5 font-bold cursor-pointer"
+                          className="btn-lime w-full justify-center text-xs py-2.5 font-bold cursor-pointer flex items-center gap-2"
                         >
                           {openBankingLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Landmark className="w-4 h-4" />}
-                          CONNECT LIVE BANK FEED
+                          FETCH AA STATEMENT TELEMETRY
                         </motion.button>
                       </div>
                     </div>
@@ -1128,7 +1191,7 @@ export default function CustomerPortal() {
                       <div className="bg-[#0a0e17] p-4 rounded-xl border border-[#1e2a3d] space-y-4">
                         <div className="flex justify-between items-center border-b border-[#1e2a3d] pb-2">
                           <span className="text-xs font-bold text-white font-mono-tech">
-                            FEED: {selectedBank} ({openBankingResult.account_number_mask})
+                            FIP: {selectedBank} ({openBankingResult.account_number_mask})
                           </span>
                           <span className="text-[10px] font-mono-tech px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-bold">
                             GRADE: {openBankingResult.cashflow_quality_grade}
@@ -1138,25 +1201,24 @@ export default function CustomerPortal() {
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono-tech">
                           <div>
                             <span className="text-slate-500 block text-[10px]">AVG MONTHLY INFLOW</span>
-                            <span className="text-emerald-400 font-bold">${openBankingResult.avg_monthly_inflow?.toLocaleString()}</span>
+                            <span className="text-emerald-400 font-bold">₹{openBankingResult.avg_monthly_inflow?.toLocaleString('en-IN')}</span>
                           </div>
                           <div>
                             <span className="text-slate-500 block text-[10px]">AVG MONTHLY OUTFLOW</span>
-                            <span className="text-rose-400 font-bold">${openBankingResult.avg_monthly_outflow?.toLocaleString()}</span>
+                            <span className="text-rose-400 font-bold">₹{openBankingResult.avg_monthly_outflow?.toLocaleString('en-IN')}</span>
                           </div>
                           <div>
-                            <span className="text-slate-500 block text-[10px]">FREE CASH FLOW</span>
-                            <span className="text-[#d2ff00] font-bold">${openBankingResult.monthly_free_cashflow?.toLocaleString()}</span>
+                            <span className="text-slate-500 block text-[10px]">MONTHLY FREE CASHFLOW</span>
+                            <span className="text-[#d2ff00] font-bold">₹{openBankingResult.monthly_free_cashflow?.toLocaleString('en-IN')}</span>
                           </div>
                           <div>
-                            <span className="text-slate-500 block text-[10px]">DSCR COVERAGE</span>
+                            <span className="text-slate-500 block text-[10px]">CASHFLOW DSCR</span>
                             <span className="text-white font-bold">{openBankingResult.debt_service_coverage_ratio}x</span>
                           </div>
                         </div>
 
-                        <div className="bg-[#121824] p-3 rounded-lg border border-[#1e2a3d] flex items-center justify-between text-xs font-mono-tech">
-                          <span className="text-slate-400">Salary Credit Stability Index:</span>
-                          <span className="text-[#d2ff00] font-bold">{(openBankingResult.salary_credit_stability_index * 100).toFixed(1)}% ({openBankingResult.salary_credit_stability_index} / 1.0) — Consistent Deposit History</span>
+                        <div className="p-3 bg-[#121824] rounded-lg border border-[#1e2a3d] text-xs font-mono-tech text-slate-300">
+                          {openBankingResult.summary_insight}
                         </div>
                       </div>
                     )}
@@ -1173,96 +1235,60 @@ export default function CustomerPortal() {
                     <div className="flex items-center justify-between border-b border-[#1e2a3d] pb-3">
                       <div>
                         <h4 className="font-bold text-white text-sm flex items-center gap-2">
-                          <TrendingDown className="w-4 h-4 text-[#d2ff00]" /> Macroeconomic Shock & Portfolio Resilience
+                          <TrendingDown className="w-4 h-4 text-[#d2ff00]" /> RBI Macroeconomic Stress Shock Simulator
                         </h4>
-                        <span className="text-[10px] font-mono-tech text-slate-500">INTEREST RATE, INFLATION & RECESSION SIMULATOR</span>
+                        <span className="text-[10px] font-mono-tech text-slate-500">REPO RATE HIKES, CPI INFLATION & STAGFLATION</span>
                       </div>
-                      <span className="text-[10px] font-mono-tech text-amber-400">SHOCK DYNAMICS</span>
+                      <span className="text-[10px] font-mono-tech text-[#d2ff00]">RESILIENCE RADAR</span>
                     </div>
 
-                    {/* Scenario Selector & Custom Sliders */}
-                    <div className="space-y-3 bg-[#0a0e17] p-4 rounded-xl border border-[#1e2a3d]">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-[#0a0e17] p-4 rounded-xl border border-[#1e2a3d]">
                       <div>
-                        <label className="text-[11px] text-slate-400 block mb-1">Pre-Packaged Macro Shock Scenario</label>
+                        <label className="text-[11px] text-slate-400 block mb-1">Shock Scenario</label>
                         <select
                           value={stressScenario}
-                          onChange={(e) => {
-                            const sc = e.target.value;
-                            setStressScenario(sc);
-                            if (sc === 'RATE_HIKE_200BPS') { setRateHike(2.0); setInflationCost(1.0); setIncomeShock(0.0); }
-                            if (sc === 'INFLATION_SURGE_500BPS') { setRateHike(1.0); setInflationCost(5.0); setIncomeShock(5.0); }
-                            if (sc === 'INCOME_SHOCK_15PCT') { setRateHike(0.0); setInflationCost(2.0); setIncomeShock(15.0); }
-                            if (sc === 'COMBINED_STAGFLATION') { setRateHike(3.0); setInflationCost(8.0); setIncomeShock(10.0); }
-                          }}
+                          onChange={(e) => setStressScenario(e.target.value)}
                           className="cyber-input text-xs"
                         >
-                          <option value="COMBINED_STAGFLATION">Severe Stagflation (+3% Rate, +8% Inflation, -10% Income)</option>
-                          <option value="RATE_HIKE_200BPS">Central Bank Rate Hike (+200 bps / +2.0%)</option>
-                          <option value="INFLATION_SURGE_500BPS">Cost-of-Living Surge (+500 bps / +5.0%)</option>
-                          <option value="INCOME_SHOCK_15PCT">Disposable Income Contraction (-15%)</option>
+                          <option value="COMBINED_STAGFLATION">RBI Stagflation (Rate Hike + CPI Surge)</option>
+                          <option value="RATE_HIKE">RBI Repo Rate Spike (+250 bps)</option>
+                          <option value="INFLATION_SURGE">CPI Living Cost Inflation Surge</option>
+                          <option value="INCOME_SHOCK">Macro Job Market / Salary Shock</option>
                         </select>
                       </div>
 
-                      <div className="grid grid-cols-3 gap-3 text-xs font-mono-tech pt-1">
-                        <div>
-                          <div className="flex justify-between text-slate-400 mb-1">
-                            <span>Rate Delta</span>
-                            <span className="text-[#d2ff00]">+{rateHike}%</span>
-                          </div>
-                          <input 
-                            type="range" min="0" max="8" step="0.5" 
-                            value={rateHike} 
-                            onChange={(e) => setRateHike(parseFloat(e.target.value))} 
-                            className="w-full h-1.5 bg-[#121824] rounded cursor-pointer accent-[#d2ff00]"
-                          />
-                        </div>
+                      <div>
+                        <label className="text-[11px] text-slate-400 block mb-1">Repo Rate Hike (+%)</label>
+                        <input
+                          type="number"
+                          step="0.5"
+                          value={rateHike}
+                          onChange={(e) => setRateHike(parseFloat(e.target.value) || 0)}
+                          className="cyber-input text-xs"
+                        />
+                      </div>
 
-                        <div>
-                          <div className="flex justify-between text-slate-400 mb-1">
-                            <span>Inflation Delta</span>
-                            <span className="text-[#d2ff00]">+{inflationCost}%</span>
-                          </div>
-                          <input 
-                            type="range" min="0" max="15" step="0.5" 
-                            value={inflationCost} 
-                            onChange={(e) => setInflationCost(parseFloat(e.target.value))} 
-                            className="w-full h-1.5 bg-[#121824] rounded cursor-pointer accent-[#d2ff00]"
-                          />
-                        </div>
-
-                        <div>
-                          <div className="flex justify-between text-slate-400 mb-1">
-                            <span>Income Shock</span>
-                            <span className="text-[#d2ff00]">-{incomeShock}%</span>
-                          </div>
-                          <input 
-                            type="range" min="0" max="30" step="1" 
-                            value={incomeShock} 
-                            onChange={(e) => setIncomeShock(parseFloat(e.target.value))} 
-                            className="w-full h-1.5 bg-[#121824] rounded cursor-pointer accent-[#d2ff00]"
-                          />
-                        </div>
+                      <div className="flex items-end">
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={handleRunStressTest}
+                          disabled={stressLoading}
+                          className="btn-lime w-full justify-center text-xs py-2.5 font-bold cursor-pointer flex items-center gap-2"
+                        >
+                          {stressLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <TrendingDown className="w-4 h-4" />}
+                          SIMULATE STRESS SHOCK
+                        </motion.button>
                       </div>
                     </div>
-
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={handleRunStressTest}
-                      disabled={stressLoading}
-                      className="btn-lime w-full justify-center text-xs py-2.5 font-bold cursor-pointer"
-                    >
-                      {stressLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <TrendingDown className="w-4 h-4" />}
-                      SIMULATE MACROECONOMIC SHOCK
-                    </motion.button>
 
                     {stressResult && (
                       <div className="bg-[#0a0e17] p-4 rounded-xl border border-[#1e2a3d] space-y-3">
                         <div className="flex justify-between items-center border-b border-[#1e2a3d] pb-2">
-                          <span className="text-xs font-bold text-white font-mono-tech">STRESSED OUTCOME SUMMARY</span>
+                          <span className="text-xs font-bold text-white font-mono-tech">STRESS SIMULATION OUTPUT</span>
                           <span className={`text-[10px] font-mono-tech px-2 py-0.5 rounded font-bold border ${
                             stressResult.resilience_grade === 'HIGHLY_RESILIENT' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' :
-                            stressResult.resilience_grade === 'MODERATE_VULNERABILITY' ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' :
+                            stressResult.resilience_grade === 'MODERATELY_VULNERABLE' ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' :
                             'bg-rose-500/10 text-rose-400 border-rose-500/30'
                           }`}>
                             {stressResult.resilience_grade}
@@ -1271,21 +1297,25 @@ export default function CustomerPortal() {
 
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono-tech">
                           <div>
-                            <span className="text-slate-500 block text-[10px]">BASELINE PROBABILITY</span>
-                            <span className="text-white font-bold">{Math.round(stressResult.baseline_approval_probability * 100)}%</span>
+                            <span className="text-slate-500 block text-[10px]">BASELINE PROB</span>
+                            <span className="text-emerald-400 font-bold">{(stressResult.baseline_approval_probability * 100).toFixed(1)}%</span>
                           </div>
                           <div>
-                            <span className="text-slate-500 block text-[10px]">STRESSED PROBABILITY</span>
-                            <span className="text-amber-400 font-bold">{Math.round(stressResult.stressed_approval_probability * 100)}%</span>
+                            <span className="text-slate-500 block text-[10px]">STRESSED PROB</span>
+                            <span className="text-rose-400 font-bold">{(stressResult.stressed_approval_probability * 100).toFixed(1)}%</span>
                           </div>
                           <div>
-                            <span className="text-slate-500 block text-[10px]">STRESSED DTI</span>
-                            <span className="text-rose-400 font-bold">{Math.round(stressResult.stressed_dti * 100)}%</span>
+                            <span className="text-slate-500 block text-[10px]">PROBABILITY DROP</span>
+                            <span className="text-amber-400 font-bold">-{stressResult.probability_drop_pct}%</span>
                           </div>
                           <div>
-                            <span className="text-slate-500 block text-[10px]">BUFFER MARGIN</span>
-                            <span className="text-[#d2ff00] font-bold">${stressResult.buffer_margin_monthly?.toLocaleString()}/mo</span>
+                            <span className="text-slate-500 block text-[10px]">STRESSED FOIR</span>
+                            <span className="text-white font-bold">{Math.round(stressResult.stressed_dti * 100)}%</span>
                           </div>
+                        </div>
+
+                        <div className="text-xs text-slate-300 font-light border-t border-[#1e2a3d] pt-2 font-mono-tech">
+                          {stressResult.stress_verdict_notes}
                         </div>
                       </div>
                     )}
@@ -1294,7 +1324,7 @@ export default function CustomerPortal() {
                 </div>
               )}
 
-              {/* Tab 6: Conformal Prediction & Epistemic Uncertainty */}
+              {/* Tab 6: Conformal Prediction */}
               {activeTab === 'conformal' && (
                 <div className="space-y-4">
                   <div className="cyber-card p-5 bg-[#121824] border-[#1e2a3d] space-y-4">
@@ -1302,71 +1332,67 @@ export default function CustomerPortal() {
                     <div className="flex items-center justify-between border-b border-[#1e2a3d] pb-3">
                       <div>
                         <h4 className="font-bold text-white text-sm flex items-center gap-2">
-                          <Gauge className="w-4 h-4 text-[#d2ff00]" /> Conformal Uncertainty Quantification
+                          <Gauge className="w-4 h-4 text-[#d2ff00]" /> Conformal Uncertainty Bounds (ICP 95%)
                         </h4>
-                        <span className="text-[10px] font-mono-tech text-slate-500">FINITE-SAMPLE COVERAGE GUARANTEES (\Gamma^\alpha)</span>
+                        <span className="text-[10px] font-mono-tech text-slate-500">GUARANTEED COVERAGE INTERVALS</span>
                       </div>
-                      <span className="text-[10px] font-mono-tech text-[#d2ff00]">NON-PARAMETRIC</span>
+                      <span className="text-[10px] font-mono-tech text-[#d2ff00]">EU AI ACT & RBI ALIGNED</span>
                     </div>
 
-                    {/* Confidence Slider */}
-                    <div className="bg-[#0a0e17] p-4 rounded-xl border border-[#1e2a3d] space-y-2">
-                      <div className="flex justify-between text-xs font-mono-tech">
-                        <span className="text-slate-300 font-medium">Confidence Level (1 - \alpha)</span>
-                        <span className="text-[#d2ff00] font-bold">{(confidenceLevel * 100).toFixed(0)}% Certainty Guarantee</span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-[#0a0e17] p-4 rounded-xl border border-[#1e2a3d]">
+                      <div>
+                        <label className="text-[11px] text-slate-400 block mb-1">Target Coverage Confidence</label>
+                        <select
+                          value={confidenceLevel}
+                          onChange={(e) => {
+                            setConfidenceLevel(parseFloat(e.target.value));
+                            fetchConformal();
+                          }}
+                          className="cyber-input text-xs"
+                        >
+                          <option value={0.90}>90% Confidence (Narrow Band)</option>
+                          <option value={0.95}>95% Standard Statutory Confidence</option>
+                          <option value={0.99}>99% Ultra-Conservative Prime Coverage</option>
+                        </select>
                       </div>
-                      <input 
-                        type="range" min="0.80" max="0.99" step="0.01" 
-                        value={confidenceLevel} 
-                        onChange={(e) => {
-                          const val = parseFloat(e.target.value);
-                          setConfidenceLevel(val);
-                          fetchConformal();
-                        }}
-                        className="w-full h-2 bg-[#121824] rounded-lg cursor-pointer accent-[#d2ff00]"
-                      />
-                      <div className="flex justify-between text-[10px] font-mono-tech text-slate-500">
-                        <span>80% Confidence</span>
-                        <span>90% Standard</span>
-                        <span>95% High (Basel III)</span>
-                        <span>99% Maximum</span>
+
+                      <div className="flex items-end">
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => fetchConformal()}
+                          className="btn-lime w-full justify-center text-xs py-2.5 font-bold cursor-pointer"
+                        >
+                          RECALCULATE CONFORMAL INTERVAL
+                        </motion.button>
                       </div>
                     </div>
 
                     {conformalResult && (
-                      <div className="bg-[#0a0e17] p-4 rounded-xl border border-[#1e2a3d] space-y-4">
-                        <div className="flex justify-between items-center border-b border-[#1e2a3d] pb-2">
-                          <span className="text-xs font-bold text-white font-mono-tech">PREDICTION SET: \Gamma^{Math.round(confidenceLevel * 100)}</span>
-                          <span className={`text-[10px] font-mono-tech px-2 py-0.5 rounded font-bold border ${
-                            conformalResult.epistemic_uncertainty === 'LOW_UNCERTAINTY' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' :
-                            conformalResult.epistemic_uncertainty === 'MODERATE_AMBIGUITY' ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' :
-                            'bg-rose-500/10 text-rose-400 border-rose-500/30'
-                          }`}>
-                            {conformalResult.epistemic_uncertainty}
-                          </span>
-                        </div>
-
+                      <div className="bg-[#0a0e17] p-4 rounded-xl border border-[#1e2a3d] space-y-3">
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono-tech">
                           <div>
-                            <span className="text-slate-500 block text-[10px]">PREDICTION SET SIZE</span>
-                            <span className="text-white font-bold">{conformalResult.prediction_set_size} ({conformalResult.prediction_set?.join(', ')})</span>
+                            <span className="text-slate-500 block text-[10px]">POINT PROBABILITY</span>
+                            <span className="text-[#d2ff00] font-bold">{(conformalResult.point_probability * 100).toFixed(1)}%</span>
                           </div>
                           <div>
-                            <span className="text-slate-500 block text-[10px]">CALIBRATED COVERAGE</span>
-                            <span className="text-[#d2ff00] font-bold">{(conformalResult.coverage_guarantee * 100).toFixed(1)}%</span>
+                            <span className="text-slate-500 block text-[10px]">CONFORMAL BOUNDS</span>
+                            <span className="text-white font-bold">
+                              [{conformalResult.calibrated_interval?.lower_bound?.toFixed(2)}, {conformalResult.calibrated_interval?.upper_bound?.toFixed(2)}]
+                            </span>
                           </div>
                           <div>
-                            <span className="text-slate-500 block text-[10px]">NONCONFORMITY SCORE</span>
-                            <span className="text-slate-300 font-bold">{conformalResult.nonconformity_score}</span>
+                            <span className="text-slate-500 block text-[10px]">EPISTEMIC UNCERTAINTY</span>
+                            <span className="text-emerald-400 font-bold">{conformalResult.metrics?.epistemic_uncertainty_score}</span>
                           </div>
                           <div>
-                            <span className="text-slate-500 block text-[10px]">DECISION RELIABILITY</span>
-                            <span className="text-emerald-400 font-bold">{conformalResult.decision_reliability}</span>
+                            <span className="text-slate-500 block text-[10px]">TRIAGE ACTION</span>
+                            <span className="text-white font-bold">{conformalResult.triage?.category}</span>
                           </div>
                         </div>
 
-                        <div className="text-xs text-slate-400 font-light border-t border-[#1e2a3d] pt-2">
-                          <strong className="text-slate-300 font-mono-tech">Mathematical Guarantee:</strong> Under exchangeability, the true label lies inside \Gamma^\alpha with probability at least {(confidenceLevel * 100).toFixed(0)}%.
+                        <div className="text-xs text-slate-300 font-light border-t border-[#1e2a3d] pt-2 font-mono-tech">
+                          {conformalResult.triage?.recommendation}
                         </div>
                       </div>
                     )}
@@ -1375,7 +1401,7 @@ export default function CustomerPortal() {
                 </div>
               )}
 
-              {/* Tab 7: Causal Recourse & Structural DAG */}
+              {/* Tab 7: Causal Recourse */}
               {activeTab === 'causal' && (
                 <div className="space-y-4">
                   <div className="cyber-card p-5 bg-[#121824] border-[#1e2a3d] space-y-4">
@@ -1383,49 +1409,46 @@ export default function CustomerPortal() {
                     <div className="flex items-center justify-between border-b border-[#1e2a3d] pb-3">
                       <div>
                         <h4 className="font-bold text-white text-sm flex items-center gap-2">
-                          <GitCommit className="w-4 h-4 text-[#d2ff00]" /> Causal Recourse along Structural DAG
+                          <GitCommit className="w-4 h-4 text-[#d2ff00]" /> Structural Causal Recourse Optimization
                         </h4>
-                        <span className="text-[10px] font-mono-tech text-slate-500">TEMPORAL LAG & ENDOGENOUS FEATURE PROPAGATION</span>
+                        <span className="text-[10px] font-mono-tech text-slate-500">DAG-CONSTRAINED ACTION PATHWAYS</span>
                       </div>
-                      <span className="text-[10px] font-mono-tech text-[#d2ff00]">CAUSAL SCM</span>
+                      <span className="text-[10px] font-mono-tech text-[#d2ff00]">AFRO BUDGET OPTIMIZER</span>
                     </div>
 
-                    <div className="bg-[#0a0e17] p-4 rounded-xl border border-[#1e2a3d] space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-white font-mono-tech">STRUCTURAL MECHANISM CASCADE</span>
-                        <span className="text-[10px] font-mono-tech text-slate-400">Max Horizon: 180 Days</span>
-                      </div>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={handleRunCausalRecourse}
+                      disabled={causalLoading}
+                      className="btn-lime w-full justify-center text-xs py-2.5 font-bold cursor-pointer flex items-center gap-2"
+                    >
+                      {causalLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <GitCommit className="w-4 h-4" />}
+                      EXECUTE CAUSAL RECOURSE OPTIMIZATION
+                    </motion.button>
 
-                      {causalLoading ? (
-                        <div className="p-8 text-center text-slate-400 font-mono-tech text-xs">
-                          <RefreshCw className="w-4 h-4 animate-spin mx-auto mb-2 text-[#d2ff00]" />
-                          Traversing causal DAG pathways...
+                    {causalResult && (
+                      <div className="bg-[#0a0e17] p-4 rounded-xl border border-[#1e2a3d] space-y-3">
+                        <div className="flex justify-between items-center border-b border-[#1e2a3d] pb-2">
+                          <span className="text-xs font-bold text-white font-mono-tech">CAUSAL RECOURSE PATHWAYS</span>
+                          <span className="text-[10px] font-mono-tech px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-bold">
+                            FEASIBILITY: {causalResult.feasibility_grade}
+                          </span>
                         </div>
-                      ) : causalResult ? (
-                        <div className="space-y-3">
-                          {causalResult.phases?.map((ph, idx) => (
-                            <div key={idx} className="p-3 bg-[#121824] rounded-lg border border-[#1e2a3d] space-y-2">
-                              <div className="flex justify-between items-center">
-                                <span className="text-xs font-bold text-[#d2ff00] font-mono-tech">
-                                  {ph.phase_name} ({ph.time_window_days} Days)
-                                </span>
-                                <span className="text-[10px] font-mono-tech text-emerald-400 font-bold">
-                                  Projected Approval: {(ph.projected_approval_prob * 100).toFixed(0)}%
-                                </span>
+
+                        <div className="space-y-2">
+                          {causalResult.interventions?.map((step, idx) => (
+                            <div key={idx} className="p-3 bg-[#121824] rounded-lg border border-[#1e2a3d] text-xs font-mono-tech flex justify-between items-center">
+                              <div>
+                                <span className="text-white font-bold block">{step.target_feature}</span>
+                                <span className="text-slate-400 text-[11px]">{step.action_description}</span>
                               </div>
-                              <p className="text-xs text-slate-300 font-light font-sans">{ph.description}</p>
-                              <div className="text-[11px] font-mono-tech text-slate-400 bg-[#0a0e17] p-2 rounded border border-[#1e2a3d]">
-                                Action: <strong className="text-white">{ph.action_item}</strong> (Lag: {ph.bureau_reporting_lag_days} days)
-                              </div>
+                              <span className="text-[#d2ff00] font-bold">{step.estimated_timeframe_days} Days</span>
                             </div>
                           ))}
                         </div>
-                      ) : (
-                        <button onClick={handleRunCausalRecourse} className="btn-dark-outline text-xs w-full justify-center cursor-pointer">
-                          Generate Causal DAG Recourse Trajectory
-                        </button>
-                      )}
-                    </div>
+                      </div>
+                    )}
 
                   </div>
                 </div>

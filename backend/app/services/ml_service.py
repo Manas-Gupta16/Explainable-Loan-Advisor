@@ -33,6 +33,12 @@ class MLInferenceService:
         self.preprocessor = LoanPreprocessor.load(self.preprocessor_path)
         self.xai_manager = XAIExplainerManager(self.model_path, self.preprocessor_path)
 
+    def reload(self):
+        """Reloads serialized model artifacts into memory."""
+        self.model = joblib.load(self.model_path)
+        self.preprocessor = LoanPreprocessor.load(self.preprocessor_path)
+        self.xai_manager = XAIExplainerManager(self.model_path, self.preprocessor_path)
+
     def predict_risk(self, input_dict: Dict[str, Any]) -> Tuple[float, str, str]:
         """
         Returns (approval_probability, risk_tier, decision_status)

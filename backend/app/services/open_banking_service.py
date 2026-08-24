@@ -4,9 +4,9 @@ from ml_engine.account_aggregator import AccountAggregatorEngine
 
 class OpenBankingCashFlowService:
     """
-    Open Banking / Account Aggregator (AA) Real-Time Financial Telemetry Service.
+    RBI Sahamati Account Aggregator (AA) Real-Time Financial Telemetry Service.
     Calculates live Cash Flow Dynamics, NACH E-Mandate Bounce Ratios, Income Volatility,
-    and Alternative Credit Scores for prime and thin-file borrowers.
+    and Alternative Credit Scores for prime and thin-file Indian borrowers.
     """
     def __init__(self):
         self.engine = AccountAggregatorEngine
@@ -19,13 +19,13 @@ class OpenBankingCashFlowService:
     ) -> Dict[str, Any]:
         """
         Processes simulated banking activity for an existing loan application.
-        Provides both new rich AA metrics and backwards-compatible flattened attributes.
+        Provides both rich AA metrics and backwards-compatible flattened attributes in INR.
         """
-        salary = monthly_net_salary if monthly_net_salary and monthly_net_salary > 0 else 6500.0
-        emi = existing_monthly_emi if existing_monthly_emi is not None and existing_monthly_emi >= 0 else 650.0
+        salary = monthly_net_salary if monthly_net_salary and monthly_net_salary > 0 else 65000.0
+        emi = existing_monthly_emi if existing_monthly_emi is not None and existing_monthly_emi >= 0 else 12000.0
 
         # Generate realistic 6-month transaction stream
-        account_type = "SALARIED_PRIME" if salary >= 5000.0 else "GIG_VOLATILE"
+        account_type = "SALARIED_PRIME" if salary >= 45000.0 else "GIG_VOLATILE"
         txns = self.engine.generate_synthetic_bank_stream(account_type=account_type, monthly_salary=salary, months=6)
         
         analysis = self.engine.analyze_transaction_stream(txns, requested_loan_emi=emi)
@@ -33,7 +33,7 @@ class OpenBankingCashFlowService:
         # Core metadata
         analysis["application_id"] = application_id
         analysis["account_number_mask"] = "XXXX-XXXX-8921"
-        analysis["account_institution"] = "HDFC National Banking Corp"
+        analysis["account_institution"] = "HDFC Bank / State Bank of India"
         analysis["account_type"] = account_type
 
         # Backwards-compatible flattened fields for legacy endpoints and database ORM
@@ -46,14 +46,14 @@ class OpenBankingCashFlowService:
         analysis["salary_credit_stability_index"] = round(float(np.clip(1.0 - vol["income_volatility_index"], 0.50, 0.99)), 3)
         analysis["cashflow_quality_grade"] = "PRIME" if analysis["cashflow_quality_tier"] == "PRIME_CASHFLOW" else ("MODERATE" if analysis["cashflow_quality_tier"] == "STABLE_CASHFLOW" else "STRESSED")
         analysis["cashflow_risk_adjustment"] = analysis["cashflow_probability_uplift"]
-        analysis["summary_insight"] = f"Account Aggregator Score: {analysis['account_aggregator_score']} ({analysis['cashflow_quality_tier']}). Monthly cashflow yields a robust DSCR of {vol['cashflow_dscr']}x with {vol['nach_mandate_bounce_count']} NACH bounces."
+        analysis["summary_insight"] = f"Account Aggregator Score: {analysis['account_aggregator_score']} ({analysis['cashflow_quality_tier']}). Monthly free cashflow yields a robust DSCR of {vol['cashflow_dscr']}x with {vol['nach_mandate_bounce_count']} NACH bounce incidents."
 
         return analysis
 
     def analyze_raw_transactions(
         self,
         transactions: List[Dict[str, Any]],
-        requested_loan_emi: float = 650.0
+        requested_loan_emi: float = 12000.0
     ) -> Dict[str, Any]:
         """Processes user-uploaded or aggregator-streamed raw transaction list."""
         analysis = self.engine.analyze_transaction_stream(transactions, requested_loan_emi=requested_loan_emi)
@@ -73,7 +73,7 @@ class OpenBankingCashFlowService:
     def get_sample_stream(
         self,
         account_type: str = "SALARIED_PRIME",
-        monthly_salary: float = 6500.0
+        monthly_salary: float = 65000.0
     ) -> List[Dict[str, Any]]:
         """Provides sample transaction stream for interactive testing."""
         return self.engine.generate_synthetic_bank_stream(

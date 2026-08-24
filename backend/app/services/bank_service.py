@@ -1,95 +1,180 @@
 from typing import List, Dict, Any
 from backend.app.schemas.loan import BankRecommendation
 
-BANKS_CONFIG = [
+INDIAN_BANKS_CONFIG = [
     {
-        "bank_name": "Apex National Bank",
-        "min_cibil": 740,
-        "max_dti": 0.40,
-        "min_income": 40000,
-        "base_interest_rate": 8.5,
-        "description": "Lowest interest rate premier lender for high credit tier applicants."
+        "bank_name": "State Bank of India (SBI)",
+        "product_name": "SBI Regular / Xpress Credit Loan",
+        "min_cibil": 750,
+        "max_foir": 0.50,
+        "min_monthly_income": 25000,
+        "base_interest_rate": 8.50,
+        "bank_type": "PSU_BANK",
+        "description": "India's largest PSU bank offering premier sovereign rates and lowest processing fees for prime credit tier borrowers."
     },
     {
-        "bank_name": "Premier Credit Bank",
+        "bank_name": "HDFC Bank",
+        "product_name": "HDFC Express Personal / Home Loan",
+        "min_cibil": 720,
+        "max_foir": 0.55,
+        "min_monthly_income": 30000,
+        "base_interest_rate": 10.50,
+        "bank_type": "PRIVATE_BANK",
+        "description": "Top private sector lender offering instant paperless disbursement for salaried corporate employees."
+    },
+    {
+        "bank_name": "ICICI Bank",
+        "product_name": "ICICI Instant Asset Loan",
+        "min_cibil": 700,
+        "max_foir": 0.60,
+        "min_monthly_income": 25000,
+        "base_interest_rate": 10.75,
+        "bank_type": "PRIVATE_BANK",
+        "description": "Straight-through digital processing with pre-approved limits and flexible debt tolerance."
+    },
+    {
+        "bank_name": "Axis Bank",
+        "product_name": "Axis 24x7 Digital Quick Loan",
         "min_cibil": 680,
-        "max_dti": 0.50,
-        "min_income": 30000,
-        "base_interest_rate": 10.2,
-        "description": "Flexible underwriting lender with fast approval processing."
+        "max_foir": 0.60,
+        "min_monthly_income": 22000,
+        "base_interest_rate": 10.99,
+        "bank_type": "PRIVATE_BANK",
+        "description": "Accessible multi-purpose credit with transparent digital KYC and quick sanction."
     },
     {
-        "bank_name": "Horizon Capital NBFC",
-        "min_cibil": 600,
-        "max_dti": 0.60,
-        "min_income": 20000,
-        "base_interest_rate": 12.8,
-        "description": "Specialized lender for medium credit scores and self-employed applicants."
+        "bank_name": "Bank of Baroda (BoB)",
+        "product_name": "Baroda Advantage Retail Loan",
+        "min_cibil": 700,
+        "max_foir": 0.55,
+        "min_monthly_income": 20000,
+        "base_interest_rate": 10.80,
+        "bank_type": "PSU_BANK",
+        "description": "Sovereign-backed public sector lender with zero pre-payment penalty for floating rate borrowers."
     },
     {
-        "bank_name": "Vanguard Microfinance",
-        "min_cibil": 500,
-        "max_dti": 0.70,
-        "min_income": 15000,
-        "base_interest_rate": 14.5,
-        "description": "Inclusive credit lender accepting high debt-to-income applicants."
+        "bank_name": "Kotak Mahindra Bank",
+        "product_name": "Kotak Smart Quick Credit",
+        "min_cibil": 700,
+        "max_foir": 0.55,
+        "min_monthly_income": 25000,
+        "base_interest_rate": 10.99,
+        "bank_type": "PRIVATE_BANK",
+        "description": "Fast-track retail lending with automated Account Aggregator statement verification."
+    },
+    {
+        "bank_name": "Bajaj Finserv NBFC",
+        "product_name": "Bajaj Flexi Term Credit",
+        "min_cibil": 620,
+        "max_foir": 0.65,
+        "min_monthly_income": 18000,
+        "base_interest_rate": 12.50,
+        "bank_type": "RETAIL_NBFC",
+        "description": "Leading retail NBFC with flexible underwriting for self-employed and mid-range CIBIL applicants."
+    },
+    {
+        "bank_name": "Navi / Fibe Fintech NBFC",
+        "product_name": "Navi Instant Digital Credit",
+        "min_cibil": 550,
+        "max_foir": 0.75,
+        "min_monthly_income": 15000,
+        "base_interest_rate": 15.50,
+        "bank_type": "DIGITAL_NBFC",
+        "description": "Financial inclusion digital lender for gig workers, thin-file borrowers, and urgent liquidity requirements."
     }
 ]
 
+# Aliased for backward compatibility
+BANKS_CONFIG = INDIAN_BANKS_CONFIG
+
 def calculate_monthly_emi(principal: float, annual_rate: float, tenure_months: int) -> float:
-    """Calculates Equated Monthly Installment (EMI)."""
+    """Calculates Equated Monthly Installment (EMI) in INR."""
     if tenure_months <= 0 or principal <= 0:
         return 0.0
-    r = annual_rate / (12 * 100)
-    n = tenure_months
+    r = annual_rate / (12.0 * 100.0)
+    n = float(tenure_months)
     if r == 0:
-        return principal / n
-    emi = (principal * r * ((1 + r) ** n)) / (((1 + r) ** n) - 1)
+        return round(principal / n, 2)
+    emi = (principal * r * ((1.0 + r) ** n)) / (((1.0 + r) ** n) - 1.0)
     return round(emi, 2)
 
 def evaluate_bank_recommendations(app_dict: Dict[str, Any], approval_prob: float) -> List[BankRecommendation]:
     """
-    Evaluates applicant parameters against multi-bank underwriting criteria
-    and returns a ranked list of recommended bank options.
+    Evaluates applicant parameters against real Indian banking underwriting criteria (CIBIL, FOIR, Monthly Income)
+    and returns a ranked list of recommended Indian Banks and NBFC options.
     """
     cibil = app_dict.get('cibil_score', 650)
-    total_income = app_dict.get('applicant_income', 0) + app_dict.get('coapplicant_income', 0)
-    existing_debts = app_dict.get('existing_debts', 0)
-    loan_amount = app_dict.get('loan_amount', 0)
+    applicant_income = app_dict.get('applicant_income', 0.0)
+    coapplicant_income = app_dict.get('coapplicant_income', 0.0)
+    total_annual_income = applicant_income + coapplicant_income
+    
+    # If income is passed as monthly (e.g. < 500000 in customer payload), detect and normalize
+    # Standard schema stores annual income
+    monthly_income = max(total_annual_income / 12.0, 1.0)
+    
+    existing_debts_annual = app_dict.get('existing_debts', 0.0)
+    existing_monthly_debts = existing_debts_annual / 12.0
+    
+    loan_amount = app_dict.get('loan_amount', 0.0)
     tenure = app_dict.get('loan_tenure_months', 36)
-
-    monthly_income = max(total_income / 12.0, 1.0)
-    monthly_debt = existing_debts / 12.0
-    dti_ratio = monthly_debt / monthly_income
 
     recommendations = []
 
-    for bank in BANKS_CONFIG:
-        # Check eligibility
-        cibil_eligible = cibil >= bank['min_cibil']
-        dti_eligible = dti_ratio <= bank['max_dti']
-        income_eligible = total_income >= bank['min_income']
-
-        match_score = 0.0
-        if cibil_eligible: match_score += 40
-        else: match_score += max(0, 40 - (bank['min_cibil'] - cibil) * 0.5)
-
-        if dti_eligible: match_score += 30
-        else: match_score += max(0, 30 - (dti_ratio - bank['max_dti']) * 50)
-
-        if income_eligible: match_score += 30
-
-        match_score = min(100.0, round(match_score * approval_prob, 1))
-
-        status = "RECOMMENDED" if (cibil_eligible and dti_eligible and income_eligible and approval_prob >= 0.5) else "CONDITIONAL"
-
-        reason = f"Fits credit criteria ({bank['min_cibil']}+ CIBIL)." if status == "RECOMMENDED" else f"Requires CIBIL score of {bank['min_cibil']}+ or lower DTI."
-
+    for bank in INDIAN_BANKS_CONFIG:
+        # Calculate bank-specific EMI
         emi = calculate_monthly_emi(loan_amount, bank['base_interest_rate'], tenure)
+        total_monthly_obligations = existing_monthly_debts + emi
+        foir = total_monthly_obligations / monthly_income
+
+        cibil_eligible = cibil >= bank['min_cibil']
+        foir_eligible = foir <= bank['max_foir']
+        income_eligible = monthly_income >= bank['min_monthly_income']
+
+        # Multi-factor Match Score Calculation
+        match_score = 0.0
+        
+        # CIBIL contribution (up to 40 pts)
+        if cibil_eligible:
+            match_score += 40.0
+        else:
+            cibil_gap = bank['min_cibil'] - cibil
+            match_score += max(0.0, 40.0 - (cibil_gap * 0.4))
+
+        # FOIR contribution (up to 35 pts)
+        if foir_eligible:
+            match_score += 35.0
+        else:
+            foir_excess = (foir - bank['max_foir']) * 100.0
+            match_score += max(0.0, 35.0 - (foir_excess * 1.5))
+
+        # Income contribution (up to 25 pts)
+        if income_eligible:
+            match_score += 25.0
+        else:
+            match_score += max(0.0, 25.0 * (monthly_income / max(bank['min_monthly_income'], 1.0)))
+
+        # Calibrate match score by overall ML approval probability
+        effective_match = min(100.0, round((match_score * 0.60) + (approval_prob * 40.0), 1))
+
+        is_recommended = cibil_eligible and foir_eligible and income_eligible and approval_prob >= 0.45
+
+        status = "RECOMMENDED" if is_recommended else "CONDITIONAL"
+
+        if is_recommended:
+            reason = f"Excellent fit: CIBIL {cibil} meets {bank['min_cibil']}+ cutoff and FOIR of {foir*100:.1f}% is safely within {bank['max_foir']*100:.0f}% limit."
+        else:
+            reasons_list = []
+            if not cibil_eligible:
+                reasons_list.append(f"Requires CIBIL {bank['min_cibil']}+ (Current: {cibil})")
+            if not foir_eligible:
+                reasons_list.append(f"FOIR {foir*100:.1f}% exceeds bank max {bank['max_foir']*100:.0f}%")
+            if not income_eligible:
+                reasons_list.append(f"Min monthly income ₹{bank['min_monthly_income']:,} required")
+            reason = " | ".join(reasons_list) if reasons_list else "Subject to manual underwriting review."
 
         recommendations.append(BankRecommendation(
             bank_name=bank['bank_name'],
-            match_score=match_score,
+            match_score=effective_match,
             base_interest_rate=bank['base_interest_rate'],
             estimated_monthly_emi=emi,
             status=status,

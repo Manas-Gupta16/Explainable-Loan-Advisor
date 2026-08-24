@@ -1,9 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, ShieldCheck, Zap, Layers, Lock, BarChart3, ChevronRight, Activity, Cpu, Sparkles } from 'lucide-react';
+import { ArrowRight, ShieldCheck, Zap, Layers, Lock, BarChart3, ChevronRight, Activity, Cpu, Sparkles, Landmark, Scale, FileText } from 'lucide-react';
 
 export default function LandingHero({ onGetStarted }) {
-  // Stagger Container Variants
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -47,24 +46,24 @@ export default function LandingHero({ onGetStarted }) {
             className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#121824] border border-[#d2ff00]/30 text-xs font-mono-tech text-[#d2ff00] shadow-[0_0_15px_rgba(210,255,0,0.1)]"
           >
             <span className="w-2 h-2 rounded-full bg-[#d2ff00] animate-ping" />
-            <span>AI PROTOCOL V2.4</span>
+            <span>INDIAN BANKING XAI PROTOCOL V2.4</span>
             <Sparkles className="w-3.5 h-3.5 ml-1 text-[#d2ff00]" />
           </motion.div>
 
           <h1 className="text-6xl sm:text-7xl font-black tracking-tight text-white leading-[1.03]">
-            Optimize <br />
+            Explainable <br />
             <motion.span 
               initial={{ backgroundPosition: '0% 50%' }}
               animate={{ backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }}
               transition={{ duration: 5, repeat: Infinity, ease: 'linear' }}
               className="text-[#d2ff00] inline-block drop-shadow-[0_0_25px_rgba(210,255,0,0.25)]"
             >
-              Liquidity.
+              Loan Underwriting.
             </motion.span>
           </h1>
 
           <p className="text-slate-400 text-base max-w-lg font-light leading-relaxed">
-            Deploy intelligent loan approval and risk assessment protocols with sub-millisecond execution. Experience the next generation of explainable financial AI infrastructure.
+            AI-powered retail credit advisor & underwriting engine for Indian Banks (SBI, HDFC, ICICI, Axis). Compliant with RBI Digital Lending Directives, CIBIL bureau scoring, and actionable DiCE counterfactual recourse.
           </p>
 
           <div className="flex items-center gap-4 pt-4">
@@ -72,9 +71,9 @@ export default function LandingHero({ onGetStarted }) {
               whileHover={{ scale: 1.04, boxShadow: '0 0 30px rgba(210,255,0,0.4)' }}
               whileTap={{ scale: 0.98 }}
               onClick={onGetStarted} 
-              className="btn-lime text-sm px-7 py-3.5 font-extrabold"
+              className="btn-lime text-sm px-7 py-3.5 font-extrabold flex items-center gap-2"
             >
-              INITIALIZE SYSTEM <ArrowRight className="w-4 h-4" />
+              LAUNCH LOAN EVALUATION <ArrowRight className="w-4 h-4" />
             </motion.button>
 
             <motion.a 
@@ -84,23 +83,23 @@ export default function LandingHero({ onGetStarted }) {
               rel="noreferrer" 
               className="btn-dark-outline text-sm px-6 py-3.5"
             >
-              VIEW DOCS
+              PROJECT DOCS
             </motion.a>
           </div>
 
           {/* Quick Metrics Bar */}
           <div className="grid grid-cols-3 gap-4 pt-6 border-t border-[#1e2a3d]/80 text-xs font-mono-tech">
             <div>
-              <span className="text-slate-500 block text-[10px]">ACCURACY</span>
-              <span className="text-white font-bold text-base">89.40%</span>
+              <span className="text-slate-500 block text-[10px]">MODEL ACCURACY</span>
+              <span className="text-white font-bold text-base">95.05%</span>
             </div>
             <div>
               <span className="text-slate-500 block text-[10px]">ROC-AUC</span>
-              <span className="text-[#d2ff00] font-bold text-base">0.9658</span>
+              <span className="text-[#d2ff00] font-bold text-base">0.9918</span>
             </div>
             <div>
               <span className="text-slate-500 block text-[10px]">XAI LATENCY</span>
-              <span className="text-emerald-400 font-bold text-base">&lt; 10ms</span>
+              <span className="text-emerald-400 font-bold text-base">&lt; 15ms</span>
             </div>
           </div>
 
@@ -116,11 +115,11 @@ export default function LandingHero({ onGetStarted }) {
             {/* Header */}
             <div className="flex items-center justify-between text-xs font-mono-tech text-slate-400 mb-6">
               <span className="flex items-center gap-1.5">
-                <Cpu className="w-4 h-4 text-[#d2ff00]" /> REAL-TIME TELEMETRY
+                <Cpu className="w-4 h-4 text-[#d2ff00]" /> INDIAN BANKING TELEMETRY
               </span>
               <span className="text-[#d2ff00] flex items-center gap-1.5 font-bold">
                 <span className="w-2 h-2 rounded-full bg-[#d2ff00] animate-ping" />
-                ONLINE
+                RBI LIVE
               </span>
             </div>
 
@@ -133,10 +132,10 @@ export default function LandingHero({ onGetStarted }) {
 
                 <div className="flex justify-between items-start z-10">
                   <div className="text-[10px] font-mono-tech text-slate-500 uppercase tracking-widest">
-                    MODEL INFERENCE
+                    STATE BANK OF INDIA (SBI) STP
                   </div>
                   <div className="text-xs font-mono-tech text-[#d2ff00] bg-[#d2ff00]/10 px-2.5 py-1 rounded border border-[#d2ff00]/30 font-bold">
-                    ROC-AUC 0.9658
+                    CIBIL 790 | 8.50% APR
                   </div>
                 </div>
 
@@ -150,19 +149,19 @@ export default function LandingHero({ onGetStarted }) {
                   <div className="text-[10px] font-mono-tech text-[#d2ff00] tracking-wider uppercase flex items-center gap-1">
                     <Activity className="w-3 h-3" /> APPROVAL ODDS
                   </div>
-                  <div className="text-3xl font-black text-white mt-0.5">89.4%</div>
+                  <div className="text-3xl font-black text-white mt-0.5 font-mono-tech">98.5%</div>
                 </motion.div>
 
                 {/* Dynamic Wave Progress */}
                 <div className="space-y-2.5 z-10 mt-auto pt-6">
                   <div className="flex justify-between text-[10px] font-mono-tech text-slate-400">
                     <span>XGBoost Confidence</span>
-                    <span className="text-[#d2ff00]">89.4%</span>
+                    <span className="text-[#d2ff00]">98.5% (Prime Tier)</span>
                   </div>
                   <div className="h-2.5 w-full bg-slate-800/80 rounded-full overflow-hidden p-0.5 border border-slate-700/50">
                     <motion.div 
                       initial={{ width: 0 }}
-                      animate={{ width: '89.4%' }}
+                      animate={{ width: '98.5%' }}
                       transition={{ duration: 1.2, ease: 'easeOut' }}
                       className="h-full bg-[#d2ff00] rounded-full shadow-[0_0_12px_rgba(210,255,0,0.5)]"
                     />
@@ -175,13 +174,13 @@ export default function LandingHero({ onGetStarted }) {
             {/* Status Pills */}
             <div className="grid grid-cols-2 gap-3 text-xs font-mono-tech">
               <div className="bg-[#0a0e17] p-3 rounded-lg border border-[#1e2a3d]">
-                <div className="text-slate-500 text-[10px]">SHAP ENGINE</div>
+                <div className="text-slate-500 text-[10px]">SHAP TREE EXPLAINER</div>
                 <div className="text-white font-bold mt-1 flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> ACTIVE
                 </div>
               </div>
               <div className="bg-[#0a0e17] p-3 rounded-lg border border-[#1e2a3d]">
-                <div className="text-slate-500 text-[10px]">DiCE RECOURSE</div>
+                <div className="text-slate-500 text-[10px]">DiCE & AFRO RECOURSE</div>
                 <div className="text-[#d2ff00] font-bold mt-1 flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#d2ff00]" /> ENABLED
                 </div>
@@ -204,10 +203,10 @@ export default function LandingHero({ onGetStarted }) {
         <div>
           <div className="text-xs font-mono-tech text-[#d2ff00] mb-1">● DEEP TECH ARCHITECTURE</div>
           <h2 className="text-4xl font-black text-white tracking-tight">
-            Infrastructure Architecture
+            Indian Retail Banking Architecture
           </h2>
           <p className="text-slate-400 text-sm font-mono-tech mt-1">
-            Modular components designed for maximum capital efficiency and regulatory explainability.
+            Modular components designed for Indian retail lenders, Account Aggregators, and regulatory compliance.
           </p>
         </div>
 
@@ -220,19 +219,19 @@ export default function LandingHero({ onGetStarted }) {
           >
             <div>
               <div className="text-[11px] font-mono-tech text-slate-400 uppercase tracking-widest flex justify-between items-center">
-                <span>LIQUIDITY POOLS</span>
+                <span>INDIAN LENDERS</span>
                 <span className="text-[#d2ff00] font-bold text-xs">01</span>
               </div>
               <h3 className="text-xl font-bold text-white mt-2">Multi-Bank Matching</h3>
-              <p className="text-slate-400 text-xs mt-1">Ranks eligibility across Apex National, Premier Credit, and NBFCs.</p>
+              <p className="text-slate-400 text-xs mt-1">Ranks loan eligibility across State Bank of India (SBI), HDFC Bank, ICICI Bank, Axis Bank, and Bajaj Finserv.</p>
             </div>
 
             <div className="flex items-end gap-2 h-28 pt-4">
-              <motion.div initial={{ height: 0 }} animate={{ height: '35%' }} transition={{ duration: 0.8 }} className="flex-1 bg-[#1a2336] rounded-t group-hover:bg-[#d2ff00]/40 transition-all" />
-              <motion.div initial={{ height: 0 }} animate={{ height: '55%' }} transition={{ duration: 0.9 }} className="flex-1 bg-[#1a2336] rounded-t group-hover:bg-[#d2ff00]/60 transition-all" />
-              <motion.div initial={{ height: 0 }} animate={{ height: '45%' }} transition={{ duration: 1.0 }} className="flex-1 bg-[#1a2336] rounded-t group-hover:bg-[#d2ff00]/80 transition-all" />
-              <motion.div initial={{ height: 0 }} animate={{ height: '90%' }} transition={{ duration: 1.1 }} className="flex-1 bg-[#d2ff00] rounded-t shadow-[0_0_20px_rgba(210,255,0,0.35)]" />
-              <motion.div initial={{ height: 0 }} animate={{ height: '70%' }} transition={{ duration: 1.2 }} className="flex-1 bg-[#d2ff00]/80 rounded-t" />
+              <motion.div initial={{ height: 0 }} animate={{ height: '40%' }} transition={{ duration: 0.8 }} className="flex-1 bg-[#1a2336] rounded-t group-hover:bg-[#d2ff00]/40 transition-all" />
+              <motion.div initial={{ height: 0 }} animate={{ height: '60%' }} transition={{ duration: 0.9 }} className="flex-1 bg-[#1a2336] rounded-t group-hover:bg-[#d2ff00]/60 transition-all" />
+              <motion.div initial={{ height: 0 }} animate={{ height: '50%' }} transition={{ duration: 1.0 }} className="flex-1 bg-[#1a2336] rounded-t group-hover:bg-[#d2ff00]/80 transition-all" />
+              <motion.div initial={{ height: 0 }} animate={{ height: '95%' }} transition={{ duration: 1.1 }} className="flex-1 bg-[#d2ff00] rounded-t shadow-[0_0_20px_rgba(210,255,0,0.35)]" />
+              <motion.div initial={{ height: 0 }} animate={{ height: '80%' }} transition={{ duration: 1.2 }} className="flex-1 bg-[#d2ff00]/80 rounded-t" />
             </div>
           </motion.div>
 
@@ -243,24 +242,24 @@ export default function LandingHero({ onGetStarted }) {
           >
             <div>
               <div className="text-[11px] font-mono-tech text-slate-400 uppercase tracking-widest flex justify-between items-center">
-                <span>RISK ENGINE</span>
+                <span>UNDERWRITING CORE</span>
                 <span className="text-[#d2ff00] font-bold text-xs">02</span>
               </div>
-              <h3 className="text-xl font-bold text-white mt-2">Dynamic Risk Scoring</h3>
-              <p className="text-slate-400 text-xs mt-1">Real-time XGBoost inference with automated hyperparameter weights.</p>
+              <h3 className="text-xl font-bold text-white mt-2">FOIR & CIBIL Engine</h3>
+              <p className="text-slate-400 text-xs mt-1">Real-time XGBoost inference incorporating FOIR debt limits and TransUnion CIBIL 300-850 scores.</p>
             </div>
 
             <div className="space-y-2.5 pt-4">
               <div className="bg-[#1a2336] p-3 rounded-lg text-xs font-mono-tech flex justify-between items-center text-slate-300">
-                <span>Alpha Ensemble</span>
+                <span>FOIR Constraint Engine</span>
                 <span className="w-2 h-2 rounded-full bg-[#d2ff00] animate-pulse" />
               </div>
               <div className="bg-[#1a2336] p-3 rounded-lg text-xs font-mono-tech flex justify-between items-center text-slate-300">
-                <span>Beta XGBoost</span>
+                <span>Calibrated XGBoost</span>
                 <span className="w-2 h-2 rounded-full bg-emerald-400" />
               </div>
               <div className="bg-[#1a2336] p-3 rounded-lg text-xs font-mono-tech flex justify-between items-center text-slate-300">
-                <span>SHAP Explainer</span>
+                <span>Local SHAP Attribution</span>
                 <span className="w-2 h-2 rounded-full bg-cyan-400" />
               </div>
             </div>
@@ -277,8 +276,8 @@ export default function LandingHero({ onGetStarted }) {
                   <ShieldCheck className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="text-[10px] font-mono-tech text-slate-400 uppercase">COMPLIANCE</div>
-                  <div className="text-xs text-slate-200 font-semibold mt-0.5">Automated regulatory XAI audit logs.</div>
+                  <div className="text-[10px] font-mono-tech text-slate-400 uppercase">RBI COMPLIANCE</div>
+                  <div className="text-xs text-slate-200 font-semibold mt-0.5">Automated Digital Lending Master Directions Audit Dossiers.</div>
                 </div>
               </div>
             </motion.div>
@@ -292,8 +291,8 @@ export default function LandingHero({ onGetStarted }) {
                 <span className="text-[11px] font-mono-tech font-bold uppercase tracking-wider">PERFORMANCE</span>
               </div>
               <div>
-                <div className="text-3xl font-black tracking-tight">Sub-10ms Latency</div>
-                <div className="text-xs font-medium text-black/80 mt-0.5">Real-time credit decisioning pipeline</div>
+                <div className="text-3xl font-black tracking-tight font-mono-tech">Sub-15ms Latency</div>
+                <div className="text-xs font-medium text-black/80 mt-0.5">Real-time Indian credit decisioning pipeline</div>
               </div>
             </motion.div>
           </div>
@@ -311,10 +310,10 @@ export default function LandingHero({ onGetStarted }) {
       >
         <div className="lg:col-span-6 space-y-6">
           <div className="inline-block text-xs font-mono-tech font-bold text-slate-600 bg-slate-300 px-3 py-1 rounded-full">
-            EXECUTION PIPELINE
+            UNDERWRITING PIPELINE
           </div>
           <h2 className="text-4xl font-black tracking-tight text-black">
-            Deployment Methodology
+            Academic & Capstone Implementation
           </h2>
 
           <div className="space-y-5">
@@ -323,8 +322,10 @@ export default function LandingHero({ onGetStarted }) {
                 01
               </div>
               <div>
-                <h4 className="font-bold text-black text-base">API Gateway Integration</h4>
-                <p className="text-slate-600 text-xs mt-0.5 leading-relaxed">Connect via REST API or WebSockets for real-time application streaming and verification.</p>
+                <h4 className="font-bold text-black text-base">Two-Sided FinTech Platform</h4>
+                <p className="text-slate-600 text-xs mt-0.5 leading-relaxed">
+                  Borrowers get tailored bank recommendations and actionable recourse roadmaps; Bank underwriters audit risk, conformal bounds, and fairness across applications.
+                </p>
               </div>
             </div>
 
@@ -333,8 +334,10 @@ export default function LandingHero({ onGetStarted }) {
                 02
               </div>
               <div>
-                <h4 className="font-bold text-black text-base">XAI Calibration</h4>
-                <p className="text-slate-600 text-xs mt-0.5 leading-relaxed">Adjust risk parameters and DiCE recourse targets dynamically for high institutional fidelity.</p>
+                <h4 className="font-bold text-black text-base">Mathematical Recourse & Calibration</h4>
+                <p className="text-slate-600 text-xs mt-0.5 leading-relaxed">
+                  SHAP feature attribution, DiCE counterfactual optimization, and Conformal Inductive Prediction with 95% guaranteed coverage bounds.
+                </p>
               </div>
             </div>
           </div>
@@ -350,13 +353,13 @@ export default function LandingHero({ onGetStarted }) {
                 ⚡
               </div>
               <div>
-                <div className="font-bold text-slate-900 text-sm">Idea Lab Project Team</div>
-                <div className="text-xs font-mono-tech text-slate-500">Ramdeobaba University</div>
+                <div className="font-bold text-slate-900 text-sm">Explainable Loan Advisor (LoanIQ)</div>
+                <div className="text-xs font-mono-tech text-slate-500">Department of Computer Science & Engineering</div>
               </div>
             </div>
 
             <p className="text-slate-700 text-xs leading-relaxed italic border-t border-slate-100 pt-3">
-              "Integrating Explainable AI (XAI) into automated credit scoring empowers applicants with actionable recourse while giving financial institutions full risk transparency."
+              "Integrating Explainable AI (XAI) into retail credit scoring bridges the transparency gap between borrowers and Indian banking institutions, preventing black-box rejections and ensuring regulatory compliance."
             </p>
           </motion.div>
         </div>
@@ -371,18 +374,18 @@ export default function LandingHero({ onGetStarted }) {
         
         <div>
           <div className="flex items-center gap-2 font-mono-tech text-[#d2ff00] text-xs mb-1">
-            <Sparkles className="w-4 h-4" /> LOANIQ PROTOCOL V2.4
+            <Sparkles className="w-4 h-4" /> LOANIQ INDIAN BANKING PROTOCOL
           </div>
-          <h3 className="text-2xl font-black text-white">Start Building Your Loan Evaluation</h3>
+          <h3 className="text-2xl font-black text-white">Experience the Explainable Underwriting Advisor</h3>
         </div>
 
         <motion.button 
           whileHover={{ scale: 1.05, boxShadow: '0 0 25px rgba(210,255,0,0.4)' }}
           whileTap={{ scale: 0.97 }}
           onClick={onGetStarted} 
-          className="btn-lime px-8 py-3.5 text-base font-extrabold"
+          className="btn-lime px-8 py-3.5 text-base font-extrabold flex items-center gap-2"
         >
-          START BUILDING <ArrowRight className="w-5 h-5" />
+          START EVALUATION <ArrowRight className="w-5 h-5" />
         </motion.button>
       </motion.div>
 

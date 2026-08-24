@@ -3,9 +3,9 @@ from typing import Dict, Any, Optional
 
 class DocumentOCRService:
     """
-    Automated OCR Document Verification & Discrepancy Fraud Detection Engine.
-    Extracts key financial figures from uploaded pay slips, tax forms, and bank statements
-    and cross-checks them against self-reported loan application parameters.
+    Automated Indian Document OCR & Discrepancy Fraud Detection Engine.
+    Extracts key financial figures from uploaded Indian Pay Slips, Form 16 Tax Certificates,
+    PAN Cards, and Bank Statements, cross-checking them against self-reported loan parameters.
     """
     def __init__(self):
         pass
@@ -18,16 +18,16 @@ class DocumentOCRService:
         raw_text: Optional[str] = None
     ) -> Dict[str, Any]:
         """
-        Parses document content, extracts income, employer, tax ID, and computes fraud risk metrics.
+        Parses Indian document content, extracts monthly income, employer, PAN/Tax ID, and computes fraud metrics.
         """
         extracted_income = declared_monthly_income
-        employer = "Apex Technologies Corp"
-        tax_id = "PAN-XXXXX9182K"
+        employer = "Tata Consultancy Services (TCS) Ltd"
+        tax_id = "ABCDE1234F"
 
-        # Heuristic / Text Pattern Matching if raw text or file name hints are provided
+        # Pattern Matching for Indian Financial Documents
         if raw_text:
-            # Match salary patterns e.g. "Gross Salary: $6,500.00" or "Monthly Income: 75000"
-            salary_match = re.search(r'(?:gross salary|net pay|monthly income|salary)[:\s\$₹]+([\d,\.]+)', raw_text, re.IGNORECASE)
+            # Match salary patterns: e.g. "Gross Salary: ₹75,000.00" or "Net Take Home Pay: INR 68000"
+            salary_match = re.search(r'(?:gross salary|net pay|take home|monthly income|salary|basic pay)[:\s₹\$RsINR\.]*([\d,\.]+)', raw_text, re.IGNORECASE)
             if salary_match:
                 try:
                     cleaned_val = salary_match.group(1).replace(',', '')
@@ -35,15 +35,18 @@ class DocumentOCRService:
                 except ValueError:
                     extracted_income = declared_monthly_income
 
-            emp_match = re.search(r'(?:employer|company|organization)[:\s]+([A-Za-z0-9\s]+)', raw_text, re.IGNORECASE)
+            emp_match = re.search(r'(?:employer|company|organization|establishment)[:\s]+([A-Za-z0-9\s\.\(\)]+)', raw_text, re.IGNORECASE)
             if emp_match:
                 employer = emp_match.group(1).strip()[:40]
 
-            tax_match = re.search(r'(?:pan|tax id|ssn|ein)[:\s]+([A-Za-z0-9\-]+)', raw_text, re.IGNORECASE)
-            if tax_match:
-                tax_id = tax_match.group(1).strip()[:20]
+            pan_match = re.search(r'(?:pan|tax id|pan no|aadhaar)[:\s]*([A-Z]{5}[0-9]{4}[A-Z]{1})', raw_text, re.IGNORECASE)
+            if pan_match:
+                tax_id = pan_match.group(1).upper()
+            else:
+                generic_tax = re.search(r'(?:pan|tax id)[:\s]+([A-Za-z0-9\-]+)', raw_text, re.IGNORECASE)
+                if generic_tax:
+                    tax_id = generic_tax.group(1).strip()[:20]
         else:
-            # Realistic extraction simulation based on document type
             if "mismatch" in file_name.lower():
                 extracted_income = round(declared_monthly_income * 0.70, 2)  # 30% lower than declared
             elif "fraud" in file_name.lower():
@@ -57,15 +60,15 @@ class DocumentOCRService:
         discrepancy_ratio = round(discrepancy_diff / denom, 4)
         discrepancy_pct_str = f"{round(discrepancy_ratio * 100, 2)}%"
 
-        # Determine fraud risk tier & status
+        # Determine fraud risk tier & status under RBI digital lending audit norms
         if discrepancy_ratio <= 0.10:
             status = "VERIFIED"
             fraud_score = round(discrepancy_ratio * 0.2, 3)
-            notes = f"Document OCR successfully confirmed monthly earnings (${extracted_income:,.2f}) within 10% tolerance."
+            notes = f"Official Indian Salary Slip / Form 16 successfully verified. Extracted net monthly income of ₹{extracted_income:,.2f} aligns within 10% declared tolerance."
         elif discrepancy_ratio <= 0.20:
             status = "SUSPECT_MISMATCH"
             fraud_score = round(0.40 + (discrepancy_ratio * 0.3), 3)
-            notes = f"Moderate income variance detected. Declared ${declared_monthly_income:,.2f} vs Extracted ${extracted_income:,.2f} ({discrepancy_pct_str}). Manual officer review required."
+            notes = f"Moderate income variance detected. Declared ₹{declared_monthly_income:,.2f} vs Extracted ₹{extracted_income:,.2f} ({discrepancy_pct_str}). Officer manual verification required."
         else:
             status = "FRAUD_FLAGGED"
             fraud_score = round(min(0.70 + (discrepancy_ratio * 0.5), 1.0), 3)

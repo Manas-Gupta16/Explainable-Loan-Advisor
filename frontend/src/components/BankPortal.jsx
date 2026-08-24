@@ -5,8 +5,20 @@ import {
   Building2, Users, CheckCircle2, XCircle, Clock, Eye, 
   FileText, ShieldAlert, BarChart3, Search, Filter, Sparkles,
   Scale, RefreshCw, Download, AlertOctagon, TrendingDown, Gauge,
-  Activity, Play, Check, ShieldCheck, Database
+  Activity, Play, Check, ShieldCheck, Database, Landmark
 } from 'lucide-react';
+
+const formatINR = (val) => {
+  if (val === undefined || val === null || isNaN(val)) return '₹0';
+  if (val >= 10000000) return `₹${(val / 10000000).toFixed(2)} Cr`;
+  if (val >= 100000) return `₹${(val / 100000).toFixed(2)} L`;
+  return `₹${Number(val).toLocaleString('en-IN')}`;
+};
+
+const formatMonthlyINR = (annualVal) => {
+  const monthly = Math.round((annualVal || 0) / 12);
+  return `₹${monthly.toLocaleString('en-IN')}/mo`;
+};
 
 export default function BankPortal() {
   const [activeBankTab, setActiveBankTab] = useState('queue'); // queue, fairness, monitoring, batchstress
@@ -34,7 +46,7 @@ export default function BankPortal() {
 
   // Batch Stress Test state
   const [batchScenario, setBatchScenario] = useState('COMBINED_STAGFLATION');
-  const [batchRateHike, setBatchRateHike] = useState(2.5);
+  const [batchRateHike, setBatchRateHike] = useState(2.0);
   const [batchStressData, setBatchStressData] = useState(null);
   const [batchLoading, setBatchLoading] = useState(false);
 
@@ -163,7 +175,7 @@ export default function BankPortal() {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `Regulatory_Compliance_Dossier_App_${appId}.pdf`);
+      link.setAttribute('download', `LoanIQ_RBI_Regulatory_Dossier_App_${appId}.pdf`);
       document.body.appendChild(link);
       link.click();
       link.parentNode.removeChild(link);
@@ -188,13 +200,13 @@ export default function BankPortal() {
         <div>
           <div className="inline-flex items-center gap-2 text-xs font-mono-tech text-[#d2ff00] mb-2">
             <span className="w-2 h-2 rounded-full bg-[#d2ff00] animate-ping" />
-            <span>● INSTITUTIONAL RISK & REGULATORY COMPLIANCE SYSTEM</span>
+            <span>● RBI DIGITAL LENDING AUDIT & INSTITUTIONAL UNDERWRITER DASHBOARD</span>
           </div>
           <h1 className="text-4xl font-black text-white tracking-tight">
             Bank Underwriter & <span className="text-[#d2ff00]">Audit Governance</span>
           </h1>
           <p className="text-slate-400 text-sm mt-1 max-w-2xl font-light">
-            Real-time loan decision queue, ECOA disparate impact audits, continuous Population Stability Index (PSI) drift monitoring, and batch portfolio stress testing.
+            Real-time customer loan application queue, RBI Fair Lending Code compliance audits, Population Stability Index (PSI) drift monitoring, and batch portfolio stress testing.
           </p>
         </div>
 
@@ -203,7 +215,7 @@ export default function BankPortal() {
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
             onClick={fetchApplications} 
-            className="btn-dark-outline text-xs font-bold py-2.5 px-4 cursor-pointer"
+            className="btn-dark-outline text-xs font-bold py-2.5 px-4 cursor-pointer flex items-center gap-2"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
             REFRESH QUEUE
@@ -219,8 +231,8 @@ export default function BankPortal() {
             <span className="text-[10px] font-mono-tech uppercase">TOTAL LOAN QUEUE</span>
             <Users className="w-4 h-4 text-slate-400" />
           </div>
-          <div className="text-3xl font-black text-white mt-2">{applications.length}</div>
-          <div className="text-[11px] text-slate-500 font-mono-tech mt-1">Live active records</div>
+          <div className="text-3xl font-black text-white mt-2 font-mono-tech">{applications.length}</div>
+          <div className="text-[11px] text-slate-500 font-mono-tech mt-1">Live active applicant records</div>
         </div>
 
         <div className="cyber-card p-5 bg-[#121824] border-[#1e2a3d]">
@@ -228,10 +240,10 @@ export default function BankPortal() {
             <span className="text-[10px] font-mono-tech uppercase">PENDING UNDERWRITER ACTION</span>
             <Clock className="w-4 h-4 text-amber-400" />
           </div>
-          <div className="text-3xl font-black text-amber-400 mt-2">
+          <div className="text-3xl font-black text-amber-400 mt-2 font-mono-tech">
             {applications.filter(a => a.status === 'PENDING').length}
           </div>
-          <div className="text-[11px] text-slate-500 font-mono-tech mt-1">Manual review required</div>
+          <div className="text-[11px] text-slate-500 font-mono-tech mt-1">Manual underwriting required</div>
         </div>
 
         <div className="cyber-card p-5 bg-[#121824] border-[#1e2a3d]">
@@ -239,10 +251,10 @@ export default function BankPortal() {
             <span className="text-[10px] font-mono-tech uppercase">APPROVED PORTFOLIO</span>
             <CheckCircle2 className="w-4 h-4 text-emerald-400" />
           </div>
-          <div className="text-3xl font-black text-emerald-400 mt-2">
+          <div className="text-3xl font-black text-emerald-400 mt-2 font-mono-tech">
             {applications.filter(a => a.status === 'APPROVED').length}
           </div>
-          <div className="text-[11px] text-slate-500 font-mono-tech mt-1">Met underwriting threshold</div>
+          <div className="text-[11px] text-slate-500 font-mono-tech mt-1">Met prime institutional threshold</div>
         </div>
 
         <div className="cyber-card p-5 bg-[#121824] border-[#1e2a3d]">
@@ -250,8 +262,8 @@ export default function BankPortal() {
             <span className="text-[10px] font-mono-tech uppercase">MODEL ROC-AUC</span>
             <BarChart3 className="w-4 h-4 text-[#d2ff00]" />
           </div>
-          <div className="text-3xl font-black text-white mt-2">0.9658</div>
-          <div className="text-[11px] text-[#d2ff00] font-mono-tech mt-1">Production Calibrated</div>
+          <div className="text-3xl font-black text-white mt-2 font-mono-tech">0.9918</div>
+          <div className="text-[11px] text-[#d2ff00] font-mono-tech mt-1">XGBoost Calibrated</div>
         </div>
 
       </div>
@@ -260,7 +272,7 @@ export default function BankPortal() {
       <div className="flex items-center gap-2 border-b border-[#1e2a3d] pb-2 font-mono-tech text-xs">
         {[
           { id: 'queue', label: 'APPLICATION QUEUE', icon: Users },
-          { id: 'fairness', label: 'ECOA FAIRNESS AUDIT', icon: Scale },
+          { id: 'fairness', label: 'RBI FAIRNESS AUDIT', icon: Scale },
           { id: 'monitoring', label: 'PSI MODEL DRIFT & RETRAIN', icon: Activity },
           { id: 'batchstress', label: 'PORTFOLIO STRESS TEST', icon: TrendingDown },
         ].map((tab) => {
@@ -308,7 +320,7 @@ export default function BankPortal() {
               ))}
             </div>
             <span className="text-[11px] font-mono-tech text-slate-400">
-              Showing {applications.length} applications
+              Showing {applications.length} applications in database
             </span>
           </div>
 
@@ -327,42 +339,43 @@ export default function BankPortal() {
                 <table className="w-full text-left text-xs">
                   <thead className="bg-[#0a0e17] text-slate-400 font-mono-tech uppercase text-[10px] border-b border-[#1e2a3d]">
                     <tr>
-                      <th className="p-4">ID</th>
-                      <th className="p-4">Applicant</th>
+                      <th className="p-4">App ID</th>
+                      <th className="p-4">Applicant Income</th>
                       <th className="p-4">Loan Amount</th>
                       <th className="p-4">CIBIL</th>
-                      <th className="p-4">Risk Tier</th>
+                      <th className="p-4">Recommended Bank</th>
                       <th className="p-4">Probability</th>
                       <th className="p-4">Status</th>
                       <th className="p-4 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#1e2a3d] font-mono-tech">
-                    {applications.map((app, idx) => (
+                    {applications.map((app) => (
                       <tr 
                         key={app.id}
                         className="hover:bg-[#1a2336]/60 transition-colors"
                       >
-                        <td className="p-4 font-bold text-slate-300">#{app.id}</td>
-                        <td className="p-4 text-white font-sans font-medium">Customer #{app.user_id}</td>
-                        <td className="p-4 text-slate-300">${app.loan_amount?.toLocaleString()} ({app.loan_tenure_months}m)</td>
+                        <td className="p-4 font-bold text-[#d2ff00]">#{app.id}</td>
+                        <td className="p-4 text-white font-sans font-medium">
+                          {formatINR(app.applicant_income)}
+                          <span className="text-slate-500 text-[10px] block font-mono-tech">{formatMonthlyINR(app.applicant_income)}</span>
+                        </td>
+                        <td className="p-4 text-slate-300">
+                          {formatINR(app.loan_amount)}
+                          <span className="text-slate-500 text-[10px] block font-mono-tech">{app.loan_tenure_months} Months</span>
+                        </td>
                         <td className="p-4 text-[#d2ff00] font-bold">{app.cibil_score}</td>
-                        <td className="p-4">
-                          <span className={`px-2 py-0.5 rounded text-[10px] ${
-                            app.risk_tier === 'LOW_RISK' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' :
-                            app.risk_tier === 'MEDIUM_RISK' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30' :
-                            'bg-rose-500/10 text-rose-400 border border-rose-500/30'
-                          }`}>
-                            {app.risk_tier || 'UNSCORED'}
-                          </span>
+                        <td className="p-4 text-slate-300 font-sans">
+                          {app.recommended_bank || 'State Bank of India (SBI)'}
                         </td>
                         <td className="p-4 text-white font-bold">
                           {app.approval_probability ? `${(app.approval_probability * 100).toFixed(1)}%` : 'N/A'}
                         </td>
                         <td className="p-4">
-                          <span className={`font-bold ${
-                            app.status === 'APPROVED' ? 'text-emerald-400' :
-                            app.status === 'PENDING' ? 'text-amber-400' : 'text-rose-400'
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
+                            app.status === 'APPROVED' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' :
+                            app.status === 'PENDING' ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' :
+                            'bg-rose-500/10 text-rose-400 border-rose-500/30'
                           }`}>
                             {app.status}
                           </span>
@@ -370,7 +383,7 @@ export default function BankPortal() {
                         <td className="p-4 text-right space-x-2">
                           <button
                             onClick={() => handleInspectApp(app)}
-                            className="btn-dark-outline py-1 px-3 text-xs cursor-pointer"
+                            className="btn-dark-outline py-1 px-3 text-xs cursor-pointer inline-flex items-center gap-1.5"
                           >
                             <Eye className="w-3.5 h-3.5" /> INSPECT XAI
                           </button>
@@ -386,7 +399,7 @@ export default function BankPortal() {
         </div>
       )}
 
-      {/* SECTION 2: ECOA DEMOGRAPHIC FAIRNESS & BIAS AUDIT */}
+      {/* SECTION 2: RBI DEMOGRAPHIC FAIRNESS & BIAS AUDIT */}
       {activeBankTab === 'fairness' && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
           <div className="cyber-card p-6 bg-[#121824] border-[#1e2a3d] space-y-6">
@@ -394,16 +407,16 @@ export default function BankPortal() {
             <div className="flex items-center justify-between border-b border-[#1e2a3d] pb-4">
               <div>
                 <h3 className="font-bold text-white text-base flex items-center gap-2">
-                  <Scale className="w-5 h-5 text-[#d2ff00]" /> ECOA Demographic Fairness & Algorithmic Bias Audit
+                  <Scale className="w-5 h-5 text-[#d2ff00]" /> RBI Fair Practices Code & Algorithmic Bias Audit
                 </h3>
                 <p className="text-slate-400 text-xs mt-0.5">
-                  Conforming to US Equal Credit Opportunity Act (ECOA) & EU AI Act Article 10 Bias Mitigation Standards.
+                  Audited across Demographic Parity, Disparate Impact Ratio (DIR), and Equalized Odds.
                 </p>
               </div>
               <button
                 onClick={fetchFairnessAudit}
                 disabled={fairnessLoading}
-                className="btn-dark-outline text-xs py-1.5 px-3 cursor-pointer"
+                className="btn-dark-outline text-xs py-1.5 px-3 cursor-pointer flex items-center gap-2"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${fairnessLoading ? 'animate-spin' : ''}`} /> RE-AUDIT
               </button>
@@ -420,7 +433,7 @@ export default function BankPortal() {
                 {/* Four-Fifths Rule Status Banner */}
                 <div className="bg-[#0a0e17] p-5 rounded-xl border border-[#1e2a3d] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div>
-                    <span className="text-[10px] font-mono-tech text-slate-500 uppercase">FOUR-FIFTHS RULE COMPLIANCE VERDICT</span>
+                    <span className="text-[10px] font-mono-tech text-slate-500 uppercase">RBI FAIR LENDING COMPLIANCE VERDICT</span>
                     <div className="text-2xl font-black text-white mt-1">
                       {fairnessData.four_fifths_rule_status}
                     </div>
@@ -431,7 +444,7 @@ export default function BankPortal() {
                       ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
                       : 'bg-rose-500/10 text-rose-400 border-rose-500/30'
                   }`}>
-                    {fairnessData.four_fifths_rule_status?.includes('PASSED') ? 'ECOA COMPLIANT' : 'BIAS DETECTED'}
+                    {fairnessData.four_fifths_rule_status?.includes('PASSED') ? 'RBI COMPLIANT' : 'BIAS DETECTED'}
                   </span>
                 </div>
 
@@ -457,28 +470,6 @@ export default function BankPortal() {
                   </div>
 
                 </div>
-
-                {/* Subgroup Breakdown Table */}
-                {fairnessData.group_metrics && (
-                  <div className="bg-[#0a0e17] p-4 rounded-xl border border-[#1e2a3d] space-y-3">
-                    <span className="text-xs font-bold text-white font-mono-tech uppercase">SUBGROUP APPROVAL RATE METRICS</span>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-mono-tech">
-                      {Object.entries(fairnessData.group_metrics).map(([grp, metrics], i) => (
-                        <div key={i} className="p-3.5 bg-[#121824] rounded-lg border border-[#1e2a3d] space-y-2">
-                          <div className="flex justify-between items-center">
-                            <span className="text-white font-bold uppercase">{grp}</span>
-                            <span className="text-[#d2ff00] font-bold">
-                              {metrics.approval_rate ? `${(metrics.approval_rate * 100).toFixed(1)}% Approval Rate` : 'N/A'}
-                            </span>
-                          </div>
-                          <div className="text-slate-400 text-[11px]">
-                            Sample Count: {metrics.sample_count || 500} | False Positive Rate: {metrics.fpr ? `${(metrics.fpr * 100).toFixed(1)}%` : '2.1%'}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
 
               </div>
             ) : null}
@@ -506,7 +497,7 @@ export default function BankPortal() {
                 <button
                   onClick={fetchModelMonitoring}
                   disabled={monitoringLoading}
-                  className="btn-dark-outline text-xs py-1.5 px-3 cursor-pointer"
+                  className="btn-dark-outline text-xs py-1.5 px-3 cursor-pointer flex items-center gap-2"
                 >
                   <RefreshCw className={`w-3.5 h-3.5 ${monitoringLoading ? 'animate-spin' : ''}`} /> REFRESH
                 </button>
@@ -515,7 +506,7 @@ export default function BankPortal() {
                   whileTap={{ scale: 0.98 }}
                   onClick={handleTriggerRetrain}
                   disabled={retrainLoading}
-                  className="btn-lime text-xs font-bold py-1.5 px-3 cursor-pointer"
+                  className="btn-lime text-xs font-bold py-1.5 px-3 cursor-pointer flex items-center gap-2"
                 >
                   {retrainLoading ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Database className="w-3.5 h-3.5" />}
                   TRIGGER MODEL RETRAIN
@@ -535,12 +526,7 @@ export default function BankPortal() {
               </div>
             )}
 
-            {monitoringLoading ? (
-              <div className="p-12 text-center text-slate-400 font-mono-tech text-xs">
-                <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-[#d2ff00]" />
-                Calculating PSI drift across recent inference batches...
-              </div>
-            ) : monitoringData ? (
+            {monitoringData ? (
               <div className="space-y-6">
                 
                 {/* Overall PSI Metric */}
@@ -564,30 +550,6 @@ export default function BankPortal() {
                   </div>
                 </div>
 
-                {/* Feature Drift Table */}
-                {monitoringData.feature_drift_breakdown && (
-                  <div className="bg-[#0a0e17] p-4 rounded-xl border border-[#1e2a3d] space-y-3">
-                    <span className="text-xs font-bold text-white font-mono-tech uppercase">FEATURE-LEVEL PSI DRIFT BREAKDOWN</span>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono-tech">
-                      {Object.entries(monitoringData.feature_drift_breakdown).map(([feat, details], i) => (
-                        <div key={i} className="p-3 bg-[#121824] rounded-lg border border-[#1e2a3d] space-y-1">
-                          <div className="flex justify-between">
-                            <span className="text-white font-bold">{feat}</span>
-                            <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${
-                              details.status === 'STABLE' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'
-                            }`}>
-                              {details.status}
-                            </span>
-                          </div>
-                          <div className="text-slate-400 text-[11px]">
-                            PSI: <strong className="text-[#d2ff00]">{details.psi_score}</strong>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
               </div>
             ) : null}
 
@@ -603,10 +565,10 @@ export default function BankPortal() {
             <div className="flex items-center justify-between border-b border-[#1e2a3d] pb-4">
               <div>
                 <h3 className="font-bold text-white text-base flex items-center gap-2">
-                  <TrendingDown className="w-5 h-5 text-[#d2ff00]" /> Macroeconomic Portfolio Shock Simulation
+                  <TrendingDown className="w-5 h-5 text-[#d2ff00]" /> RBI Macroeconomic Portfolio Shock Simulation
                 </h3>
                 <p className="text-slate-400 text-xs mt-0.5">
-                  Simulate portfolio-wide systemic shocks (rate hikes, stagflation, recessions) across all loan applications.
+                  Simulate portfolio-wide systemic shocks (RBI repo rate spikes, inflation, and salary contractions) across all customer applications.
                 </p>
               </div>
             </div>
@@ -621,13 +583,13 @@ export default function BankPortal() {
                   className="cyber-input text-xs"
                 >
                   <option value="COMBINED_STAGFLATION">Combined Stagflation Shock</option>
-                  <option value="RATE_HIKE_200BPS">Central Bank Rate Hike (+200 bps)</option>
+                  <option value="RATE_HIKE_200BPS">RBI Repo Rate Hike (+200 bps)</option>
                   <option value="INCOME_SHOCK_15PCT">Disposable Income Contraction</option>
                 </select>
               </div>
 
               <div>
-                <label className="text-[11px] text-slate-400 block mb-1 font-mono-tech">Rate Hike Delta ({batchRateHike}%)</label>
+                <label className="text-[11px] text-slate-400 block mb-1 font-mono-tech">Repo Rate Delta ({batchRateHike}%)</label>
                 <input
                   type="range" min="0" max="8" step="0.5"
                   value={batchRateHike}
@@ -642,7 +604,7 @@ export default function BankPortal() {
                   whileTap={{ scale: 0.98 }}
                   onClick={handleRunBatchStress}
                   disabled={batchLoading}
-                  className="btn-lime w-full justify-center text-xs py-2.5 font-bold cursor-pointer"
+                  className="btn-lime w-full justify-center text-xs py-2.5 font-bold cursor-pointer flex items-center gap-2"
                 >
                   {batchLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
                   RUN BATCH SHOCK SIMULATION
@@ -667,38 +629,6 @@ export default function BankPortal() {
                     <span className="text-slate-500 block text-[10px]">HIGH RISK EXPOSURE COUNT</span>
                     <div className="text-3xl font-black text-rose-400">{batchStressData.high_risk_exposure_count}</div>
                   </div>
-                </div>
-
-                {/* Results Table */}
-                <div className="bg-[#0a0e17] rounded-xl border border-[#1e2a3d] overflow-hidden">
-                  <table className="w-full text-left text-xs font-mono-tech">
-                    <thead className="bg-[#121824] text-slate-400 uppercase text-[10px] border-b border-[#1e2a3d]">
-                      <tr>
-                        <th className="p-3">App ID</th>
-                        <th className="p-3">CIBIL</th>
-                        <th className="p-3">Baseline Prob</th>
-                        <th className="p-3">Stressed Prob</th>
-                        <th className="p-3">Resilience Grade</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[#1e2a3d]">
-                      {batchStressData.results?.slice(0, 10).map((r, i) => (
-                        <tr key={i} className="hover:bg-[#1a2336]/40">
-                          <td className="p-3 text-white font-bold">#{r.application_id}</td>
-                          <td className="p-3 text-[#d2ff00]">{r.applicant_cibil}</td>
-                          <td className="p-3 text-slate-300">{Math.round(r.baseline_prob * 100)}%</td>
-                          <td className="p-3 text-amber-400 font-bold">{Math.round(r.stressed_prob * 100)}%</td>
-                          <td className="p-3">
-                            <span className={`px-2 py-0.5 rounded text-[10px] ${
-                              r.resilience_grade === 'HIGHLY_RESILIENT' ? 'text-emerald-400 bg-emerald-500/10' : 'text-rose-400 bg-rose-500/10'
-                            }`}>
-                              {r.resilience_grade}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
                 </div>
               </div>
             )}
@@ -736,10 +666,10 @@ export default function BankPortal() {
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handleDownloadDossierPdf(selectedApp.id)}
                     disabled={pdfDownloading}
-                    className="btn-lime text-xs py-1.5 px-3 font-bold cursor-pointer"
+                    className="btn-lime text-xs py-1.5 px-3 font-bold cursor-pointer flex items-center gap-1.5"
                   >
                     {pdfDownloading ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
-                    EXPORT REGULATORY DOSSIER PDF
+                    EXPORT RBI DOSSIER PDF
                   </motion.button>
                   <button
                     onClick={() => setSelectedApp(null)}
@@ -758,11 +688,11 @@ export default function BankPortal() {
                 </div>
                 <div>
                   <span className="text-slate-500 block text-[10px]">APPLICANT INCOME</span>
-                  <span className="text-white font-bold">${selectedApp.applicant_income?.toLocaleString()}</span>
+                  <span className="text-white font-bold">{formatINR(selectedApp.applicant_income)}</span>
                 </div>
                 <div>
                   <span className="text-slate-500 block text-[10px]">REQUESTED LOAN</span>
-                  <span className="text-white font-bold">${selectedApp.loan_amount?.toLocaleString()}</span>
+                  <span className="text-white font-bold">{formatINR(selectedApp.loan_amount)}</span>
                 </div>
                 <div>
                   <span className="text-slate-500 block text-[10px]">PROBABILITY</span>
@@ -776,7 +706,7 @@ export default function BankPortal() {
               {appConformal && (
                 <div className="bg-[#0a0e17] p-4 rounded-xl border border-[#1e2a3d] space-y-2 text-xs font-mono-tech">
                   <div className="flex justify-between text-white font-bold">
-                    <span>CONFORMAL UNCERTAINTY QUANTIFICATION</span>
+                    <span>CONFORMAL UNCERTAINTY QUANTIFICATION (ICP 95%)</span>
                     <span className="text-[#d2ff00]">{appConformal.epistemic_uncertainty}</span>
                   </div>
                   <div className="grid grid-cols-3 gap-2 text-slate-400 text-[11px]">
@@ -793,7 +723,7 @@ export default function BankPortal() {
                 <textarea
                   value={officerNotes}
                   onChange={(e) => setOfficerNotes(e.target.value)}
-                  placeholder="Enter underwriter compliance notes and audit trail justifications..."
+                  placeholder="Enter underwriter compliance notes and RBI audit trail justifications..."
                   className="cyber-input h-20 text-xs"
                 />
 
@@ -803,7 +733,7 @@ export default function BankPortal() {
                     whileTap={{ scale: 0.98 }}
                     onClick={() => handleDecision('APPROVED')}
                     disabled={actionLoading}
-                    className="btn-lime flex-1 justify-center bg-emerald-500 hover:bg-emerald-600 text-white shadow-none font-extrabold cursor-pointer"
+                    className="btn-lime flex-1 justify-center bg-emerald-500 hover:bg-emerald-600 text-white shadow-none font-extrabold cursor-pointer flex items-center gap-2"
                   >
                     <CheckCircle2 className="w-4 h-4" /> APPROVE APPLICATION
                   </motion.button>
@@ -812,7 +742,7 @@ export default function BankPortal() {
                     whileTap={{ scale: 0.98 }}
                     onClick={() => handleDecision('REJECTED')}
                     disabled={actionLoading}
-                    className="btn-lime flex-1 justify-center bg-rose-500 hover:bg-rose-600 text-white shadow-none font-extrabold cursor-pointer"
+                    className="btn-lime flex-1 justify-center bg-rose-500 hover:bg-rose-600 text-white shadow-none font-extrabold cursor-pointer flex items-center gap-2"
                   >
                     <XCircle className="w-4 h-4" /> REJECT APPLICATION
                   </motion.button>

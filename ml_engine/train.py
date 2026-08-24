@@ -5,19 +5,18 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 try:
     from xgboost import XGBClassifier
     HAS_XGBOOST = True
 except Exception:
     HAS_XGBOOST = False
 
-from sklearn.ensemble import RandomForestClassifier
-
 from ml_engine.data.loader import load_and_normalize_dataset
-from ml_engine.data.generate_dataset import generate_loan_dataset
+from ml_engine.data.generate_dataset import generate_indian_loan_dataset
 from ml_engine.preprocessing import LoanPreprocessor
 
-def train_model():
+def train_model(force_regenerate: bool = True):
     base_dir = os.path.dirname(os.path.dirname(__file__))
     data_dir = os.path.join(base_dir, 'ml_engine', 'data')
     artifacts_dir = os.path.join(base_dir, 'ml_engine', 'artifacts')
@@ -25,9 +24,9 @@ def train_model():
     os.makedirs(artifacts_dir, exist_ok=True)
 
     csv_path = os.path.join(data_dir, 'loan_dataset.csv')
-    if not os.path.exists(csv_path):
-        print(f"No existing dataset found at {csv_path}. Generating default dataset...")
-        df_gen = generate_loan_dataset(num_samples=5000)
+    if force_regenerate or not os.path.exists(csv_path):
+        print(f"Generating realistic Indian Retail Banking dataset (10,000 samples)...")
+        df_gen = generate_indian_loan_dataset(num_samples=10000, seed=42)
         df_gen.to_csv(csv_path, index=False)
 
     df = load_and_normalize_dataset(csv_path)
@@ -45,24 +44,26 @@ def train_model():
         try:
             scale_pos_weight = (len(y_train) - sum(y_train)) / max(sum(y_train), 1)
             model = XGBClassifier(
-                n_estimators=150,
-                max_depth=5,
-                learning_rate=0.05,
+                n_estimators=180,
+                max_depth=6,
+                learning_rate=0.06,
+                subsample=0.85,
+                colsample_bytree=0.85,
                 scale_pos_weight=scale_pos_weight,
                 random_state=42,
                 eval_metric='logloss'
             )
             model.fit(X_train, y_train)
         except Exception as e:
-            print(f"XGBoost runtime load failed: {e}. Falling back to RandomForestClassifier...")
-            model = RandomForestClassifier(n_estimators=150, max_depth=8, random_state=42, class_weight='balanced')
+            print(f"XGBoost runtime load failed: {e}. Falling back to GradientBoostingClassifier...")
+            model = GradientBoostingClassifier(n_estimators=150, max_depth=5, learning_rate=0.08, random_state=42)
             model.fit(X_train, y_train)
-            model_type = 'RandomForestClassifier'
+            model_type = 'GradientBoostingClassifier'
     else:
-        print("XGBoost library unavailable. Training RandomForestClassifier fallback...")
-        model = RandomForestClassifier(n_estimators=150, max_depth=8, random_state=42, class_weight='balanced')
+        print("XGBoost library unavailable. Training GradientBoostingClassifier fallback...")
+        model = GradientBoostingClassifier(n_estimators=150, max_depth=5, learning_rate=0.08, random_state=42)
         model.fit(X_train, y_train)
-        model_type = 'RandomForestClassifier'
+        model_type = 'GradientBoostingClassifier'
 
     print(f"Trained {model_type} on {len(X_train)} samples with {X_train.shape[1]} features...")
 
@@ -110,4 +111,4 @@ def train_model():
     return model, preprocessor, metrics
 
 if __name__ == '__main__':
-    train_model()
+    train_model(force_regenerate=True)

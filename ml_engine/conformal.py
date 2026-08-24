@@ -100,7 +100,8 @@ class ConformalPredictor:
         z_scores = np.abs((X_arr[0] - self.feature_means) / self.feature_stds)
         max_z_score = float(np.max(z_scores))
         avg_z_score = float(np.mean(z_scores))
-        is_ood = bool(credibility < 0.05 or avg_z_score > 3.0)
+        is_ood = bool(credibility < 0.05 or avg_z_score > 2.0 or max_z_score > 2.5)
+
 
         # Calibrated Probability Interval [p_lower, p_upper]
         # Quantile cutoff for non-conformity

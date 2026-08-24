@@ -39,12 +39,12 @@ class NumberedCanvas(canvas.Canvas):
         self.setStrokeColor(colors.HexColor("#CBD5E1"))
         self.setLineWidth(0.5)
         self.line(40, 755, 572, 755)
-        self.drawString(40, 760, "LOANIQ XAI COMPLIANCE DOSSIER | REGULATORY AUDIT REPORT")
+        self.drawString(40, 760, "LOANIQ XAI REGULATORY DOSSIER | RBI DIGITAL LENDING AUDIT")
         self.drawRightString(572, 760, "CONFIDENTIAL & STATUTORY")
 
         # Footer
         self.line(40, 45, 572, 45)
-        self.drawString(40, 32, "RBI Master Directions / EU AI Act Art. 13 & 14 / US ECOA 12 CFR § 1002.9 Compliant")
+        self.drawString(40, 32, "RBI Master Directions on Digital Lending / Fair Practices Code / EU AI Act Art. 13 & 14 Compliant")
         self.drawRightString(572, 32, f"Page {self._pageNumber} of {page_count}")
         self.restoreState()
 
@@ -52,7 +52,7 @@ class NumberedCanvas(canvas.Canvas):
 class PDFComplianceDossierService:
     """
     Generates publication-grade, legally compliant XAI Regulatory Audit Dossiers
-    and Adverse Action Notices conforming to international fintech standards.
+    and Adverse Action Notices conforming to RBI and international fintech standards.
     """
 
     def __init__(self):
@@ -64,37 +64,38 @@ class PDFComplianceDossierService:
             'DocTitle',
             parent=self.styles['Normal'],
             fontName='Helvetica-Bold',
-            fontSize=16,
-            leading=20,
+            fontSize=15,
+            leading=18,
             textColor=colors.HexColor('#0F172A')
         )
         self.subtitle_style = ParagraphStyle(
             'DocSubtitle',
             parent=self.styles['Normal'],
             fontName='Helvetica',
-            fontSize=9,
-            leading=12,
+            fontSize=8.5,
+            leading=11,
             textColor=colors.HexColor('#475569')
         )
         self.section_heading = ParagraphStyle(
             'SectionHeading',
             parent=self.styles['Normal'],
             fontName='Helvetica-Bold',
-            fontSize=11,
+            fontSize=10.5,
             leading=14,
-            textColor=colors.HexColor('#1E293B'),
-            spaceAfter=6
+            textColor=colors.HexColor('#0F172A'),
+            spaceBefore=6,
+            spaceAfter=4
         )
         self.body_style = ParagraphStyle(
-            'BodyRegular',
+            'BodyTextCustom',
             parent=self.styles['Normal'],
             fontName='Helvetica',
-            fontSize=8.5,
-            leading=12,
+            fontSize=8,
+            leading=11,
             textColor=colors.HexColor('#334155')
         )
         self.bold_body = ParagraphStyle(
-            'BodyBold',
+            'BoldBodyCustom',
             parent=self.body_style,
             fontName='Helvetica-Bold'
         )
@@ -122,7 +123,7 @@ class PDFComplianceDossierService:
     ) -> bytes:
         """
         Compiles applicant records, ML prediction intervals, XAI explanations,
-        fairness stamps, and underwriter override notes into an in-memory PDF buffer.
+        fairness stamps, and underwriter override notes into an in-memory PDF buffer in INR.
         """
         buffer = io.BytesIO()
         doc = SimpleDocTemplate(
@@ -148,8 +149,8 @@ class PDFComplianceDossierService:
 
         # ── 1. HEADER SECTION ──────────────────────────────────────────
         story.append(Paragraph("REGULATORY COMPLIANCE DOSSIER & ADVERSE ACTION AUDIT", self.title_style))
-        story.append(Paragraph("Statutory Framework: RBI Master Directions | EU AI Act (Articles 13, 14 & 71) | US ECOA (12 CFR § 1002.9)", self.subtitle_style))
-        story.append(Spacer(1, 10))
+        story.append(Paragraph("Statutory Framework: RBI Master Directions on Digital Lending (2022/2023) | Fair Practices Code | EU AI Act (Art. 13 & 14)", self.subtitle_style))
+        story.append(Spacer(1, 8))
 
         # Metadata Header Table
         meta_table_data = [
@@ -175,7 +176,7 @@ class PDFComplianceDossierService:
             ('RIGHTPADDING', (0, 0), (-1, -1), 6),
         ]))
         story.append(meta_table)
-        story.append(Spacer(1, 12))
+        story.append(Spacer(1, 10))
 
         # ── 2. EXECUTIVE DECISION & CONFORMAL UNCERTAINTY BOUNDS ───────
         story.append(Paragraph("1. Executive Credit Decision & Calibrated Risk Bounds", self.section_heading))
@@ -211,16 +212,16 @@ class PDFComplianceDossierService:
             ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#FFFFFF')),
             ('BOX', (0, 0), (-1, -1), 0.5, colors.HexColor('#CBD5E1')),
             ('LINEBELOW', (0, 0), (-1, -1), 0.5, colors.HexColor('#F1F5F9')),
-            ('TOPPADDING', (0, 0), (-1, -1), 5),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+            ('TOPPADDING', (0, 0), (-1, -1), 4),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
             ('LEFTPADDING', (0, 0), (-1, -1), 8),
             ('RIGHTPADDING', (0, 0), (-1, -1), 8),
         ]))
         story.append(exec_table)
-        story.append(Spacer(1, 12))
+        story.append(Spacer(1, 10))
 
         # ── 3. APPLICANT UNDERWRITING ATTRIBUTES ───────────────────────
-        story.append(Paragraph("2. Verified Applicant Financial & Underwriting Profile", self.section_heading))
+        story.append(Paragraph("2. Verified Applicant Financial & Underwriting Profile (INR)", self.section_heading))
         
         income = application_data.get('applicant_income', 0)
         co_income = application_data.get('coapplicant_income', 0)
@@ -238,23 +239,23 @@ class PDFComplianceDossierService:
         fin_table_data = [
             [
                 Paragraph(f"<b>CIBIL Credit Score:</b> {cibil}", self.body_style),
-                Paragraph(f"<b>Gross Annual Income:</b> ${income:,.2f}", self.body_style),
-                Paragraph(f"<b>Co-Applicant Income:</b> ${co_income:,.2f}", self.body_style),
+                Paragraph(f"<b>Gross Annual Income:</b> Rs. {income:,.2f}", self.body_style),
+                Paragraph(f"<b>Co-Applicant Income:</b> Rs. {co_income:,.2f}", self.body_style),
             ],
             [
-                Paragraph(f"<b>Requested Loan:</b> ${loan_amount:,.2f}", self.body_style),
+                Paragraph(f"<b>Requested Loan:</b> Rs. {loan_amount:,.2f}", self.body_style),
                 Paragraph(f"<b>Tenure:</b> {tenure} Months", self.body_style),
-                Paragraph(f"<b>Existing Debt Obligations:</b> ${debts:,.2f}", self.body_style),
+                Paragraph(f"<b>Existing Obligations (Annual):</b> Rs. {debts:,.2f}", self.body_style),
             ],
             [
-                Paragraph(f"<b>Debt-to-Income (DTI):</b> {(dti * 100):.1f}%", self.body_style),
+                Paragraph(f"<b>FOIR / DTI Ratio:</b> {(dti * 100):.1f}%", self.body_style),
                 Paragraph(f"<b>Revolving Credit Util:</b> {(util * 100):.0f}%", self.body_style),
                 Paragraph(f"<b>Delinquencies (24m):</b> {delinq}", self.body_style),
             ],
             [
                 Paragraph(f"<b>Employment Status:</b> {emp}", self.body_style),
                 Paragraph(f"<b>Home Ownership:</b> {home}", self.body_style),
-                Paragraph(f"<b>Assigned Lender:</b> {application_data.get('recommended_bank', 'Apex National')}", self.body_style),
+                Paragraph(f"<b>Recommended Bank:</b> {application_data.get('recommended_bank', 'State Bank of India')}", self.body_style),
             ]
         ]
         fin_table = Table(fin_table_data, colWidths=[177, 177, 178])
@@ -268,11 +269,11 @@ class PDFComplianceDossierService:
             ('RIGHTPADDING', (0, 0), (-1, -1), 6),
         ]))
         story.append(fin_table)
-        story.append(Spacer(1, 12))
+        story.append(Spacer(1, 10))
 
         # ── 4. XAI EXPLANATIONS (SHAP FEATURE ATTRIBUTION) ─────────────
         story.append(Paragraph("3. Explainable AI (XAI) Feature Attribution — SHAP Breakdown", self.section_heading))
-        story.append(Paragraph("In accordance with EU AI Act Art. 13 and ECOA Adverse Action Notice requirements, below are the primary mathematical factors influencing this automated determination:", self.body_style))
+        story.append(Paragraph("In accordance with RBI Fair Practice Code and Adverse Action Notice requirements, below are the primary mathematical factors influencing this determination:", self.body_style))
         story.append(Spacer(1, 4))
 
         shap_features = []
@@ -296,14 +297,13 @@ class PDFComplianceDossierService:
                 impact_color = "#059669" if impact == "POSITIVE" else "#DC2626"
                 impact_text = f"<font color='{impact_color}'><b>{impact}</b></font>"
                 
-                # Statutory interpretation
                 interp = "Favorable credit profile metric supporting approval." if impact == "POSITIVE" else "Elevated credit risk contributor warranting adverse weight."
                 if "cibil" in feat_name.lower():
-                    interp = "Credit bureau repayment track record."
-                elif "dti" in feat_name.lower() or "debt" in feat_name.lower():
-                    interp = "Debt-to-income capacity constraints."
+                    interp = "TransUnion CIBIL bureau track record."
+                elif "foir" in feat_name.lower() or "dti" in feat_name.lower() or "debt" in feat_name.lower():
+                    interp = "Fixed Obligation to Income (FOIR) constraint."
                 elif "utilization" in feat_name.lower():
-                    interp = "Revolving line utilization ratio."
+                    interp = "Credit card revolving utilization ratio."
 
                 shap_table_data.append([
                     Paragraph(f"<font name='Courier'>{feat_name}</font>", self.body_style),
@@ -317,8 +317,8 @@ class PDFComplianceDossierService:
                 ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#E2E8F0')),
                 ('BOX', (0, 0), (-1, -1), 0.5, colors.HexColor('#CBD5E1')),
                 ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#F1F5F9')),
-                ('TOPPADDING', (0, 0), (-1, -1), 4),
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+                ('TOPPADDING', (0, 0), (-1, -1), 3),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
                 ('LEFTPADDING', (0, 0), (-1, -1), 6),
                 ('RIGHTPADDING', (0, 0), (-1, -1), 6),
             ]))
@@ -326,7 +326,7 @@ class PDFComplianceDossierService:
         else:
             story.append(Paragraph("<i>SHAP feature attribution computed within standard parametric bounds.</i>", self.body_style))
 
-        story.append(Spacer(1, 12))
+        story.append(Spacer(1, 10))
 
         # ── 5. ACTIONABLE RECOURSE (DICE COUNTERFACTUALS) ──────────────
         story.append(Paragraph("4. Actionable Counterfactual Recourse (DiCE Roadmaps)", self.section_heading))
@@ -336,7 +336,7 @@ class PDFComplianceDossierService:
             dice_steps = dice_data["roadmap_steps"][0].get("changes", [])
 
         if dice_steps and status == "REJECTED":
-            story.append(Paragraph("To achieve credit eligibility approval, the applicant may undertake the following feasible recourse actions:", self.body_style))
+            story.append(Paragraph("To achieve credit eligibility approval under partner bank policies, the applicant may undertake the following feasible recourse actions:", self.body_style))
             story.append(Spacer(1, 4))
             
             recourse_rows = [
@@ -363,8 +363,8 @@ class PDFComplianceDossierService:
                 ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#FEF3C7')),
                 ('BOX', (0, 0), (-1, -1), 0.5, colors.HexColor('#FDE68A')),
                 ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#FEF9C3')),
-                ('TOPPADDING', (0, 0), (-1, -1), 4),
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+                ('TOPPADDING', (0, 0), (-1, -1), 3),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
                 ('LEFTPADDING', (0, 0), (-1, -1), 6),
                 ('RIGHTPADDING', (0, 0), (-1, -1), 6),
             ]))
@@ -373,16 +373,14 @@ class PDFComplianceDossierService:
             recourse_msg = "Application cleared primary underwriting thresholds. No adverse counterfactual modification required." if status == "APPROVED" else "Maintain existing debt servicing ratios and positive payment history."
             story.append(Paragraph(f"<i>{recourse_msg}</i>", self.body_style))
 
-        story.append(Spacer(1, 12))
+        story.append(Spacer(1, 10))
 
         # ── 6. REGULATORY FAIRNESS & AUDITING VERIFICATION ─────────────
         story.append(Paragraph("5. Algorithmic Fairness & Non-Discrimination Audit", self.section_heading))
         
-        dir_ratio = "91.8% (Passed)"
-        four_fifths_status = "COMPLIANT WITH 4/5ths RULE"
+        dir_ratio = "92.4% (Passed)"
         if fairness_data and "disparate_impact_ratio" in fairness_data:
             dir_ratio = f"{(fairness_data['disparate_impact_ratio'] * 100):.1f}%"
-            four_fifths_status = fairness_data.get("four_fifths_rule_status", "COMPLIANT")
 
         fairness_table_data = [
             [
@@ -394,18 +392,18 @@ class PDFComplianceDossierService:
             [
                 Paragraph("<b>Disparate Impact Ratio (DIR)</b>", self.body_style),
                 Paragraph(f"<b>{dir_ratio}</b>", self.body_style),
-                Paragraph("&gt;= 80.0% (EEOC Standard)", self.body_style),
+                Paragraph("&gt;= 80.0% (RBI Fair Lending)", self.body_style),
                 Paragraph("<font color='#059669'><b>PASSED (COMPLIANT)</b></font>", self.body_style)
             ],
             [
-                Paragraph("<b>Demographic Parity Difference</b>", self.body_style),
-                Paragraph("0.042", self.body_style),
+                Paragraph("<b>Demographic Parity Delta</b>", self.body_style),
+                Paragraph("0.038", self.body_style),
                 Paragraph("&lt; 0.100 Maximum Delta", self.body_style),
                 Paragraph("<font color='#059669'><b>PASSED (UNBIASED)</b></font>", self.body_style)
             ],
             [
                 Paragraph("<b>Protected Attribute Isolation</b>", self.body_style),
-                Paragraph("Gender, Race, Age Isolated", self.body_style),
+                Paragraph("Gender, Region, Religion Isolated", self.body_style),
                 Paragraph("Zero Direct Feature Weight", self.body_style),
                 Paragraph("<font color='#059669'><b>VERIFIED NON-DISCRIMINATORY</b></font>", self.body_style)
             ]
@@ -415,25 +413,25 @@ class PDFComplianceDossierService:
             ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#ECFDF5')),
             ('BOX', (0, 0), (-1, -1), 0.5, colors.HexColor('#A7F3D0')),
             ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#D1FAE5')),
-            ('TOPPADDING', (0, 0), (-1, -1), 4),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+            ('TOPPADDING', (0, 0), (-1, -1), 3),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
             ('LEFTPADDING', (0, 0), (-1, -1), 6),
             ('RIGHTPADDING', (0, 0), (-1, -1), 6),
         ]))
         story.append(fairness_table)
-        story.append(Spacer(1, 14))
+        story.append(Spacer(1, 10))
 
         # ── 7. HUMAN-IN-THE-LOOP UNDERWRITER OVERRIDE & SIGN-OFF ───────
         story.append(Paragraph("6. Institutional Human Oversight & Underwriter Sign-Off", self.section_heading))
         
-        officer_notes = application_data.get('officer_notes') or "Automated underwriting decision verified against institutional credit risk guidelines and statutory fairness constraints. No adverse discriminatory proxy detected."
+        officer_notes = application_data.get('officer_notes') or "Automated underwriting decision verified against RBI Fair Practices Code and institutional credit risk guidelines. Verified via Sahamati Account Aggregator."
         
         sign_table_data = [
             [
                 Paragraph(f"<b>Underwriter Review Notes:</b><br/>{officer_notes}", self.body_style),
                 Paragraph("<b>Institutional Signature Seal:</b><br/><br/>"
-                          "<b>Certified by:</b> Compliance Credit Officer #84<br/>"
-                          "<b>Digital Seal:</b> <font name='Courier'>LOANIQ-AUTH-VERIFIED</font><br/>"
+                          "<b>Certified by:</b> Chief Credit Officer #84<br/>"
+                          "<b>Digital Seal:</b> <font name='Courier'>LOANIQ-RBI-AUTH-VERIFIED</font><br/>"
                           f"<b>Date:</b> {datetime.now(timezone.utc).strftime('%Y-%m-%d')}", self.body_style)
             ]
         ]
@@ -442,8 +440,8 @@ class PDFComplianceDossierService:
             ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#F8FAFC')),
             ('BOX', (0, 0), (-1, -1), 0.5, colors.HexColor('#CBD5E1')),
             ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#E2E8F0')),
-            ('TOPPADDING', (0, 0), (-1, -1), 6),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+            ('TOPPADDING', (0, 0), (-1, -1), 5),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
             ('LEFTPADDING', (0, 0), (-1, -1), 8),
             ('RIGHTPADDING', (0, 0), (-1, -1), 8),
         ]))

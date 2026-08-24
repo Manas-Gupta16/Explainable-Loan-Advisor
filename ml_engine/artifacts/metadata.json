@@ -1,10 +1,10 @@
 {
   "metrics": {
-    "accuracy": 0.894,
-    "precision": 0.8961038961038961,
-    "recall": 0.8771186440677966,
-    "f1_score": 0.8865096359743041,
-    "roc_auc": 0.9657606253210067
+    "accuracy": 0.9505,
+    "precision": 0.9399038461538461,
+    "recall": 0.941034897713598,
+    "f1_score": 0.9404690318701142,
+    "roc_auc": 0.9918214113289666
   },
   "feature_names": [
     "cibil_score",
@@ -18,13 +18,15 @@
     "credit_history_years",
     "dti_ratio",
     "loan_to_income_ratio",
+    "foir_ratio",
     "employment_status_Business",
     "employment_status_Salaried",
     "employment_status_Self-Employed",
     "employment_status_Unemployed",
     "education_Graduate",
-    "education_Not Graduate",
     "education_Post Graduate",
+    "education_Professional",
+    "education_Undergraduate",
     "home_ownership_MORTGAGE",
     "home_ownership_OWN",
     "home_ownership_RENT",
@@ -35,7 +37,7 @@
     "loan_purpose_Vehicle"
   ],
   "dataset_shape": [
-    5000,
+    10000,
     14
   ],
   "model_type": "XGBoostClassifier",

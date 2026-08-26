@@ -124,17 +124,13 @@ export default function VoiceGuideModal({ isOpen, onClose, applicationResult, de
     stopAudio();
 
     // Use backend gTTS streaming audio endpoint for 100% natural, fluent regional pronunciation
-    const audioUrl = `/api/v1/customer/voice-audio?text=${encodeURIComponent(currentText)}&lang=${currentLangConfig.locale}`;
+    const audioUrl = `/api/v1/customer/voice-audio?text=${encodeURIComponent(currentText)}&lang=${currentLangConfig.locale}&t=${Date.now()}`;
     const audio = new Audio(audioUrl);
     audioRef.current = audio;
 
-    audio.oncanplaythrough = () => {
+    audio.onplaying = () => {
       setIsLoadingAudio(false);
       setIsPlaying(true);
-      audio.play().catch(err => {
-        console.warn("Audio autoplay blocked, falling back to Web Speech:", err);
-        fallbackWebSpeech();
-      });
     };
 
     audio.onended = () => {
@@ -142,23 +138,39 @@ export default function VoiceGuideModal({ isOpen, onClose, applicationResult, de
       setIsLoadingAudio(false);
     };
 
-    audio.onerror = () => {
-      console.warn("Backend audio stream error, falling back to Web Speech");
+    audio.onerror = (e) => {
+      console.warn("Backend audio stream error, falling back to Web Speech:", e);
       setIsLoadingAudio(false);
       fallbackWebSpeech();
     };
+
+    audio.play().catch(err => {
+      console.warn("Audio play error, falling back to Web Speech:", err);
+      setIsLoadingAudio(false);
+      fallbackWebSpeech();
+    });
   };
 
   const fallbackWebSpeech = () => {
     if (!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(currentText);
-    utterance.lang = currentLangConfig.locale === 'hi' ? 'hi-IN' : currentLangConfig.locale === 'mr' ? 'mr-IN' : 'en-IN';
+    const localeMap = {
+      hi: 'hi-IN',
+      mr: 'mr-IN',
+      gu: 'gu-IN',
+      bn: 'bn-IN',
+      ta: 'ta-IN',
+      te: 'te-IN',
+      en: 'en-IN'
+    };
+    utterance.lang = localeMap[currentLangConfig.locale] || 'hi-IN';
     utterance.onend = () => setIsPlaying(false);
     utterance.onerror = () => setIsPlaying(false);
     setIsPlaying(true);
     window.speechSynthesis.speak(utterance);
   };
+
 
   const handleLanguageChange = (newLang) => {
     stopAudio();

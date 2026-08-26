@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { 
@@ -315,27 +315,55 @@ export default function CustomerPortal() {
     }
   };
 
-  // 2. Play TTS Audio Simulation
+  const coachAudioRef = useRef(null);
+
+  // 2. Play Coach Voice Audio using backend gTTS stream
   const handleToggleSpeech = () => {
     if (!coachData?.conversational_audio_script) return;
 
-    if ('speechSynthesis' in window) {
-      if (isPlayingAudio) {
-        window.speechSynthesis.cancel();
-        setIsPlayingAudio(false);
-      } else {
-        const utterance = new SpeechSynthesisUtterance(coachData.conversational_audio_script);
-        utterance.rate = 1.0;
-        utterance.pitch = 1.0;
-        utterance.onend = () => setIsPlayingAudio(false);
-        utterance.onerror = () => setIsPlayingAudio(false);
-        setIsPlayingAudio(true);
-        window.speechSynthesis.speak(utterance);
+    if (isPlayingAudio) {
+      if (coachAudioRef.current) {
+        coachAudioRef.current.pause();
+        coachAudioRef.current.src = "";
+        coachAudioRef.current = null;
       }
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+      setIsPlayingAudio(false);
     } else {
-      setIsPlayingAudio(!isPlayingAudio);
+      const langCodeMap = {
+        'Hindi': 'hi',
+        'Marathi': 'mr',
+        'Gujarati': 'gu',
+        'Bengali': 'bn',
+        'Tamil': 'ta',
+        'Telugu': 'te',
+        'English': 'en',
+        'Hinglish': 'hinglish'
+      };
+      const code = langCodeMap[coachLanguage] || 'hi';
+      const audioUrl = `/api/v1/customer/voice-audio?text=${encodeURIComponent(coachData.conversational_audio_script)}&lang=${code}&t=${Date.now()}`;
+      const audio = new Audio(audioUrl);
+      coachAudioRef.current = audio;
+
+      audio.onplaying = () => setIsPlayingAudio(true);
+      audio.onended = () => setIsPlayingAudio(false);
+      audio.onerror = () => {
+        setIsPlayingAudio(false);
+        if ('speechSynthesis' in window) {
+          const utterance = new SpeechSynthesisUtterance(coachData.conversational_audio_script);
+          window.speechSynthesis.speak(utterance);
+        }
+      };
+
+      audio.play().catch(err => {
+        console.warn("Coach audio error:", err);
+        setIsPlayingAudio(false);
+      });
     }
   };
+
 
   // 3. OCR Document Upload Simulation
   const handleUploadDocument = async () => {
@@ -483,6 +511,9 @@ export default function CustomerPortal() {
               { code: 'hi', label: 'हिंदी' },
               { code: 'mr', label: 'मराठी' },
               { code: 'gu', label: 'ગુજરાતી' },
+              { code: 'bn', label: 'বাংলা' },
+              { code: 'ta', label: 'தமிழ்' },
+              { code: 'te', label: 'తెలుగు' },
               { code: 'en', label: 'English' }
             ].map(({ code, label }) => (
               <button
@@ -491,7 +522,16 @@ export default function CustomerPortal() {
                 onClick={() => {
                   setUiLang(code);
                   setUserProfile(prev => ({ ...prev, preferred_language: code }));
-                  setCoachLanguage(code === 'hi' ? 'Hindi' : code === 'mr' ? 'Marathi' : code === 'gu' ? 'Gujarati' : 'English');
+                  const map = {
+                    hi: 'Hindi',
+                    mr: 'Marathi',
+                    gu: 'Gujarati',
+                    bn: 'Bengali',
+                    ta: 'Tamil',
+                    te: 'Telugu',
+                    en: 'English'
+                  };
+                  setCoachLanguage(map[code] || 'Hindi');
                 }}
                 className={`px-2.5 py-1 rounded-lg text-xs font-mono-tech font-bold transition-all cursor-pointer ${
                   uiLang === code
@@ -503,6 +543,7 @@ export default function CustomerPortal() {
               </button>
             ))}
           </div>
+
 
           <motion.button
             whileHover={{ scale: 1.03 }}
@@ -1052,10 +1093,16 @@ export default function CustomerPortal() {
                           }}
                           className="cyber-input text-xs py-1 px-2.5 w-auto font-mono-tech"
                         >
+                          <option value="Hindi">हिंदी (Hindi)</option>
+                          <option value="Marathi">मराठी (Marathi)</option>
+                          <option value="Gujarati">ગુજરાતી (Gujarati)</option>
+                          <option value="Bengali">বাংলা (Bengali)</option>
+                          <option value="Tamil">தமிழ் (Tamil)</option>
+                          <option value="Telugu">తెలుగు (Telugu)</option>
                           <option value="English">English</option>
-                          <option value="Hindi">Hindi (हिंदी)</option>
                           <option value="Hinglish">Hinglish</option>
                         </select>
+
 
                         {/* Regenerate Button */}
                         <button

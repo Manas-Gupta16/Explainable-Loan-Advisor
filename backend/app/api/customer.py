@@ -622,7 +622,7 @@ def stream_voice_audio(text: str, lang: str = "hi"):
     Generates and streams fluent, native MP3 speech audio using gTTS 
     in Indian regional languages (Hindi, Marathi, Gujarati, Bengali, Tamil, Telugu, English).
     """
-    from fastapi.responses import StreamingResponse
+    from fastapi.responses import Response
     import io
     from gtts import gTTS
 
@@ -640,8 +640,18 @@ def stream_voice_audio(text: str, lang: str = "hi"):
     fp = io.BytesIO()
     tts = gTTS(text=text, lang=target_lang, slow=False)
     tts.write_to_fp(fp)
-    fp.seek(0)
-    return StreamingResponse(fp, media_type="audio/mpeg")
+    content = fp.getvalue()
+    
+    return Response(
+        content=content,
+        media_type="audio/mpeg",
+        headers={
+            "Content-Length": str(len(content)),
+            "Accept-Ranges": "bytes",
+            "Cache-Control": "public, max-age=3600"
+        }
+    )
+
 
 
 

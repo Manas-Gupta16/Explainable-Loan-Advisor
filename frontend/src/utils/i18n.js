@@ -241,5 +241,189 @@ export const TRANSLATIONS = {
       aa: "ખાતા એગ્રીગેટર (AA)",
       stress: "RBI સ્ટ્રેસ ટેસ્ટ"
     }
+  },
+
+  bn: {
+    lang_name: "বাংলা (Bengali)",
+    badge: "গ্রামীণ ও ভারত আর্থিক অন্তর্ভুক্তি XAI প্ল্যাটফর্ম",
+    title_main: "গ্রামীণ ঋণ মূল্যায়ন ও",
+    title_highlight: "কিষাণ ক্রেডিট পরামর্শ",
+    subtitle: "ভারতীয় কৃষক, গ্রামীণ মুদি দোকানদার এবং পশুপালকদের জন্য নিবেদিত। স্থায়ী প্রোফাইল, স্থানীয় ভাষা ভয়েস গাইড এবং ৪% ভর্তুকিযুক্ত KCC ফসল ঋণ।",
+    voice_guide_btn: "🔊 ভয়েস গাইড",
+    export_pdf: "RBI রিপোর্ট ডাউনলোড",
+    demo_profiles_label: "গ্রামীণ ঋণগ্রহীতা প্রোফাইল:",
+    demo_sub_badge: "KCC ও কৃষি প্রকল্প",
+    verified_profile: "যাচাইকৃত কৃষক প্রোফাইল",
+    edit_profile: "প্রোফাইল পরিবর্তন",
+    income: "মাসিক আয়",
+    cibil: "সিভিল স্কোর",
+    land_kcc: "জমি / KCC",
+    kcc_sub_pill: "৪% ভর্তুকি",
+    est_repayment: "আনুমানিক কিস্তি",
+    proposed_foir: "ঋণ-আয় অনুপাত (FOIR)",
+    post_harvest_note: "(ফসল কাটার পর পরিশোধ)",
+    monthly_emi_note: "(মাসিক কিস্তি)",
+    prime_tier: "(অনুমোদিত)",
+    kcc_eligible_tier: "(KCC যোগ্য)",
+    high_risk_tier: "(উচ্চ ঝুঁকি)",
+    loan_purpose_label: "ঋণের উদ্দেশ্য",
+    purposes: {
+      "Kisan Agri Crop / Seeds": "কিষাণ ফসল ও বীজ (KCC ৪% ভর্তুকি)",
+      "Tractor & Farm Equipment": "ট্র্যাক্টর ও কৃষি যন্ত্রপাতি",
+      "Dairy & Livestock": "ডেইরি ও পশুপালন বিকাশ",
+      "Village Kirana / Rural MSME": "গ্রামীণ মুদি ও ব্যবসা",
+      "Rural Housing (PMAY-G)": "গ্রামীণ পাকা বাড়ি (PMAY-G)",
+      "Informal Moneylender Debt-Swap": "মহাজন ঋণ মুক্তি (কম সুদে ঋণ)",
+      "Personal": "ব্যক্তিগত ও জরুরি চিকিৎসা খরচ"
+    },
+    requested_loan_label: "ঋণের পরিমাণ",
+    tenure_label: "ঋণের মেয়াদ",
+    repayment_schedule_label: "পরিশোধ পদ্ধতি",
+    schedules: {
+      "MONTHLY_EMI": "মাসিক কিস্তি (EMI)",
+      "HARVEST_BIANNUAL_BULLET": "ফসল কাটার পর এককালীন (খরিফ ও রবি)"
+    },
+    tenures: {
+      12: "১২ মাস (১ ফসল মৌসুম)",
+      24: "২৪ মাস (২ বছর)",
+      36: "৩৬ মাস (৩ বছর ডেইরি)",
+      60: "৬০ মাস (৫ বছর ট্র্যাক্টর)",
+      84: "৮৪ মাস (৭ বছর বাড়ি)"
+    },
+    advanced_overrides: "উন্নত আর্থিক বিকল্প",
+    card_utilization: "কার্ড ব্যবহার",
+    delinquent_lines: "বকেয়া কিস্তি",
+    eval_button: "যোগ্যতা ও ঋণ বিকল্প পরীক্ষা করুন",
+    evaluating_button: "মূল্যায়ন চলছে...",
+    tabs: {
+      banks: "ব্যাংক সুপারিশ ও SHAP",
+      coach: "AI ভয়েস পরামর্শদাতা",
+      ocr: "কাগজপত্র যাচাইকরণ",
+      aa: "অ্যাকাউন্ট এগ্রিগেটর (AA)",
+      stress: "RBI স্ট্রেস টেস্ট"
+    }
+  },
+
+  ta: {
+    lang_name: "தமிழ் (Tamil)",
+    badge: "கிராமப்புற நிதி உள்ளடக்கம் XAI தளம்",
+    title_main: "கிராமப்புற கடன் மதிப்பீடு &",
+    title_highlight: "கிசான் கடன் வழிகாட்டி",
+    subtitle: "இந்திய விவசாயிகள், கிராமப்புற வணிகர்கள் மற்றும் கால்நடை வளர்ப்பாளர்களுக்கான சிறப்பு தளம். 4% மானிய வட்டி கிசான் கிரெடிட் கார்டு திட்டம்.",
+    voice_guide_btn: "🔊 குரல் வழிகாட்டி",
+    export_pdf: "RBI அறிக்கை பதிவிறக்கு",
+    demo_profiles_label: "கிராமப்புற கடன் சுயவிவரம்:",
+    demo_sub_badge: "KCC & வேளாண் திட்டங்கள்",
+    verified_profile: "விவசாயி சுயவிவரம்",
+    edit_profile: "சுயவிவரம் மாற்று",
+    income: "மாத வருமானம்",
+    cibil: "சிபில் மதிப்பெண்",
+    land_kcc: "நிலம் / KCC",
+    kcc_sub_pill: "4% மானிய வட்டி",
+    est_repayment: "மதிப்பிடப்பட்ட தவணை",
+    proposed_foir: "கடன்-வருமான விகிதம் (FOIR)",
+    post_harvest_note: "(அறுவடைக்கு பின் திருப்பிச் செலுத்துதல்)",
+    monthly_emi_note: "(மாத தவணை)",
+    prime_tier: "(அங்கீகரிக்கப்பட்டது)",
+    kcc_eligible_tier: "(KCC தகுதி)",
+    high_risk_tier: "(அதிக ஆபத்து)",
+    loan_purpose_label: "கடனின் நோக்கம்",
+    purposes: {
+      "Kisan Agri Crop / Seeds": "வேளாண் பயிர் & விதைகள் (KCC 4% மானியம்)",
+      "Tractor & Farm Equipment": "டிராக்டர் & பண்ணை உபகரணங்கள்",
+      "Dairy & Livestock": "பால் பண்ணை & கால்நடை பராமரிப்பு",
+      "Village Kirana / Rural MSME": "கிராமப்புற மளிகை & சிறு தொழில்",
+      "Rural Housing (PMAY-G)": "கிராமப்புற கான்கிரீட் வீடு (PMAY-G)",
+      "Informal Moneylender Debt-Swap": "கந்துவட்டி கடன் மீட்பு (குறைந்த வட்டி)",
+      "Personal": "தனிநபர் & அவசர மருத்துவ செலவு"
+    },
+    requested_loan_label: "தேவையான கடன்",
+    tenure_label: "கால அளவு",
+    repayment_schedule_label: "திருப்பிச் செலுத்தும் முறை",
+    schedules: {
+      "MONTHLY_EMI": "மாதாந்திர தவணை (EMI)",
+      "HARVEST_BIANNUAL_BULLET": "அறுவடைக்கு பின் மொத்தமாக"
+    },
+    tenures: {
+      12: "12 மாதங்கள் (1 பயிர் பருவம்)",
+      24: "24 மாதங்கள் (2 ஆண்டுகள்)",
+      36: "36 மாதங்கள் (3 ஆண்டுகள் பால்பண்ணை)",
+      60: "60 மாதங்கள் (5 ஆண்டுகள் டிராக்டர்)",
+      84: "84 மாதங்கள் (7 ஆண்டுகள் வீடு)"
+    },
+    advanced_overrides: "மேம்பட்ட நிதியியல் அமைப்புகள்",
+    card_utilization: "கார்டு பயன்பாடு",
+    delinquent_lines: "நிலுவை தவணைகள்",
+    eval_button: "தகுதியை சரிபார்க்கவும்",
+    evaluating_button: "மதிப்பீடு செய்யப்படுகிறது...",
+    tabs: {
+      banks: "வங்கி பரிந்துரைகள் & SHAP",
+      coach: "AI குரல் ஆலோசகர்",
+      ocr: "ஆவண சரிபார்ப்பு",
+      aa: "கணக்கு திரட்டி (AA)",
+      stress: "RBI அழுத்த சோதனை"
+    }
+  },
+
+  te: {
+    lang_name: "తెలుగు (Telugu)",
+    badge: "గ్రామీణ ఆర్థిక చేరిక XAI వేదిక",
+    title_main: "గ్రామీణ రుణ మూల్యాంకనం &",
+    title_highlight: "కిసాన్ క్రెడిట్ మార్గదర్శకం",
+    subtitle: "భారతీయ రైతులు, గ్రామ కిరాణా వ్యాపారులు మరియు పాడి రైతులకు ప్రత్యేక వేదిక. 4% రాయితీ కిసాన్ క్రెడిట్ కార్డు పథకం.",
+    voice_guide_btn: "🔊 వాయిస్ గైడ్",
+    export_pdf: "RBI నివేదిక డౌన్‌లోడ్",
+    demo_profiles_label: "రైతు ప్రొఫైల్స్ (1-క్లిక్):",
+    demo_sub_badge: "KCC & వ్యవసాయ పథకాలు",
+    verified_profile: "ధృవీకరించిన రైతు ప్రొఫైల్",
+    edit_profile: "ప్రొఫైల్ మార్చు",
+    income: "నెలవారీ ఆదాయం",
+    cibil: "సిబిల్ స్కోర్",
+    land_kcc: "భూమి / KCC",
+    kcc_sub_pill: "4% రాయితీ",
+    est_repayment: "అంచనా వాయిదా",
+    proposed_foir: "రుణ-ఆదాయ నిష్పత్తి (FOIR)",
+    post_harvest_note: "(పంట కోత తర్వాత చెల్లింపు)",
+    monthly_emi_note: "(నెలవారీ EMI)",
+    prime_tier: "(ఆమోదించబడింది)",
+    kcc_eligible_tier: "(KCC అర్హత)",
+    high_risk_tier: "(అధిక రిస్క్)",
+    loan_purpose_label: "రుణ ప్రయోజనం",
+    purposes: {
+      "Kisan Agri Crop / Seeds": "కిసాన్ పంట & విత్తనాలు (KCC 4% రాయితీ)",
+      "Tractor & Farm Equipment": "ట్రాక్టర్ & వ్యవసాయ యంత్రాలు",
+      "Dairy & Livestock": "పాడి & పశుసంవర్ధక అభివృద్ధి",
+      "Village Kirana / Rural MSME": "గ్రామ కిరాణా & వ్యాపారం",
+      "Rural Housing (PMAY-G)": "గ్రామీణ పక్కా ఇల్లు (PMAY-G)",
+      "Informal Moneylender Debt-Swap": "వడ్డీ వ్యాపారుల రుణ విముక్తి",
+      "Personal": "వ్యక్తిగత & అత్యవసర వైద్య ఖర్చులు"
+    },
+    requested_loan_label: "కావలసిన రుణం",
+    tenure_label: "వ్యవధి",
+    repayment_schedule_label: "చెల్లింపు షెడ్యూల్",
+    schedules: {
+      "MONTHLY_EMI": "నెలవారీ వాయిదా (EMI)",
+      "HARVEST_BIANNUAL_BULLET": "పంట కోత తర్వాత ఒకేసారి (ఖరీఫ్ & రబీ)"
+    },
+    tenures: {
+      12: "12 నెలలు (1 పంట సీజన్)",
+      24: "24 నెలలు (2 సంవత్సరాలు)",
+      36: "36 నెలలు (3 సంవత్సరాలు పాడి)",
+      60: "60 నెలలు (5 సంవత్సరాలు ట్రాక్టర్)",
+      84: "84 నెలలు (7 సంవత్సరాలు ఇల్లు)"
+    },
+    advanced_overrides: "అదనపు ఆర్థిక ఎంపికలు",
+    card_utilization: "కార్డ్ వినియోగం",
+    delinquent_lines: "బాకీ ఉన్న వాయిదాలు",
+    eval_button: "అర్హతను పరిశీలించండి",
+    evaluating_button: "పరిశీలన జరుగుతోంది...",
+    tabs: {
+      banks: "బ్యాంక్ సిఫార్సులు & SHAP",
+      coach: "AI వాయిస్ సలహాదారు",
+      ocr: "పత్రాల ధృవీకరణ",
+      aa: "ఖాతా అగ్రిగేటర్ (AA)",
+      stress: "RBI స్ట్రెస్ టెస్ట్"
+    }
   }
 };
+

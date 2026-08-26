@@ -5,8 +5,11 @@ import {
   Send, ShieldCheck, AlertTriangle, CheckCircle,
   RefreshCw, Layers, MapPin, PieChart, Sparkles,
   FileText, Download, Play, Pause, Volume2, Landmark,
-  TrendingDown, Gauge, FileCheck, BrainCircuit, GitCommit, UserCheck, CheckCircle2
+  TrendingDown, Gauge, FileCheck, BrainCircuit, GitCommit, UserCheck, CheckCircle2,
+  Wheat, Edit3, ChevronDown, ChevronUp, Radio, HelpCircle, ArrowRight, Sliders
 } from 'lucide-react';
+import BorrowerProfileModal from './BorrowerProfileModal';
+import VoiceGuideModal from './VoiceGuideModal';
 
 const formatINR = (val) => {
   if (val === undefined || val === null || isNaN(val)) return '₹0';
@@ -22,83 +25,91 @@ const formatMonthlyINR = (annualVal) => {
 
 const PRESETS = [
   {
-    name: "SBI Prime Salaried Executive",
-    badge: "INSTANT STP APPROVAL",
+    name: "🌾 Rameshwar Patil (Farmer)",
+    badge: "KCC 4% SUBVENTION",
     badgeColor: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30",
+    description: "3.5 Acres Agri land, Cotton/Soybean, Kisan Credit Card",
     data: {
-      cibil_score: 790,
-      applicant_income: 1500000, // ₹1.25 Lakhs/mo
-      coapplicant_income: 360000, // ₹30k/mo
-      loan_amount: 1200000, // ₹12 Lakhs
-      loan_tenure_months: 48,
-      existing_debts: 180000, // ₹15k/mo EMI
-      credit_card_utilization: 0.18,
+      cibil_score: 695,
+      applicant_income: 456000, // ₹38k/mo
+      coapplicant_income: 0,
+      loan_amount: 180000, // ₹1.8 Lakhs
+      loan_tenure_months: 12,
+      existing_debts: 54000, // ₹4.5k/mo
+      credit_card_utilization: 0.15,
       delinquent_lines_2yrs: 0,
-      credit_history_years: 8.5,
-      employment_status: 'Salaried',
-      education: 'Post Graduate',
+      credit_history_years: 4.5,
+      employment_status: 'Farmer / Agriculture',
+      education: 'Undergraduate',
       home_ownership: 'OWN',
-      loan_purpose: 'Personal'
+      loan_purpose: 'Kisan Agri Crop / Seeds',
+      repayment_cycle: 'HARVEST_BIANNUAL_BULLET'
     }
   },
   {
-    name: "HDFC Near-Prime IT Professional",
-    badge: "FAST TRACK NEAR-PRIME",
+    name: "🥛 Sunita Devi (Dairy Co-op)",
+    badge: "DAIRY / LIVESTOCK",
     badgeColor: "text-[#d2ff00] bg-[#d2ff00]/10 border-[#d2ff00]/30",
+    description: "6 Milking Cows, Daily Milk Co-op Pouring, Women JLG",
     data: {
-      cibil_score: 715,
-      applicant_income: 960000, // ₹80k/mo
-      coapplicant_income: 0,
-      loan_amount: 650000, // ₹6.5 Lakhs
+      cibil_score: 710,
+      applicant_income: 504000, // ₹42k/mo
+      coapplicant_income: 180000, // ₹15k/mo
+      loan_amount: 250000, // ₹2.5 Lakhs
       loan_tenure_months: 36,
-      existing_debts: 144000, // ₹12k/mo EMI
-      credit_card_utilization: 0.28,
+      existing_debts: 60000, // ₹5k/mo
+      credit_card_utilization: 0.20,
+      delinquent_lines_2yrs: 0,
+      credit_history_years: 3.5,
+      employment_status: 'Dairy / Livestock',
+      education: 'High School',
+      home_ownership: 'OWN',
+      loan_purpose: 'Dairy & Livestock',
+      repayment_cycle: 'MONTHLY_EMI'
+    }
+  },
+  {
+    name: "🏬 Gopal Sharma (Kirana Store)",
+    badge: "RURAL MSME / KIRANA",
+    badgeColor: "text-amber-400 bg-amber-500/10 border-amber-500/30",
+    description: "General Store & Agri Inputs, UPI QR Payments, Bandhan Bank",
+    data: {
+      cibil_score: 725,
+      applicant_income: 660000, // ₹55k/mo
+      coapplicant_income: 0,
+      loan_amount: 400000, // ₹4.0 Lakhs
+      loan_tenure_months: 48,
+      existing_debts: 96000, // ₹8k/mo
+      credit_card_utilization: 0.32,
       delinquent_lines_2yrs: 0,
       credit_history_years: 5.0,
-      employment_status: 'Salaried',
+      employment_status: 'Rural Self-Employed / Kirana',
       education: 'Graduate',
-      home_ownership: 'RENT',
-      loan_purpose: 'Personal'
+      home_ownership: 'OWN',
+      loan_purpose: 'Village Kirana / Rural MSME',
+      repayment_cycle: 'MONTHLY_EMI'
     }
   },
   {
-    name: "Bajaj Finserv MSME Trader",
-    badge: "NBFC / PARETO RECOURSE",
-    badgeColor: "text-amber-400 bg-amber-500/10 border-amber-500/30",
-    data: {
-      cibil_score: 660,
-      applicant_income: 720000, // ₹60k/mo
-      coapplicant_income: 0,
-      loan_amount: 800000, // ₹8 Lakhs
-      loan_tenure_months: 48,
-      existing_debts: 216000, // ₹18k/mo EMI
-      credit_card_utilization: 0.42,
-      delinquent_lines_2yrs: 0,
-      credit_history_years: 4.0,
-      employment_status: 'Self-Employed',
-      education: 'Graduate',
-      home_ownership: 'RENT',
-      loan_purpose: 'Business'
-    }
-  },
-  {
-    name: "High FOIR Overleveraged Defaulter",
-    badge: "HIGH DEFAULT RISK (78% FOIR)",
+    name: "⚠️ Sahukar Debt Relief",
+    badge: "MONELEYNDER DEBT SWAP",
     badgeColor: "text-rose-400 bg-rose-500/10 border-rose-500/30",
+    description: "48% p.a. Informal Sahukar Loan -> Swap with Bank Credit",
     data: {
-      cibil_score: 565,
-      applicant_income: 420000, // ₹35k/mo
+      cibil_score: 590,
+      applicant_income: 336000, // ₹28k/mo
       coapplicant_income: 0,
-      loan_amount: 1500000, // ₹15 Lakhs
+      loan_amount: 120000, // ₹1.2 Lakhs
       loan_tenure_months: 24,
-      existing_debts: 240000, // ₹20k/mo EMI
-      credit_card_utilization: 0.85,
-      delinquent_lines_2yrs: 2,
-      credit_history_years: 2.5,
-      employment_status: 'Salaried',
+      existing_debts: 168000, // ₹14k/mo exploitative debt
+      credit_card_utilization: 0.70,
+      delinquent_lines_2yrs: 1,
+      credit_history_years: 2.0,
+      employment_status: 'Daily Wage / Labor',
       education: 'Undergraduate',
       home_ownership: 'RENT',
-      loan_purpose: 'Personal'
+      loan_purpose: 'Informal Moneylender Debt-Swap',
+      repayment_cycle: 'MONTHLY_EMI'
     }
   }
 ];
@@ -110,8 +121,27 @@ export default function CustomerPortal() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
 
+  // Profile Persistence & Voice Guide Modals
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isVoiceGuideOpen, setIsVoiceGuideOpen] = useState(false);
+  const [showOverrides, setShowOverrides] = useState(false);
+  const [userProfile, setUserProfile] = useState({
+    full_name: "Rameshwar Patil",
+    employment_type: "Farmer / Agriculture",
+    agri_land_acres: 3.5,
+    kcc_holder: true,
+    monthly_income: 38000,
+    coapplicant_income: 0,
+    existing_debts_monthly: 4500,
+    cibil_score: 695,
+    home_ownership: "Owned - Ancestral / Pucca",
+    preferred_language: "hi",
+    phone_number: "+91 98231 45678"
+  });
+
   // AI Coach state
-  const [coachLanguage, setCoachLanguage] = useState('English');
+  const [coachLanguage, setCoachLanguage] = useState('Hindi');
+
   const [coachData, setCoachData] = useState(null);
   const [coachLoading, setCoachLoading] = useState(false);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
@@ -206,19 +236,63 @@ export default function CustomerPortal() {
     evaluateApplication(formData);
   };
 
-  // Initial mount auto-evaluation
+  // Initial mount auto-evaluation & profile fetch
   useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await axios.get('/api/v1/auth/profile');
+        if (res.data) {
+          setUserProfile(res.data);
+          setFormData(prev => ({
+            ...prev,
+            cibil_score: res.data.cibil_score,
+            applicant_income: res.data.monthly_income * 12,
+            coapplicant_income: (res.data.coapplicant_income || 0) * 12,
+            existing_debts: (res.data.existing_debts_monthly || 0) * 12,
+            employment_status: res.data.employment_type
+          }));
+        }
+      } catch (err) {
+        console.log("Using default rural profile:", err.message);
+      }
+    };
+    fetchProfile();
     evaluateApplication(PRESETS[0].data);
   }, []);
+
+  const handleSaveProfile = (newProfile) => {
+    setUserProfile(newProfile);
+    const updated = {
+      ...formData,
+      cibil_score: newProfile.cibil_score,
+      applicant_income: newProfile.monthly_income * 12,
+      coapplicant_income: (newProfile.coapplicant_income || 0) * 12,
+      existing_debts: (newProfile.existing_debts_monthly || 0) * 12,
+      employment_status: newProfile.employment_type,
+      home_ownership: newProfile.home_ownership?.includes('Pucca') || newProfile.home_ownership?.includes('Owned') ? 'OWN' : 'RENT'
+    };
+    setFormData(updated);
+    evaluateApplication(updated);
+  };
 
   // 1. Fetch AI Coach
   const fetchCoachAdvice = async (customResult, currentForm = formData) => {
     const curResult = customResult || result;
     setCoachLoading(true);
     try {
+      const langCodeMap = {
+        'Hindi': 'hi',
+        'Marathi': 'mr',
+        'Gujarati': 'gu',
+        'Bengali': 'bn',
+        'Tamil': 'ta',
+        'Telugu': 'te',
+        'English': 'en',
+        'Hinglish': 'hinglish'
+      };
       const payload = {
-        applicant_name: "Valued Borrower",
-        language: coachLanguage === 'Hindi' ? 'hi' : coachLanguage === 'Hinglish' ? 'hinglish' : 'en',
+        applicant_name: userProfile?.full_name || "Valued Borrower",
+        language: langCodeMap[coachLanguage] || 'hi',
         application_id: curResult?.application_id || null,
         loan_input: currentForm,
         shap_data: curResult?.shap_explanation || null,
@@ -228,6 +302,7 @@ export default function CustomerPortal() {
       setCoachData(res.data);
     } catch (err) {
       console.error("Error fetching AI Coach advice:", err);
+
     } finally {
       setCoachLoading(false);
     }
@@ -380,18 +455,28 @@ export default function CustomerPortal() {
         <div>
           <div className="inline-flex items-center gap-2 text-xs font-mono-tech text-[#d2ff00] mb-2">
             <span className="w-2 h-2 rounded-full bg-[#d2ff00] animate-ping" />
-            <span>● INDIAN RETAIL BANKING XAI & RECOURSE PORTAL</span>
+            <span>● RURAL & BHARAT FINANCIAL INCLUSION XAI PLATFORM</span>
           </div>
           <h1 className="text-4xl font-black text-white tracking-tight">
-            Loan Underwriting & <span className="text-[#d2ff00]">Actionable Recourse</span>
+            Rural Underwriting & <span className="text-[#d2ff00]">Kisan Credit Recourse</span>
           </h1>
           <p className="text-slate-400 text-sm mt-1 max-w-2xl font-light">
-            Real-time AI credit assessment incorporating RBI underwriting guidelines, CIBIL bureau scoring (300-850), FOIR debt-burden metrics, multi-bank matching (SBI, HDFC, ICICI, Axis), and DiCE counterfactuals.
+            Designed for Indian farmers, village Kirana owners, and rural entrepreneurs. Features verified profile persistence, regional language voice guides (Hindi, Marathi, Gujarati, etc.), and RBI-subsidized KCC crop schemes.
           </p>
         </div>
 
-        {/* Action Controls */}
-        <div className="flex items-center gap-3">
+        {/* Action Controls: Voice Guide & PDF */}
+        <div className="flex items-center gap-2.5">
+          <motion.button
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => setIsVoiceGuideOpen(true)}
+            className="bg-[#121824] hover:bg-[#1a2336] text-[#d2ff00] border border-[#d2ff00]/40 text-xs font-bold py-2.5 px-3.5 rounded-xl shadow-[0_0_15px_rgba(210,255,0,0.15)] cursor-pointer flex items-center gap-2"
+          >
+            <Volume2 className="w-4 h-4 text-[#d2ff00] animate-pulse" />
+            <span>🔊 आवाज़ में समझें (VOICE GUIDE)</span>
+          </motion.button>
+
           {result && (
             <motion.button
               whileHover={{ scale: 1.03 }}
@@ -405,7 +490,7 @@ export default function CustomerPortal() {
               ) : (
                 <Download className="w-3.5 h-3.5" />
               )}
-              <span>EXPORT RBI COMPLIANCE PDF</span>
+              <span>EXPORT RBI PDF</span>
             </motion.button>
           )}
         </div>
@@ -415,9 +500,9 @@ export default function CustomerPortal() {
       <div className="bg-[#121824] border border-[#1e2a3d] p-3 rounded-2xl">
         <div className="flex items-center justify-between mb-2 px-2">
           <span className="text-[11px] font-mono-tech text-slate-400 flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-[#d2ff00]" /> DEMO PROFILES (1-CLICK QUICK LOAD):
+            <Sparkles className="w-3.5 h-3.5 text-[#d2ff00]" /> RURAL BORROWER PROFILES (1-CLICK QUICK LOAD):
           </span>
-          <span className="text-[10px] font-mono-tech text-[#d2ff00]">AUTHENTIC INDIAN BANKING DATA</span>
+          <span className="text-[10px] font-mono-tech text-[#d2ff00]">KCC & AGRI SCHEMES</span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
           {PRESETS.map((p, idx) => (
@@ -431,7 +516,7 @@ export default function CustomerPortal() {
               </div>
               <div className="flex items-center justify-between mt-1">
                 <span className="text-[10px] font-mono-tech text-slate-400">
-                  CIBIL {p.data.cibil_score} | {formatINR(p.data.loan_amount)} ({p.data.loan_tenure_months}m)
+                  CIBIL {p.data.cibil_score} | {formatINR(p.data.loan_amount)}
                 </span>
                 <span className={`text-[9px] font-mono-tech px-1.5 py-0.5 rounded border ${p.badgeColor}`}>{p.badge}</span>
               </div>
@@ -451,231 +536,221 @@ export default function CustomerPortal() {
         >
           <form onSubmit={handleSubmit} className="cyber-card space-y-4 bg-[#121824] border-[#1e2a3d]">
             
-            <div className="flex items-center justify-between border-b border-[#1e2a3d] pb-3">
-              <h3 className="font-bold text-white text-sm flex items-center gap-2">
-                <UserCheck className="w-4 h-4 text-[#d2ff00]" /> Underwriting Parameters (INR)
-              </h3>
-              <span className="text-[10px] font-mono-tech text-[#d2ff00]">LIVE FOIR ENGINE</span>
+            {/* Verified Borrower Profile Banner (Eliminates redundant inputs) */}
+            <div className="bg-[#0a0e17] p-3.5 rounded-xl border border-[#1e2a3d] space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg bg-[#d2ff00]/10 text-[#d2ff00] border border-[#d2ff00]/30 flex items-center justify-center text-xs font-bold">
+                    🌾
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
+                      {userProfile.full_name}
+                      <span className="text-[9px] font-mono-tech px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                        {userProfile.employment_type}
+                      </span>
+                    </h4>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setIsProfileModalOpen(true)}
+                  className="px-2.5 py-1 rounded bg-[#162030] hover:bg-[#1f2c42] text-[#d2ff00] text-[10px] font-mono-tech font-bold border border-[#d2ff00]/30 transition-all flex items-center gap-1 cursor-pointer"
+                >
+                  <Edit3 className="w-3 h-3" /> Edit Profile
+                </button>
+              </div>
+
+              {/* Profile Details Pills */}
+              <div className="grid grid-cols-3 gap-2 text-[10px] font-mono-tech bg-[#121824] p-2 rounded-lg border border-[#1e2a3d]/60">
+                <div>
+                  <span className="text-slate-400 block text-[9px]">INCOME</span>
+                  <span className="text-white font-bold">{formatINR(userProfile.monthly_income)}/mo</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block text-[9px]">CIBIL SCORE</span>
+                  <span className="text-[#d2ff00] font-bold">{formData.cibil_score}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block text-[9px]">LAND / KCC</span>
+                  <span className="text-emerald-400 font-bold">{userProfile.agri_land_acres} Ac (4% Sub)</span>
+                </div>
+              </div>
             </div>
 
             {/* Live Affordability Banner */}
             <div className="bg-[#0a0e17] p-3 rounded-xl border border-[#1e2a3d] grid grid-cols-2 gap-2 text-xs font-mono-tech">
               <div>
-                <span className="text-slate-400 text-[10px] block">EST. MONTHLY EMI</span>
-                <span className="text-[#d2ff00] font-bold">₹{Math.round(estimatedProposedEMI).toLocaleString('en-IN')}/mo</span>
+                <span className="text-slate-400 text-[10px] block">EST. REPAYMENT</span>
+                <span className="text-[#d2ff00] font-bold">
+                  ₹{Math.round(estimatedProposedEMI).toLocaleString('en-IN')}/mo
+                </span>
+                <span className="text-[9px] text-slate-400 block">
+                  {formData.repayment_cycle === 'HARVEST_BIANNUAL_BULLET' ? '(Post-Harvest Cycle)' : '(Monthly EMI)'}
+                </span>
               </div>
               <div>
                 <span className="text-slate-400 text-[10px] block">PROPOSED FOIR</span>
-                <span className={`font-bold ${liveFOIR <= 45 ? 'text-emerald-400' : liveFOIR <= 55 ? 'text-amber-400' : 'text-rose-400'}`}>
-                  {liveFOIR}% {liveFOIR <= 45 ? '(Prime)' : liveFOIR <= 55 ? '(Moderate)' : '(High Risk)'}
+                <span className={`font-bold ${liveFOIR <= 45 ? 'text-emerald-400' : liveFOIR <= 60 ? 'text-amber-400' : 'text-rose-400'}`}>
+                  {liveFOIR}% {liveFOIR <= 45 ? '(Prime)' : liveFOIR <= 60 ? '(KCC Eligible)' : '(High Risk)'}
                 </span>
               </div>
             </div>
 
-            {/* CIBIL Score Slider */}
+            {/* 1. Loan Purpose (Rural-Focused) */}
             <div>
-              <div className="flex justify-between text-xs mb-1">
-                <label className="text-slate-300 font-medium">TransUnion CIBIL Score</label>
-                <span className="font-mono-tech font-bold text-[#d2ff00] text-sm">{formData.cibil_score}</span>
+              <label className="text-xs text-slate-300 font-bold block mb-1">
+                Loan Purpose (ऋण का उद्देश्य)
+              </label>
+              <select
+                name="loan_purpose"
+                value={formData.loan_purpose}
+                onChange={handleChange}
+                className="cyber-input text-xs"
+              >
+                <option value="Kisan Agri Crop / Seeds">🌾 Kisan Agri Crop / Seeds (KCC 4% Subvention)</option>
+                <option value="Tractor & Farm Equipment">🚜 Tractor & Farm Equipment (कृषि यंत्र व ट्रैक्टर)</option>
+                <option value="Dairy & Livestock">🥛 Dairy & Livestock (पशुपालन / दुग्ध व्यवसाय)</option>
+                <option value="Village Kirana / Rural MSME">🏬 Village Kirana / Rural MSME (दुकान व व्यापार)</option>
+                <option value="Rural Housing (PMAY-G)">🏠 Rural Housing (ग्रामीण पक्का आवास)</option>
+                <option value="Informal Moneylender Debt-Swap">⚠️ Sahukar Debt-Swap (साहूकार कर्ज मुक्ति)</option>
+                <option value="Personal">💼 Personal / Medical Emergency (आपातकालीन खर्च)</option>
+              </select>
+            </div>
+
+            {/* 2. Requested Loan Amount (INR) with Quick Select Chips */}
+            <div>
+              <div className="flex justify-between items-center mb-1 text-xs">
+                <label className="text-slate-300 font-bold">Requested Loan (ऋण राशि)</label>
+                <span className="font-mono-tech text-[#d2ff00] font-bold">{formatINR(formData.loan_amount)}</span>
               </div>
               <input
-                type="range"
-                min="300"
-                max="850"
-                step="5"
-                name="cibil_score"
-                value={formData.cibil_score}
+                type="number"
+                name="loan_amount"
+                step="10000"
+                value={formData.loan_amount}
                 onChange={handleChange}
-                className="w-full h-2 bg-[#0a0e17] rounded-lg cursor-pointer accent-[#d2ff00]"
+                className="cyber-input text-xs font-bold"
+                required
               />
-              <div className="flex justify-between text-[10px] font-mono-tech text-slate-500 mt-1">
-                <span>300 (Subprime)</span>
-                <span>650 (Fair)</span>
-                <span>750+ (SBI/HDFC Prime)</span>
-                <span>850</span>
+
+              {/* Quick Select Chips */}
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {[50000, 150000, 300000, 600000, 1000000].map((amt) => (
+                  <button
+                    key={amt}
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, loan_amount: amt }))}
+                    className={`px-2 py-0.5 rounded text-[10px] font-mono-tech transition-all cursor-pointer border ${
+                      formData.loan_amount === amt 
+                        ? 'bg-[#d2ff00] text-black font-bold border-[#d2ff00]' 
+                        : 'bg-[#0a0e17] text-slate-400 border-[#1e2a3d] hover:border-slate-500'
+                    }`}
+                  >
+                    {formatINR(amt)}
+                  </button>
+                ))}
               </div>
             </div>
 
-            {/* Incomes */}
+            {/* 3. Tenure & Repayment Cycle */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs text-slate-400 block mb-1">
-                  Applicant Income (₹/yr)
-                  <span className="text-[#d2ff00] block text-[10px]">{formatMonthlyINR(formData.applicant_income)}</span>
-                </label>
-                <input
-                  type="number"
-                  name="applicant_income"
-                  step="25000"
-                  value={formData.applicant_income}
-                  onChange={handleChange}
-                  className="cyber-input text-xs"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs text-slate-400 block mb-1">
-                  Co-Applicant (₹/yr)
-                  <span className="text-slate-400 block text-[10px]">{formatMonthlyINR(formData.coapplicant_income)}</span>
-                </label>
-                <input
-                  type="number"
-                  name="coapplicant_income"
-                  step="20000"
-                  value={formData.coapplicant_income}
-                  onChange={handleChange}
-                  className="cyber-input text-xs"
-                />
-              </div>
-            </div>
-
-            {/* Loan Amount & Tenure */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs text-slate-400 block mb-1">
-                  Requested Loan (₹)
-                  <span className="text-[#d2ff00] block text-[10px]">{formatINR(formData.loan_amount)}</span>
-                </label>
-                <input
-                  type="number"
-                  name="loan_amount"
-                  step="50000"
-                  value={formData.loan_amount}
-                  onChange={handleChange}
-                  className="cyber-input text-xs"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs text-slate-400 block mb-1">Tenure (Months)</label>
+                <label className="text-xs text-slate-300 block mb-1">Tenure (अवधि)</label>
                 <select
                   name="loan_tenure_months"
                   value={formData.loan_tenure_months}
                   onChange={handleChange}
                   className="cyber-input text-xs"
                 >
-                  <option value={12}>12 Months (1 yr)</option>
-                  <option value={24}>24 Months (2 yrs)</option>
-                  <option value={36}>36 Months (3 yrs)</option>
-                  <option value={48}>48 Months (4 yrs)</option>
-                  <option value={60}>60 Months (5 yrs)</option>
-                  <option value={84}>84 Months (7 yrs)</option>
-                  <option value={120}>120 Months (10 yrs)</option>
-                  <option value={240}>240 Months (20 yrs Home)</option>
+                  <option value={12}>12 Months (1 Crop Season)</option>
+                  <option value={24}>24 Months (2 Years)</option>
+                  <option value={36}>36 Months (3 Years Dairy)</option>
+                  <option value={60}>60 Months (5 Years Tractor)</option>
+                  <option value={84}>84 Months (7 Years Housing)</option>
                 </select>
               </div>
-            </div>
-
-            {/* Existing Debts & Utilization */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs text-slate-400 block mb-1">
-                  Existing EMIs (₹/yr)
-                  <span className="text-slate-400 block text-[10px]">{formatMonthlyINR(formData.existing_debts)}</span>
-                </label>
-                <input
-                  type="number"
-                  name="existing_debts"
-                  step="12000"
-                  value={formData.existing_debts}
-                  onChange={handleChange}
-                  className="cyber-input text-xs"
-                />
-              </div>
 
               <div>
-                <label className="text-xs text-slate-400 block mb-1">
-                  Card Utilization
-                  <span className="text-[#d2ff00] block text-[10px]">{(formData.credit_card_utilization * 100).toFixed(0)}%</span>
-                </label>
-                <input
-                  type="number"
-                  step="0.05"
-                  min="0.05"
-                  max="1.0"
-                  name="credit_card_utilization"
-                  value={formData.credit_card_utilization}
-                  onChange={handleChange}
-                  className="cyber-input text-xs"
-                />
-              </div>
-            </div>
-
-            {/* Delinquencies & History */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs text-slate-400 block mb-1">Delinquent Lines (2yr DPD)</label>
-                <input
-                  type="number"
-                  min="0"
-                  max="5"
-                  name="delinquent_lines_2yrs"
-                  value={formData.delinquent_lines_2yrs}
-                  onChange={handleChange}
-                  className="cyber-input text-xs"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs text-slate-400 block mb-1">Credit History (Yrs)</label>
-                <input
-                  type="number"
-                  step="0.5"
-                  name="credit_history_years"
-                  value={formData.credit_history_years}
-                  onChange={handleChange}
-                  className="cyber-input text-xs"
-                />
-              </div>
-            </div>
-
-            {/* Categoricals */}
-            <div className="grid grid-cols-3 gap-2">
-              <div>
-                <label className="text-[11px] text-slate-400 block mb-1">Employment</label>
+                <label className="text-xs text-slate-300 block mb-1">Repayment Schedule</label>
                 <select
-                  name="employment_status"
-                  value={formData.employment_status}
+                  name="repayment_cycle"
+                  value={formData.repayment_cycle || 'MONTHLY_EMI'}
                   onChange={handleChange}
-                  className="cyber-input text-xs p-1.5"
+                  className="cyber-input text-xs font-bold text-[#d2ff00]"
                 >
-                  <option value="Salaried">Salaried (Corporate/Govt)</option>
-                  <option value="Self-Employed">Self-Employed / MSME</option>
-                  <option value="Business">Business Owner</option>
-                  <option value="Unemployed">Unemployed</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="text-[11px] text-slate-400 block mb-1">Home Ownership</label>
-                <select
-                  name="home_ownership"
-                  value={formData.home_ownership}
-                  onChange={handleChange}
-                  className="cyber-input text-xs p-1.5"
-                >
-                  <option value="OWN">Owned</option>
-                  <option value="RENT">Rented</option>
-                  <option value="MORTGAGE">Mortgage</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="text-[11px] text-slate-400 block mb-1">Loan Purpose</label>
-                <select
-                  name="loan_purpose"
-                  value={formData.loan_purpose}
-                  onChange={handleChange}
-                  className="cyber-input text-xs p-1.5"
-                >
-                  <option value="Personal">Personal Loan</option>
-                  <option value="Home">Home Loan</option>
-                  <option value="Vehicle">Vehicle Loan</option>
-                  <option value="Education">Education Loan</option>
-                  <option value="Business">Business / MSME</option>
+                  <option value="MONTHLY_EMI">Monthly EMI (मासिक किश्त)</option>
+                  <option value="HARVEST_BIANNUAL_BULLET">Post-Harvest (फसल कटाई)</option>
                 </select>
               </div>
             </div>
+
+            {/* 4. Advanced Financial Overrides (Expandable Accordion) */}
+            <div className="border border-[#1e2a3d] rounded-xl overflow-hidden bg-[#0a0e17]">
+              <button
+                type="button"
+                onClick={() => setShowOverrides(!showOverrides)}
+                className="w-full p-2.5 flex items-center justify-between text-xs text-slate-400 hover:text-white font-mono-tech transition-colors cursor-pointer"
+              >
+                <span className="flex items-center gap-1.5">
+                  <Sliders className="w-3.5 h-3.5 text-[#d2ff00]" /> Advanced Financial Overrides (वैकल्पिक समायोजन)
+                </span>
+                {showOverrides ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </button>
+
+              {showOverrides && (
+                <div className="p-3 border-t border-[#1e2a3d] space-y-3">
+                  {/* CIBIL Slider */}
+                  <div>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="text-slate-400">CIBIL Score</span>
+                      <span className="text-[#d2ff00] font-bold">{formData.cibil_score}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="300"
+                      max="850"
+                      step="5"
+                      name="cibil_score"
+                      value={formData.cibil_score}
+                      onChange={handleChange}
+                      className="w-full h-1.5 bg-[#121824] rounded-lg cursor-pointer accent-[#d2ff00]"
+                    />
+                  </div>
+
+                  {/* Card Utilization & Delinquencies */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <span className="text-[10px] text-slate-400 block mb-1">Card Utilization</span>
+                      <input
+                        type="number"
+                        step="0.05"
+                        min="0"
+                        max="1"
+                        name="credit_card_utilization"
+                        value={formData.credit_card_utilization}
+                        onChange={handleChange}
+                        className="cyber-input text-xs"
+                      />
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-400 block mb-1">Delinquent Lines</span>
+                      <input
+                        type="number"
+                        min="0"
+                        max="5"
+                        name="delinquent_lines_2yrs"
+                        value={formData.delinquent_lines_2yrs}
+                        onChange={handleChange}
+                        className="cyber-input text-xs"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
 
             <motion.button
               whileHover={{ scale: 1.02, boxShadow: '0 0 25px rgba(210,255,0,0.3)' }}
@@ -1478,6 +1553,23 @@ export default function CustomerPortal() {
 
       </div>
 
+      {/* Borrower Profile Modal (Permanent Baseline Details) */}
+      <BorrowerProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+        profile={userProfile}
+        onSave={handleSaveProfile}
+      />
+
+      {/* Multi-Lingual Regional Voice Guide Modal */}
+      <VoiceGuideModal
+        isOpen={isVoiceGuideOpen}
+        onClose={() => setIsVoiceGuideOpen(false)}
+        applicationResult={result}
+        defaultLanguage={userProfile?.preferred_language || 'hi'}
+      />
+
     </motion.div>
   );
 }
+

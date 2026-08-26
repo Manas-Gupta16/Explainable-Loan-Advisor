@@ -4,8 +4,11 @@ from backend.app.core.config import settings
 from backend.app.db.database import engine, Base
 from backend.app.api import auth, customer, bank, xai
 
-# Create database tables on startup
+# Create database tables on startup & ensure schema migrations
 Base.metadata.create_all(bind=engine)
+from backend.app.db.migrate_schema import migrate
+migrate()
+
 
 app = FastAPI(
     title=settings.PROJECT_NAME,

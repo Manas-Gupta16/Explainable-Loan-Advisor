@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Text, Boolean
 from sqlalchemy.orm import relationship
 import datetime
 from backend.app.db.database import Base
@@ -12,6 +12,21 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
     role = Column(String, default="CUSTOMER")  # CUSTOMER or BANK_OFFICER
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+    # Baseline Financial & Rural Profile (eliminates repetitive form filling)
+    monthly_income = Column(Float, default=35000.0)
+    coapplicant_income = Column(Float, default=0.0)
+    cibil_score = Column(Integer, default=680)
+    existing_debts_monthly = Column(Float, default=5000.0)
+    credit_card_utilization = Column(Float, default=0.25)
+    credit_history_years = Column(Float, default=4.0)
+    delinquent_lines_2yrs = Column(Integer, default=0)
+    employment_type = Column(String, default="Farmer / Agriculture")
+    agri_land_acres = Column(Float, default=3.0)
+    kcc_holder = Column(Boolean, default=False)
+    home_ownership = Column(String, default="Owned - Ancestral / Pucca")
+    preferred_language = Column(String, default="hi")  # hi, mr, gu, ta, te, bn, en
+    phone_number = Column(String, nullable=True)
 
     applications = relationship("LoanApplication", back_populates="applicant")
 
@@ -35,6 +50,8 @@ class LoanApplication(Base):
     education = Column(String, default="Graduate")
     home_ownership = Column(String, default="RENT")
     loan_purpose = Column(String, default="Personal")
+    repayment_cycle = Column(String, default="MONTHLY_EMI")  # MONTHLY_EMI or HARVEST_BIANNUAL_BULLET
+
 
     # Prediction & Risk Results
     approval_probability = Column(Float, nullable=True)

@@ -18,6 +18,47 @@ class UserResponse(BaseModel):
     email: str
     full_name: str
     role: str
+    monthly_income: Optional[float] = 35000.0
+    agri_land_acres: Optional[float] = 3.0
+    kcc_holder: Optional[bool] = False
+    preferred_language: Optional[str] = "hi"
+
+    model_config = ConfigDict(from_attributes=True)
+
+class UserProfileUpdate(BaseModel):
+    full_name: Optional[str] = None
+    monthly_income: Optional[float] = Field(default=35000.0, ge=0)
+    coapplicant_income: Optional[float] = Field(default=0.0, ge=0)
+    cibil_score: Optional[int] = Field(default=680, ge=300, le=850)
+    existing_debts_monthly: Optional[float] = Field(default=5000.0, ge=0)
+    credit_card_utilization: Optional[float] = Field(default=0.25, ge=0.0, le=1.0)
+    credit_history_years: Optional[float] = Field(default=4.0, ge=0.0)
+    delinquent_lines_2yrs: Optional[int] = Field(default=0, ge=0)
+    employment_type: Optional[str] = "Farmer / Agriculture"
+    agri_land_acres: Optional[float] = Field(default=3.0, ge=0)
+    kcc_holder: Optional[bool] = False
+    home_ownership: Optional[str] = "Owned - Ancestral / Pucca"
+    preferred_language: Optional[str] = "hi"
+    phone_number: Optional[str] = None
+
+class UserProfileResponse(BaseModel):
+    id: int
+    email: str
+    full_name: str
+    role: str
+    monthly_income: float
+    coapplicant_income: float
+    cibil_score: int
+    existing_debts_monthly: float
+    credit_card_utilization: float
+    credit_history_years: float
+    delinquent_lines_2yrs: int
+    employment_type: str
+    agri_land_acres: float
+    kcc_holder: bool
+    home_ownership: str
+    preferred_language: str
+    phone_number: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -41,6 +82,8 @@ class LoanApplicationCreate(BaseModel):
     education: str = "Graduate"
     home_ownership: str = "RENT"
     loan_purpose: str = "Personal"
+    repayment_cycle: Optional[str] = "MONTHLY_EMI"  # MONTHLY_EMI or HARVEST_BIANNUAL_BULLET
+
 
 class BankRecommendation(BaseModel):
     bank_name: str

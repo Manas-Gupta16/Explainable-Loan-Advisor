@@ -110,13 +110,29 @@ class LLMFinancialCoachService:
 
         if language == "hi":
             verdict_text = f"नमस्ते {applicant_name}! आपके लोन आवेदन का विश्लेषण पूरा हो गया है। आपका CIBIL स्कोर {cibil} और FOIR अनुपात {foir_pct}% है। आपकी मुख्य वित्तीय शक्ति {top_positives[0]} है।"
-            audio_script = f"नमस्ते {applicant_name}! यह आपका एआई लोन सलाहकार है। आपकी लोन स्वीकृति संभावना {odds_str} है। कम ब्याज दरों के लिए अगले 90 दिनों में अपना क्रेडिट कार्ड उपयोग कम करें।"
+            audio_script = f"नमस्ते {applicant_name}! यह आपका एआई लोन सलाहकार है। आपकी लोन स्वीकृति संभावना {odds_str} है। SBI और Bank of Baroda की सर्वोत्तम ग्रामीण व किसान योजनाओं के लिए नीचे दिया गया मार्गदर्शन सुनें।"
+        elif language == "mr":
+            verdict_text = f"नमस्कार {applicant_name}! तुमच्या कर्जाच्या अर्जाचे विश्लेषण पूर्ण झाले आहे. तुमचा CIBIL स्कोअर {cibil} आणि FOIR प्रमाण {foir_pct}% आहे. तुमची मुख्य आर्थिक ताकद {top_positives[0]} आहे."
+            audio_script = f"नमस्कार {applicant_name}! हा तुमचा एआय कर्ज सल्लागार आहे. तुमची कर्ज मंजुरीची शक्यता {odds_str} आहे. SBI आणि बँक ऑफ बडोदाच्या सर्वोत्तम कृषी व ग्रामीण योजनांसाठी खालील मार्गदर्शक सूचनांचे पालन करा."
+        elif language == "gu":
+            verdict_text = f"નમસ્તે {applicant_name}! તમારી લોન અરજીનું મૂલ્યાંકન પૂર્ણ થયું છે. તમારો CIBIL સ્કોર {cibil} અને FOIR ગુણોત્તર {foir_pct}% છે. તમારી મુખ્ય આર્થિક શક્તિ {top_positives[0]} છે."
+            audio_script = f"નમસ્તે {applicant_name}! આ તમારું AI લોન સલાહકાર છે. તમારી લોન મંજૂરીની સંભાવના {odds_str} છે. ઓછા વ્યાજ દરે કિસાન ક્રેડિટ મેળવવા માટે આપેલ માર્ગદર્શિકા અનુસરો."
+        elif language == "bn":
+            verdict_text = f"নমস্কার {applicant_name}! আপনার ঋণ আবেদনের বিশ্লেষণ সম্পন্ন হয়েছে। আপনার CIBIL স্কোর {cibil} এবং FOIR অনুপাত {foir_pct}%। আপনার প্রধান আর্থিক শক্তি {top_positives[0]}।"
+            audio_script = f"নমস্কার {applicant_name}! এটি আপনার এআই ঋণ উপদেষ্টা। আপনার ঋণ অনুমোদনের সম্ভাবনা {odds_str}। কম সুদের হারে কৃষি ও গ্রামীণ ঋণের জন্য প্রদত্ত পদক্ষেপগুলি অনুসরণ করুন।"
+        elif language == "ta":
+            verdict_text = f"வணக்கம் {applicant_name}! உங்கள் கடன் விண்ணப்பம் வெற்றிகரமாக மதிப்பீடு செய்யப்பட்டுள்ளது. உங்கள் CIBIL மதிப்பெண் {cibil} மற்றும் FOIR விகிதம் {foir_pct}% ஆகும்."
+            audio_script = f"வணக்கம் {applicant_name}! இது உங்கள் AI கடன் ஆலோசகர். உங்கள் கடன் ஒப்புதல் வாய்ப்பு {odds_str} ஆகும். குறைந்த வட்டியில் வேளாண் கடன் பெற கீழே உள்ள வழிமுறைகளைப் பின்பற்றவும்."
+        elif language == "te":
+            verdict_text = f"నమస్కారం {applicant_name}! మీ లోన్ దరఖాస్తు విజయవంతంగా పరిశీలించబడింది. మీ CIBIL స్కోర్ {cibil} మరియు FOIR నిష్పత్తి {foir_pct}%."
+            audio_script = f"నమస్కారం {applicant_name}! ఇది మీ AI లోన్ సలహాదారు. మీ రుణ ఆమోదం సంభావ్యత {odds_str}. తక్కువ వడ్డీతో కిసాన్ క్రెడిట్ పొందేందుకు కింది మార్గదర్శకాలను పాటించండి."
         elif language == "hinglish":
             verdict_text = f"Namaste {applicant_name}! Aapka loan profile analyze ho gaya hai. Aapka current CIBIL score {cibil} hai aur approval probability {odds_str} hai. SBI aur HDFC ke lowest interest rates pane ke liye apna FOIR kam karein."
             audio_script = f"Namaste {applicant_name}! Main aapka AI Loan Advisor hoon. Aapki approval odds {odds_str} hain. Best bank rates unlock karne ke liye niche diya gaya roadmap follow karein."
         elif language == "es":
             verdict_text = f"Hola {applicant_name}! Sus fundamentos financieros han sido analizados (CIBIL: {cibil}, FOIR: {foir_pct}%)."
             audio_script = f"Hola {applicant_name}! Este es su asesor de préstamos con IA explicable."
+
 
         return {
             "applicant_name": applicant_name,

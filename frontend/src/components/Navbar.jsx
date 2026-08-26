@@ -64,13 +64,20 @@ export default function Navbar({ activeTab, setActiveTab }) {
           </button>
         </nav>
 
-        {/* System Active Badge */}
-        <div className="flex items-center gap-3">
+        {/* Right Controls: Bharat FinTech Badge */}
+        <div className="flex items-center gap-2.5">
+          <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#121824] border border-[#1e2a3d] text-xs font-mono-tech">
+            <span className="text-[#d2ff00] font-bold">🌾 BHARAT INCLUSION</span>
+            <span className="text-slate-500">|</span>
+            <span className="text-slate-300">7 REGIONAL LANGUAGES</span>
+          </div>
+
           <div className="tech-badge-lime flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-[#d2ff00] animate-ping" />
             <span>SYSTEM ACTIVE</span>
           </div>
         </div>
+
 
       </div>
     </header>

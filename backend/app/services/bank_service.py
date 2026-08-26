@@ -3,6 +3,17 @@ from backend.app.schemas.loan import BankRecommendation
 
 INDIAN_BANKS_CONFIG = [
     {
+        "bank_name": "SBI Kisan Credit Card (KCC) & Agri",
+        "product_name": "SBI Crop & Farm Investment Scheme",
+        "min_cibil": 600,
+        "max_foir": 0.65,
+        "min_monthly_income": 12000,
+        "base_interest_rate": 7.00,
+        "bank_type": "AGRI_PSU",
+        "is_rural": True,
+        "description": "Government-subsidized agricultural credit. 7% base rate with 3% prompt repayment subvention (effective 4.0% p.a. for disciplined farmers)."
+    },
+    {
         "bank_name": "State Bank of India (SBI)",
         "product_name": "SBI Regular / Xpress Credit Loan",
         "min_cibil": 750,
@@ -10,17 +21,52 @@ INDIAN_BANKS_CONFIG = [
         "min_monthly_income": 25000,
         "base_interest_rate": 8.50,
         "bank_type": "PSU_BANK",
+        "is_rural": False,
         "description": "India's largest PSU bank offering premier sovereign rates and lowest processing fees for prime credit tier borrowers."
     },
     {
+        "bank_name": "Bank of Baroda Kisan Tatkal / Tractor",
+        "product_name": "BoB Rural Agri & Equipment Loan",
+        "min_cibil": 640,
+        "max_foir": 0.60,
+        "min_monthly_income": 15000,
+        "base_interest_rate": 8.15,
+        "bank_type": "AGRI_PSU",
+        "is_rural": True,
+        "description": "Specialized rural equipment & seasonal crop financing with post-harvest bullet repayment options."
+    },
+    {
+        "bank_name": "Regional Rural Banks (RRB / NABARD)",
+        "product_name": "Gramin Vikas Farm & Allied Loan",
+        "min_cibil": 620,
+        "max_foir": 0.65,
+        "min_monthly_income": 10000,
+        "base_interest_rate": 7.50,
+        "bank_type": "RRB",
+        "is_rural": True,
+        "description": "NABARD-partnered regional rural banking scheme (e.g. Maharashtra Gramin Bank) tailored for local farmers and rural artisans."
+    },
+    {
+        "bank_name": "Bandhan Bank Rural Micro-Enterprise",
+        "product_name": "Suraksha Rural MSME & JLG Credit",
+        "min_cibil": 580,
+        "max_foir": 0.70,
+        "min_monthly_income": 10000,
+        "base_interest_rate": 12.50,
+        "bank_type": "MICROFINANCE",
+        "is_rural": True,
+        "description": "Accessible financial inclusion credit for village Kirana stores, dairy co-ops, and self-help group (SHG) micro-entrepreneurs."
+    },
+    {
         "bank_name": "HDFC Bank",
-        "product_name": "HDFC Express Personal / Home Loan",
+        "product_name": "HDFC Express Personal / Rural Loan",
         "min_cibil": 720,
         "max_foir": 0.55,
         "min_monthly_income": 30000,
         "base_interest_rate": 10.50,
         "bank_type": "PRIVATE_BANK",
-        "description": "Top private sector lender offering instant paperless disbursement for salaried corporate employees."
+        "is_rural": False,
+        "description": "Top private sector lender offering instant paperless disbursement for salaried corporate and large business owners."
     },
     {
         "bank_name": "ICICI Bank",
@@ -30,6 +76,7 @@ INDIAN_BANKS_CONFIG = [
         "min_monthly_income": 25000,
         "base_interest_rate": 10.75,
         "bank_type": "PRIVATE_BANK",
+        "is_rural": False,
         "description": "Straight-through digital processing with pre-approved limits and flexible debt tolerance."
     },
     {
@@ -40,49 +87,33 @@ INDIAN_BANKS_CONFIG = [
         "min_monthly_income": 22000,
         "base_interest_rate": 10.99,
         "bank_type": "PRIVATE_BANK",
+        "is_rural": False,
         "description": "Accessible multi-purpose credit with transparent digital KYC and quick sanction."
     },
     {
-        "bank_name": "Bank of Baroda (BoB)",
-        "product_name": "Baroda Advantage Retail Loan",
-        "min_cibil": 700,
-        "max_foir": 0.55,
-        "min_monthly_income": 20000,
-        "base_interest_rate": 10.80,
-        "bank_type": "PSU_BANK",
-        "description": "Sovereign-backed public sector lender with zero pre-payment penalty for floating rate borrowers."
-    },
-    {
-        "bank_name": "Kotak Mahindra Bank",
-        "product_name": "Kotak Smart Quick Credit",
-        "min_cibil": 700,
-        "max_foir": 0.55,
-        "min_monthly_income": 25000,
-        "base_interest_rate": 10.99,
-        "bank_type": "PRIVATE_BANK",
-        "description": "Fast-track retail lending with automated Account Aggregator statement verification."
-    },
-    {
-        "bank_name": "Bajaj Finserv NBFC",
-        "product_name": "Bajaj Flexi Term Credit",
+        "bank_name": "Bajaj Finserv Rural Kirana & MSME",
+        "product_name": "Bajaj Rural Flexi Term Credit",
         "min_cibil": 620,
         "max_foir": 0.65,
-        "min_monthly_income": 18000,
-        "base_interest_rate": 12.50,
+        "min_monthly_income": 15000,
+        "base_interest_rate": 13.50,
         "bank_type": "RETAIL_NBFC",
-        "description": "Leading retail NBFC with flexible underwriting for self-employed and mid-range CIBIL applicants."
+        "is_rural": True,
+        "description": "Flexible working capital and inventory credit for rural traders, fertilizer distributors, and Kirana merchants."
     },
     {
         "bank_name": "Navi / Fibe Fintech NBFC",
         "product_name": "Navi Instant Digital Credit",
         "min_cibil": 550,
         "max_foir": 0.75,
-        "min_monthly_income": 15000,
+        "min_monthly_income": 12000,
         "base_interest_rate": 15.50,
         "bank_type": "DIGITAL_NBFC",
-        "description": "Financial inclusion digital lender for gig workers, thin-file borrowers, and urgent liquidity requirements."
+        "is_rural": False,
+        "description": "Financial inclusion digital lender for gig workers, thin-file borrowers, and emergency liquidity requirements."
     }
 ]
+
 
 # Aliased for backward compatibility
 BANKS_CONFIG = INDIAN_BANKS_CONFIG

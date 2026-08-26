@@ -161,9 +161,11 @@ export default function VoiceGuideModal({ isOpen, onClose, applicationResult, de
       };
 
       audio.onerror = (e) => {
-        console.error("Audio playback error:", e);
+        if (!audioRef.current || !audio.src || audio.src === window.location.href) return;
+        console.warn("Audio playback stopped or reset");
         stopAudio();
       };
+
 
       await audio.play();
     } catch (err) {

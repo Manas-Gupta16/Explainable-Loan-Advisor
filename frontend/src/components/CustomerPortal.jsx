@@ -174,7 +174,7 @@ export default function CustomerPortal() {
     evaluateApplication(preset.data);
   };
 
-  const evaluateApplication = async (dataToSubmit = formData) => {
+  const evaluateApplication = async (dataToSubmit = formData, isRetry = false) => {
     setLoading(true);
     setError(null);
 
@@ -185,12 +185,21 @@ export default function CustomerPortal() {
       fetchCoachAdvice(response.data, dataToSubmit);
       fetchConformal(response.data, dataToSubmit);
     } catch (err) {
-      console.error(err);
-      setError('Failed to analyze loan application. Make sure backend server is running on port 8000.');
+      console.error("Evaluation error:", err);
+      // If initial auto-evaluation on mount fails because the backend was just booting up, auto-retry once after 1.5s
+      if (!isRetry) {
+        setTimeout(() => {
+          evaluateApplication(dataToSubmit, true);
+        }, 1500);
+      } else {
+        const detail = err.response?.data?.detail || err.message || 'Network connection failed';
+        setError(`Evaluation failed: ${detail}. Ensure backend is running at http://127.0.0.1:8000.`);
+      }
     } finally {
       setLoading(false);
     }
   };
+
 
   const handleSubmit = (e) => {
     if (e) e.preventDefault();
@@ -687,10 +696,18 @@ export default function CustomerPortal() {
             </motion.button>
 
             {error && (
-              <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs">
-                {error}
+              <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center justify-between gap-2">
+                <span>{error}</span>
+                <button
+                  type="button"
+                  onClick={() => evaluateApplication(formData, true)}
+                  className="px-2.5 py-1 rounded bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 font-mono-tech text-[10px] font-bold cursor-pointer shrink-0"
+                >
+                  RETRY
+                </button>
               </div>
             )}
+
 
           </form>
         </motion.div>

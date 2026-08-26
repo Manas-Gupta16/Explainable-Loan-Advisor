@@ -1,59 +1,59 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Volume2, Play, Pause, RefreshCw, X, Globe, Sparkles, 
-  CheckCircle, Radio, Award, AlertCircle
+  Volume2, Play, Pause, X, Radio, AlertCircle
 } from 'lucide-react';
 
 const REGIONAL_SCRIPTS = {
   hi: {
     name: "हिंदी (Hindi)",
-    locale: "hi-IN",
+    locale: "hi",
     welcome: "नमस्ते! यह आपका AI ग्रामीण व किसान ऋण मार्गदर्शक है।",
-    script: (app) => `नमस्ते! आपका ऋण आवेदन मूल्यांकित हो चुका है। आपकी पात्रता संभावना लगभग ${(app?.approval_probability ? app.approval_probability * 100 : 92).toFixed(0)} प्रतिशत है। भारतीय स्टेट बैंक और बैंक ऑफ बड़ौदा की किसान योजनाओं से आपको 7 प्रतिशत की रियायती ब्याज दर पर सहायता मिल सकती है। समय पर भुगतान करने पर आपको सरकार की 3 प्रतिशत ब्याज सबवेंशन छूट का भी लाभ मिलेगा।`
+    script: (app) => `नमस्ते! आपके ऋण आवेदन का विश्लेषण पूरा हो चुका है। आपकी पात्रता संभावना लगभग ${(app?.approval_probability ? app.approval_probability * 100 : 92).toFixed(0)} प्रतिशत है। भारतीय स्टेट बैंक और बैंक ऑफ बड़ौदा की किसान क्रेडिट योजनाओं से आपको 7 प्रतिशत की रियायती ब्याज दर पर कृषि ऋण मिल सकता है। समय पर भुगतान करने पर आपको सरकार की 3 प्रतिशत ब्याज छूट का भी लाभ मिलेगा।`
   },
   mr: {
     name: "मराठी (Marathi)",
-    locale: "mr-IN",
+    locale: "mr",
     welcome: "नमस्कार! हा तुमचा AI कृषी व ग्रामीण कर्ज सल्लागार आहे.",
-    script: (app) => `नमस्कार! तुमच्या कर्ज अर्जाचे विश्लेषण पूर्ण झाले आहे. तुमची कर्ज मंजुरीची शक्यता अंदाजे ${(app?.approval_probability ? app.approval_probability * 100 : 92).toFixed(0)} टक्के आहे. स्टेट बँक ऑफ इंडिया आणि बँक ऑफ बडोदाच्या कृषी कर्ज योजनांमधून तुम्हाला 7 टक्के दराने कर्ज उपलब्ध होऊ शकते. वेळेवर परतफेड केल्यास 3 टक्के शासकीय अनुदान सवलत मिळेल.`
+    script: (app) => `नमस्कार! तुमच्या कर्ज अर्जाचे विश्लेषण पूर्ण झाले आहे. तुमची कर्ज मंजुरीची शक्यता अंदाजे ${(app?.approval_probability ? app.approval_probability * 100 : 92).toFixed(0)} टक्के आहे. स्टेट बँक ऑफ इंडिया आणि बँक ऑफ बडोदाच्या कृषी कर्ज योजनांमधून तुम्हाला 7 टक्के सवलतीच्या दराने कर्ज मिळू शकते. वेळेवर परतफेड केल्यास 3 टक्के शासकीय अनुदान सवलत मिळेल.`
   },
   gu: {
     name: "ગુજરાતી (Gujarati)",
-    locale: "gu-IN",
+    locale: "gu",
     welcome: "નમસ્તે! આ તમારું AI કિસાન લોન માર્ગદર્શક છે.",
     script: (app) => `નમસ્તે! તમારી લોન અરજી તપાસવામાં આવી છે. તમારી લોન મંજૂરીની સંભાવના ${(app?.approval_probability ? app.approval_probability * 100 : 92).toFixed(0)} ટકા છે. કિસાન ક્રેડિટ કાર્ડ યોજના દ્વારા તમને 4 ટકા અસરકારક વ્યાજ દરે કૃષિ ધિરાણ મળી શકે છે.`
   },
   bn: {
     name: "বাংলা (Bengali)",
-    locale: "bn-IN",
+    locale: "bn",
     welcome: "নমস্কার! এটি আপনার এআই গ্রামীণ ও কৃষি ঋণ উপদেষ্টা।",
-    script: (app) => `নমস্কার! আপনার ঋণ আবেদন সফলভাবে বিশ্লেষণ করা হয়েছে। আপনার ঋণ পাওয়ার সম্ভাবনা ${(app?.approval_probability ? app.approval_probability * 100 : 92).toFixed(0)} শতাংশ। কিষাণ ক্রেডিট কার্ড ও গ্রামীণ ব্যাংকের মাধ্যমে আপনি সহজ শর্তে ঋণ পেতে পারেন।`
+    script: (app) => `নমস্কার! আপনার ঋণ আবেদন সফলভাবে বিশ্লেষণ করা হয়েছে। আপনার ঋণ পাওয়ার সম্ভাবনা ${(app?.approval_probability ? app.approval_probability * 100 : 92).toFixed(0)} শতাংশ। কিষাণ ক্রেডিট কার্ড ও গ্রামীण ব্যাংকের মাধ্যমে আপনি সহজ শর্তে ঋণ পেতে পারেন।`
   },
   ta: {
     name: "தமிழ் (Tamil)",
-    locale: "ta-IN",
+    locale: "ta",
     welcome: "வணக்கம்! இது உங்கள் AI கிராமப்புற மற்றும் வேளாண் கடன் வழிகாட்டி.",
     script: (app) => `வணக்கம்! உங்கள் கடன் விண்ணப்பம் வெற்றிகரமாக பரிசீலிக்கப்பட்டது. உங்கள் கடன் ஒப்புதல் வாய்ப்பு ${(app?.approval_probability ? app.approval_probability * 100 : 92).toFixed(0)} சதவீதம். எஸ்பிஐ கிசான் திட்டத்தின் மூலம் குறைந்த வட்டியில் கடன் பெறலாம்.`
   },
   te: {
     name: "తెలుగు (Telugu)",
-    locale: "te-IN",
+    locale: "te",
     welcome: "నమస్కారం! ఇది మీ AI గ్రామీణ మరియు కిసాన్ రుణ సలహాదారు.",
     script: (app) => `నమస్కారం! మీ రుణ దరఖాస్తు పరిశీలించబడింది. మీ రుణ ఆమోద సంభావ్యత ${(app?.approval_probability ? app.approval_probability * 100 : 92).toFixed(0)} శాతం. కిసాన్ క్రెడిట్ కార్డు పథకం ద్వారా రాయితీ వడ్డీతో రుణం పొందవచ్చు.`
   },
   en: {
     name: "English",
-    locale: "en-IN",
+    locale: "en",
     welcome: "Hello! This is your Rural & Agricultural AI Financial Advisor.",
     script: (app) => `Hello! Your loan application has been analyzed. Your approval odds are approximately ${(app?.approval_probability ? app.approval_probability * 100 : 92).toFixed(0)} percent. You are strongly eligible for SBI Kisan Credit Card and Regional Rural Bank schemes at a subsidized 7.0 percent rate with a 3 percent prompt repayment rebate.`
   }
 };
 
-export default function VoiceGuideModal({ isOpen, onClose, applicationResult, defaultLanguage = "hi" }) {
+export default function VoiceGuideModal({ isOpen, onClose, applicationResult, defaultLanguage = "hi", onLanguageSelect }) {
   const [lang, setLang] = useState(defaultLanguage);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [rate, setRate] = useState(0.95);
+  const [isLoadingAudio, setIsLoadingAudio] = useState(false);
+  const audioRef = useRef(null);
 
   const currentLangConfig = REGIONAL_SCRIPTS[lang] || REGIONAL_SCRIPTS.hi;
   const currentText = currentLangConfig.script(applicationResult);
@@ -62,49 +62,74 @@ export default function VoiceGuideModal({ isOpen, onClose, applicationResult, de
     setLang(defaultLanguage);
   }, [defaultLanguage]);
 
-  // Clean up speech on close or unmount
+  const stopAudio = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    setIsPlaying(false);
+    setIsLoadingAudio(false);
+  };
+
   useEffect(() => {
     return () => {
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-      }
+      stopAudio();
     };
   }, []);
 
   const handleTogglePlay = () => {
-    if (!('speechSynthesis' in window)) {
-      alert("Speech synthesis not supported in this browser. Please use Google Chrome or Microsoft Edge.");
+    if (isPlaying) {
+      stopAudio();
       return;
     }
 
-    if (isPlaying) {
-      window.speechSynthesis.cancel();
-      setIsPlaying(false);
-    } else {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(currentText);
-      utterance.rate = rate;
-      utterance.lang = currentLangConfig.locale;
+    setIsLoadingAudio(true);
+    stopAudio();
 
-      // Select matching voice if available
-      const voices = window.speechSynthesis.getVoices();
-      const matchedVoice = voices.find(v => v.lang.startsWith(currentLangConfig.locale.slice(0, 2)));
-      if (matchedVoice) utterance.voice = matchedVoice;
+    // Use backend gTTS streaming audio endpoint for 100% natural, fluent regional pronunciation
+    const audioUrl = `/api/v1/customer/voice-audio?text=${encodeURIComponent(currentText)}&lang=${currentLangConfig.locale}`;
+    const audio = new Audio(audioUrl);
+    audioRef.current = audio;
 
-      utterance.onend = () => setIsPlaying(false);
-      utterance.onerror = () => setIsPlaying(false);
-
+    audio.oncanplaythrough = () => {
+      setIsLoadingAudio(false);
       setIsPlaying(true);
-      window.speechSynthesis.speak(utterance);
-    }
+      audio.play().catch(err => {
+        console.warn("Audio autoplay blocked, falling back to Web Speech:", err);
+        fallbackWebSpeech();
+      });
+    };
+
+    audio.onended = () => {
+      setIsPlaying(false);
+      setIsLoadingAudio(false);
+    };
+
+    audio.onerror = () => {
+      console.warn("Backend audio stream error, falling back to Web Speech");
+      setIsLoadingAudio(false);
+      fallbackWebSpeech();
+    };
+  };
+
+  const fallbackWebSpeech = () => {
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(currentText);
+    utterance.lang = currentLangConfig.locale === 'hi' ? 'hi-IN' : currentLangConfig.locale === 'mr' ? 'mr-IN' : 'en-IN';
+    utterance.onend = () => setIsPlaying(false);
+    utterance.onerror = () => setIsPlaying(false);
+    setIsPlaying(true);
+    window.speechSynthesis.speak(utterance);
   };
 
   const handleLanguageChange = (newLang) => {
-    if (isPlaying && 'speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      setIsPlaying(false);
-    }
+    stopAudio();
     setLang(newLang);
+    if (onLanguageSelect) onLanguageSelect(newLang);
   };
 
   if (!isOpen) return null;
@@ -127,18 +152,17 @@ export default function VoiceGuideModal({ isOpen, onClose, applicationResult, de
               </div>
               <div>
                 <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                  Multi-Lingual Voice Guide (आवाज़ में समझें)
+                  {lang === 'hi' ? 'आवाज़ में समझें (AI वाणी मार्गदर्शक)' : lang === 'mr' ? 'आवाजात समजून घ्या (AI आवाज सल्लागार)' : 'Multi-Lingual Voice Guide'}
                 </h3>
                 <p className="text-xs text-slate-400 font-mono-tech">
-                  Listen to personalized loan explanations in regional Indian languages
+                  {lang === 'hi' ? 'अपनी मातृभाषा में संपूर्ण ऋण विवरण स्पष्ट आवाज़ में सुनें' : lang === 'mr' ? 'तुमच्या भाषेत कर्जाचा संपूर्ण तपशील स्पष्ट आवाजात ऐका' : 'Listen to full loan explanation in your mother tongue'}
                 </p>
               </div>
             </div>
 
             <button 
               onClick={() => {
-                if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-                setIsPlaying(false);
+                stopAudio();
                 onClose();
               }}
               className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-[#1a2336] transition-colors cursor-pointer"
@@ -150,7 +174,7 @@ export default function VoiceGuideModal({ isOpen, onClose, applicationResult, de
           {/* Regional Language Selector Buttons */}
           <div className="space-y-1.5">
             <span className="text-[11px] font-mono-tech text-slate-400 block uppercase">
-              SELECT LANGUAGE (भाषा चुनें):
+              {lang === 'hi' ? 'भाषा चुनें (Select Language):' : lang === 'mr' ? 'भाषा निवडा (Select Language):' : 'Select Language:'}
             </span>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {Object.entries(REGIONAL_SCRIPTS).map(([key, item]) => (
@@ -175,7 +199,7 @@ export default function VoiceGuideModal({ isOpen, onClose, applicationResult, de
               <span className="text-[#d2ff00] font-bold flex items-center gap-1.5">
                 <Radio className="w-3 h-3 animate-pulse text-[#d2ff00]" /> {currentLangConfig.welcome}
               </span>
-              <span className="text-slate-500">VOICE ENGINE ACTIVE</span>
+              <span className="text-slate-500">VOICE ACTIVE</span>
             </div>
 
             <p className="text-sm text-slate-200 leading-relaxed font-sans font-light">
@@ -190,44 +214,43 @@ export default function VoiceGuideModal({ isOpen, onClose, applicationResult, de
                 <span className="w-1 h-4 bg-[#d2ff00] animate-pulse delay-200 rounded-full" />
                 <span className="w-1 h-7 bg-[#d2ff00] animate-pulse delay-300 rounded-full" />
                 <span className="w-1 h-3 bg-[#d2ff00] animate-pulse delay-150 rounded-full" />
-                <span className="text-[11px] font-mono-tech text-[#d2ff00] ml-2">Speaking aloud...</span>
+                <span className="text-[11px] font-mono-tech text-[#d2ff00] ml-2">
+                  {lang === 'hi' ? 'आवाज़ बज रही है...' : lang === 'mr' ? 'आवाज सुरू आहे...' : 'Speaking aloud...'}
+                </span>
               </div>
             )}
           </div>
 
           {/* Playback Controls */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-[#162030] p-3 rounded-xl border border-[#1e2a3d]">
-            
-            {/* Speed Control */}
-            <div className="flex items-center gap-2 text-xs font-mono-tech text-slate-400">
-              <span>Speed:</span>
-              <button 
-                onClick={() => setRate(0.85)} 
-                className={`px-2 py-0.5 rounded text-[10px] ${rate === 0.85 ? 'bg-[#d2ff00] text-black font-bold' : 'bg-[#0a0e17] text-slate-400'}`}
-              >
-                0.85x (Slow)
-              </button>
-              <button 
-                onClick={() => setRate(1.0)} 
-                className={`px-2 py-0.5 rounded text-[10px] ${rate === 1.0 ? 'bg-[#d2ff00] text-black font-bold' : 'bg-[#0a0e17] text-slate-400'}`}
-              >
-                1.0x (Normal)
-              </button>
-            </div>
+          <div className="flex items-center justify-between gap-3 bg-[#162030] p-3 rounded-xl border border-[#1e2a3d]">
+            <span className="text-xs font-mono-tech text-slate-400">
+              {lang === 'hi' ? 'प्राकृतिक स्पष्ट हिंदी आवाज़' : lang === 'mr' ? 'नैसर्गिक स्पष्ट मराठी आवाज' : 'Natural Regional Audio'}
+            </span>
 
-            {/* Big Play Button */}
+            {/* Big Play / Pause Button */}
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleTogglePlay}
+              disabled={isLoadingAudio}
               className={`btn-lime px-6 py-2.5 text-xs font-black shadow-[0_0_20px_rgba(210,255,0,0.3)] flex items-center gap-2 cursor-pointer ${
                 isPlaying ? 'bg-amber-400 text-black' : ''
               }`}
             >
-              {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 fill-current" />}
-              <span>{isPlaying ? 'PAUSE VOICE' : 'PLAY AUDIO GUIDE'}</span>
+              {isLoadingAudio ? (
+                <span>लोड हो रहा है...</span>
+              ) : isPlaying ? (
+                <>
+                  <Pause className="w-4 h-4" />
+                  <span>{lang === 'hi' ? 'आवाज़ रोकें' : lang === 'mr' ? 'आवाज थांबवा' : 'PAUSE VOICE'}</span>
+                </>
+              ) : (
+                <>
+                  <Play className="w-4 h-4 fill-current" />
+                  <span>{lang === 'hi' ? 'पूरी आवाज़ सुनें' : lang === 'mr' ? 'पूर्ण आवाज ऐका' : 'PLAY AUDIO GUIDE'}</span>
+                </>
+              )}
             </motion.button>
-
           </div>
 
         </motion.div>

@@ -616,6 +616,34 @@ def get_sample_account_aggregator_stream(
         monthly_salary=monthly_salary
     )
 
+@router.get("/voice-audio")
+def stream_voice_audio(text: str, lang: str = "hi"):
+    """
+    Generates and streams fluent, native MP3 speech audio using gTTS 
+    in Indian regional languages (Hindi, Marathi, Gujarati, Bengali, Tamil, Telugu, English).
+    """
+    from fastapi.responses import StreamingResponse
+    import io
+    from gtts import gTTS
+
+    supported_langs = {
+        "hi": "hi",
+        "mr": "mr",
+        "gu": "gu",
+        "bn": "bn",
+        "ta": "ta",
+        "te": "te",
+        "en": "en"
+    }
+    target_lang = supported_langs.get(lang, "hi")
+
+    fp = io.BytesIO()
+    tts = gTTS(text=text, lang=target_lang, slow=False)
+    tts.write_to_fp(fp)
+    fp.seek(0)
+    return StreamingResponse(fp, media_type="audio/mpeg")
+
+
 
 
 

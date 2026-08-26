@@ -6,10 +6,12 @@ import {
   RefreshCw, Layers, MapPin, PieChart, Sparkles,
   FileText, Download, Play, Pause, Volume2, Landmark,
   TrendingDown, Gauge, FileCheck, BrainCircuit, GitCommit, UserCheck, CheckCircle2,
-  Wheat, Edit3, ChevronDown, ChevronUp, Radio, HelpCircle, ArrowRight, Sliders
+  Wheat, Edit3, ChevronDown, ChevronUp, Radio, HelpCircle, ArrowRight, Sliders, Globe
 } from 'lucide-react';
 import BorrowerProfileModal from './BorrowerProfileModal';
 import VoiceGuideModal from './VoiceGuideModal';
+import { TRANSLATIONS } from '../utils/i18n';
+
 
 const formatINR = (val) => {
   if (val === undefined || val === null || isNaN(val)) return '₹0';
@@ -121,6 +123,10 @@ export default function CustomerPortal() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
 
+  // Single-Language Pure Mode state (hi, mr, en, gu)
+  const [uiLang, setUiLang] = useState('hi');
+  const t = TRANSLATIONS[uiLang] || TRANSLATIONS.hi;
+
   // Profile Persistence & Voice Guide Modals
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isVoiceGuideOpen, setIsVoiceGuideOpen] = useState(false);
@@ -141,6 +147,7 @@ export default function CustomerPortal() {
 
   // AI Coach state
   const [coachLanguage, setCoachLanguage] = useState('Hindi');
+
 
   const [coachData, setCoachData] = useState(null);
   const [coachLoading, setCoachLoading] = useState(false);
@@ -455,26 +462,56 @@ export default function CustomerPortal() {
         <div>
           <div className="inline-flex items-center gap-2 text-xs font-mono-tech text-[#d2ff00] mb-2">
             <span className="w-2 h-2 rounded-full bg-[#d2ff00] animate-ping" />
-            <span>● RURAL & BHARAT FINANCIAL INCLUSION XAI PLATFORM</span>
+            <span>● {t.badge}</span>
           </div>
           <h1 className="text-4xl font-black text-white tracking-tight">
-            Rural Underwriting & <span className="text-[#d2ff00]">Kisan Credit Recourse</span>
+            {t.title_main} <span className="text-[#d2ff00]">{t.title_highlight}</span>
           </h1>
           <p className="text-slate-400 text-sm mt-1 max-w-2xl font-light">
-            Designed for Indian farmers, village Kirana owners, and rural entrepreneurs. Features verified profile persistence, regional language voice guides (Hindi, Marathi, Gujarati, etc.), and RBI-subsidized KCC crop schemes.
+            {t.subtitle}
           </p>
         </div>
 
-        {/* Action Controls: Voice Guide & PDF */}
-        <div className="flex items-center gap-2.5">
+        {/* Action Controls: Language Switcher, Voice Guide & PDF */}
+        <div className="flex flex-wrap items-center gap-2.5">
+          {/* Language Switcher (Single-Language Pure Mode) */}
+          <div className="flex items-center gap-1 bg-[#121824] border border-[#1e2a3d] p-1 rounded-xl">
+            <span className="text-[10px] text-slate-400 font-mono-tech pl-1.5 flex items-center gap-1">
+              <Globe className="w-3 h-3 text-[#d2ff00]" />
+            </span>
+            {[
+              { code: 'hi', label: 'हिंदी' },
+              { code: 'mr', label: 'मराठी' },
+              { code: 'gu', label: 'ગુજરાતી' },
+              { code: 'en', label: 'English' }
+            ].map(({ code, label }) => (
+              <button
+                key={code}
+                type="button"
+                onClick={() => {
+                  setUiLang(code);
+                  setUserProfile(prev => ({ ...prev, preferred_language: code }));
+                  setCoachLanguage(code === 'hi' ? 'Hindi' : code === 'mr' ? 'Marathi' : code === 'gu' ? 'Gujarati' : 'English');
+                }}
+                className={`px-2.5 py-1 rounded-lg text-xs font-mono-tech font-bold transition-all cursor-pointer ${
+                  uiLang === code
+                    ? 'bg-[#d2ff00] text-black shadow-[0_0_10px_rgba(210,255,0,0.3)]'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
           <motion.button
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
             onClick={() => setIsVoiceGuideOpen(true)}
-            className="bg-[#121824] hover:bg-[#1a2336] text-[#d2ff00] border border-[#d2ff00]/40 text-xs font-bold py-2.5 px-3.5 rounded-xl shadow-[0_0_15px_rgba(210,255,0,0.15)] cursor-pointer flex items-center gap-2"
+            className="bg-[#121824] hover:bg-[#1a2336] text-[#d2ff00] border border-[#d2ff00]/40 text-xs font-bold py-2 px-3 rounded-xl shadow-[0_0_15px_rgba(210,255,0,0.15)] cursor-pointer flex items-center gap-2"
           >
             <Volume2 className="w-4 h-4 text-[#d2ff00] animate-pulse" />
-            <span>🔊 आवाज़ में समझें (VOICE GUIDE)</span>
+            <span>{t.voice_guide_btn}</span>
           </motion.button>
 
           {result && (
@@ -483,14 +520,14 @@ export default function CustomerPortal() {
               whileTap={{ scale: 0.97 }}
               onClick={handleDownloadPdf}
               disabled={pdfDownloading}
-              className="btn-lime text-xs font-bold py-2.5 px-4 shadow-[0_0_15px_rgba(210,255,0,0.25)] cursor-pointer flex items-center gap-2"
+              className="btn-lime text-xs font-bold py-2 px-3.5 shadow-[0_0_15px_rgba(210,255,0,0.25)] cursor-pointer flex items-center gap-2"
             >
               {pdfDownloading ? (
                 <RefreshCw className="w-3.5 h-3.5 animate-spin" />
               ) : (
                 <Download className="w-3.5 h-3.5" />
               )}
-              <span>EXPORT RBI PDF</span>
+              <span>{t.export_pdf}</span>
             </motion.button>
           )}
         </div>
@@ -498,11 +535,12 @@ export default function CustomerPortal() {
 
       {/* Demo Preset Selector Bar */}
       <div className="bg-[#121824] border border-[#1e2a3d] p-3 rounded-2xl">
+
         <div className="flex items-center justify-between mb-2 px-2">
           <span className="text-[11px] font-mono-tech text-slate-400 flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-[#d2ff00]" /> RURAL BORROWER PROFILES (1-CLICK QUICK LOAD):
+            <Sparkles className="w-3.5 h-3.5 text-[#d2ff00]" /> {t.demo_profiles_label}
           </span>
-          <span className="text-[10px] font-mono-tech text-[#d2ff00]">KCC & AGRI SCHEMES</span>
+          <span className="text-[10px] font-mono-tech text-[#d2ff00]">{t.demo_sub_badge}</span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
           {PRESETS.map((p, idx) => (
@@ -558,23 +596,23 @@ export default function CustomerPortal() {
                   onClick={() => setIsProfileModalOpen(true)}
                   className="px-2.5 py-1 rounded bg-[#162030] hover:bg-[#1f2c42] text-[#d2ff00] text-[10px] font-mono-tech font-bold border border-[#d2ff00]/30 transition-all flex items-center gap-1 cursor-pointer"
                 >
-                  <Edit3 className="w-3 h-3" /> Edit Profile
+                  <Edit3 className="w-3 h-3" /> {t.edit_profile}
                 </button>
               </div>
 
               {/* Profile Details Pills */}
               <div className="grid grid-cols-3 gap-2 text-[10px] font-mono-tech bg-[#121824] p-2 rounded-lg border border-[#1e2a3d]/60">
                 <div>
-                  <span className="text-slate-400 block text-[9px]">INCOME</span>
+                  <span className="text-slate-400 block text-[9px]">{t.income}</span>
                   <span className="text-white font-bold">{formatINR(userProfile.monthly_income)}/mo</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[9px]">CIBIL SCORE</span>
+                  <span className="text-slate-400 block text-[9px]">{t.cibil}</span>
                   <span className="text-[#d2ff00] font-bold">{formData.cibil_score}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[9px]">LAND / KCC</span>
-                  <span className="text-emerald-400 font-bold">{userProfile.agri_land_acres} Ac (4% Sub)</span>
+                  <span className="text-slate-400 block text-[9px]">{t.land_kcc}</span>
+                  <span className="text-emerald-400 font-bold">{userProfile.agri_land_acres} Ac ({t.kcc_sub_pill})</span>
                 </div>
               </div>
             </div>
@@ -582,26 +620,26 @@ export default function CustomerPortal() {
             {/* Live Affordability Banner */}
             <div className="bg-[#0a0e17] p-3 rounded-xl border border-[#1e2a3d] grid grid-cols-2 gap-2 text-xs font-mono-tech">
               <div>
-                <span className="text-slate-400 text-[10px] block">EST. REPAYMENT</span>
+                <span className="text-slate-400 text-[10px] block">{t.est_repayment}</span>
                 <span className="text-[#d2ff00] font-bold">
                   ₹{Math.round(estimatedProposedEMI).toLocaleString('en-IN')}/mo
                 </span>
                 <span className="text-[9px] text-slate-400 block">
-                  {formData.repayment_cycle === 'HARVEST_BIANNUAL_BULLET' ? '(Post-Harvest Cycle)' : '(Monthly EMI)'}
+                  {formData.repayment_cycle === 'HARVEST_BIANNUAL_BULLET' ? t.post_harvest_note : t.monthly_emi_note}
                 </span>
               </div>
               <div>
-                <span className="text-slate-400 text-[10px] block">PROPOSED FOIR</span>
+                <span className="text-slate-400 text-[10px] block">{t.proposed_foir}</span>
                 <span className={`font-bold ${liveFOIR <= 45 ? 'text-emerald-400' : liveFOIR <= 60 ? 'text-amber-400' : 'text-rose-400'}`}>
-                  {liveFOIR}% {liveFOIR <= 45 ? '(Prime)' : liveFOIR <= 60 ? '(KCC Eligible)' : '(High Risk)'}
+                  {liveFOIR}% {liveFOIR <= 45 ? t.prime_tier : liveFOIR <= 60 ? t.kcc_eligible_tier : t.high_risk_tier}
                 </span>
               </div>
             </div>
 
-            {/* 1. Loan Purpose (Rural-Focused) */}
+            {/* 1. Loan Purpose (Single-Language Pure Mode) */}
             <div>
               <label className="text-xs text-slate-300 font-bold block mb-1">
-                Loan Purpose (ऋण का उद्देश्य)
+                {t.loan_purpose_label}
               </label>
               <select
                 name="loan_purpose"
@@ -609,20 +647,20 @@ export default function CustomerPortal() {
                 onChange={handleChange}
                 className="cyber-input text-xs"
               >
-                <option value="Kisan Agri Crop / Seeds">🌾 Kisan Agri Crop / Seeds (KCC 4% Subvention)</option>
-                <option value="Tractor & Farm Equipment">🚜 Tractor & Farm Equipment (कृषि यंत्र व ट्रैक्टर)</option>
-                <option value="Dairy & Livestock">🥛 Dairy & Livestock (पशुपालन / दुग्ध व्यवसाय)</option>
-                <option value="Village Kirana / Rural MSME">🏬 Village Kirana / Rural MSME (दुकान व व्यापार)</option>
-                <option value="Rural Housing (PMAY-G)">🏠 Rural Housing (ग्रामीण पक्का आवास)</option>
-                <option value="Informal Moneylender Debt-Swap">⚠️ Sahukar Debt-Swap (साहूकार कर्ज मुक्ति)</option>
-                <option value="Personal">💼 Personal / Medical Emergency (आपातकालीन खर्च)</option>
+                <option value="Kisan Agri Crop / Seeds">🌾 {t.purposes["Kisan Agri Crop / Seeds"]}</option>
+                <option value="Tractor & Farm Equipment">🚜 {t.purposes["Tractor & Farm Equipment"]}</option>
+                <option value="Dairy & Livestock">🥛 {t.purposes["Dairy & Livestock"]}</option>
+                <option value="Village Kirana / Rural MSME">🏬 {t.purposes["Village Kirana / Rural MSME"]}</option>
+                <option value="Rural Housing (PMAY-G)">🏠 {t.purposes["Rural Housing (PMAY-G)"]}</option>
+                <option value="Informal Moneylender Debt-Swap">⚠️ {t.purposes["Informal Moneylender Debt-Swap"]}</option>
+                <option value="Personal">💼 {t.purposes["Personal"]}</option>
               </select>
             </div>
 
             {/* 2. Requested Loan Amount (INR) with Quick Select Chips */}
             <div>
               <div className="flex justify-between items-center mb-1 text-xs">
-                <label className="text-slate-300 font-bold">Requested Loan (ऋण राशि)</label>
+                <label className="text-slate-300 font-bold">{t.requested_loan_label}</label>
                 <span className="font-mono-tech text-[#d2ff00] font-bold">{formatINR(formData.loan_amount)}</span>
               </div>
               <input
@@ -657,31 +695,31 @@ export default function CustomerPortal() {
             {/* 3. Tenure & Repayment Cycle */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs text-slate-300 block mb-1">Tenure (अवधि)</label>
+                <label className="text-xs text-slate-300 block mb-1">{t.tenure_label}</label>
                 <select
                   name="loan_tenure_months"
                   value={formData.loan_tenure_months}
                   onChange={handleChange}
                   className="cyber-input text-xs"
                 >
-                  <option value={12}>12 Months (1 Crop Season)</option>
-                  <option value={24}>24 Months (2 Years)</option>
-                  <option value={36}>36 Months (3 Years Dairy)</option>
-                  <option value={60}>60 Months (5 Years Tractor)</option>
-                  <option value={84}>84 Months (7 Years Housing)</option>
+                  <option value={12}>{t.tenures[12]}</option>
+                  <option value={24}>{t.tenures[24]}</option>
+                  <option value={36}>{t.tenures[36]}</option>
+                  <option value={60}>{t.tenures[60]}</option>
+                  <option value={84}>{t.tenures[84]}</option>
                 </select>
               </div>
 
               <div>
-                <label className="text-xs text-slate-300 block mb-1">Repayment Schedule</label>
+                <label className="text-xs text-slate-300 block mb-1">{t.repayment_schedule_label}</label>
                 <select
                   name="repayment_cycle"
                   value={formData.repayment_cycle || 'MONTHLY_EMI'}
                   onChange={handleChange}
                   className="cyber-input text-xs font-bold text-[#d2ff00]"
                 >
-                  <option value="MONTHLY_EMI">Monthly EMI (मासिक किश्त)</option>
-                  <option value="HARVEST_BIANNUAL_BULLET">Post-Harvest (फसल कटाई)</option>
+                  <option value="MONTHLY_EMI">{t.schedules["MONTHLY_EMI"]}</option>
+                  <option value="HARVEST_BIANNUAL_BULLET">{t.schedules["HARVEST_BIANNUAL_BULLET"]}</option>
                 </select>
               </div>
             </div>
@@ -694,7 +732,7 @@ export default function CustomerPortal() {
                 className="w-full p-2.5 flex items-center justify-between text-xs text-slate-400 hover:text-white font-mono-tech transition-colors cursor-pointer"
               >
                 <span className="flex items-center gap-1.5">
-                  <Sliders className="w-3.5 h-3.5 text-[#d2ff00]" /> Advanced Financial Overrides (वैकल्पिक समायोजन)
+                  <Sliders className="w-3.5 h-3.5 text-[#d2ff00]" /> {t.advanced_overrides}
                 </span>
                 {showOverrides ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
               </button>
@@ -704,7 +742,7 @@ export default function CustomerPortal() {
                   {/* CIBIL Slider */}
                   <div>
                     <div className="flex justify-between text-xs mb-1">
-                      <span className="text-slate-400">CIBIL Score</span>
+                      <span className="text-slate-400">{t.cibil}</span>
                       <span className="text-[#d2ff00] font-bold">{formData.cibil_score}</span>
                     </div>
                     <input
@@ -722,7 +760,7 @@ export default function CustomerPortal() {
                   {/* Card Utilization & Delinquencies */}
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <span className="text-[10px] text-slate-400 block mb-1">Card Utilization</span>
+                      <span className="text-[10px] text-slate-400 block mb-1">{t.card_utilization}</span>
                       <input
                         type="number"
                         step="0.05"
@@ -735,11 +773,11 @@ export default function CustomerPortal() {
                       />
                     </div>
                     <div>
-                      <span className="text-[10px] text-slate-400 block mb-1">Delinquent Lines</span>
+                      <span className="text-[10px] text-slate-400 block mb-1">{t.delinquent_lines}</span>
                       <input
                         type="number"
                         min="0"
-                        max="5"
+                        max="10"
                         name="delinquent_lines_2yrs"
                         value={formData.delinquent_lines_2yrs}
                         onChange={handleChange}
@@ -751,7 +789,6 @@ export default function CustomerPortal() {
               )}
             </div>
 
-
             <motion.button
               whileHover={{ scale: 1.02, boxShadow: '0 0 25px rgba(210,255,0,0.3)' }}
               whileTap={{ scale: 0.98 }}
@@ -761,14 +798,15 @@ export default function CustomerPortal() {
             >
               {loading ? (
                 <span className="flex items-center gap-2">
-                  <RefreshCw className="w-4 h-4 animate-spin" /> RUNNING XGBOOST & XAI PIPELINE...
+                  <RefreshCw className="w-4 h-4 animate-spin" /> {t.evaluating_button}
                 </span>
               ) : (
                 <span className="flex items-center gap-2">
-                  <Send className="w-4 h-4" /> EVALUATE ELIGIBILITY & RECOURSE
+                  <Send className="w-4 h-4" /> {t.eval_button}
                 </span>
               )}
             </motion.button>
+
 
             {error && (
               <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center justify-between gap-2">
@@ -852,14 +890,15 @@ export default function CustomerPortal() {
               {/* Navigation Sub-Tabs */}
               <div className="flex items-center gap-1.5 overflow-x-auto pb-1 border-b border-[#1e2a3d] text-xs font-mono-tech">
                 {[
-                  { id: 'overview', label: 'INDIAN BANKS & SHAP', icon: Layers },
-                  { id: 'coach', label: 'AI FINANCIAL COACH', icon: Sparkles },
-                  { id: 'ocr', label: 'DOC OCR & PAN', icon: FileCheck },
-                  { id: 'openbanking', label: 'ACCOUNT AGGREGATOR', icon: Landmark },
-                  { id: 'stresstest', label: 'RBI STRESS TEST', icon: TrendingDown },
+                  { id: 'overview', label: t.tabs?.banks || 'INDIAN BANKS & SHAP', icon: Layers },
+                  { id: 'coach', label: t.tabs?.coach || 'AI VOICE COACH', icon: Sparkles },
+                  { id: 'ocr', label: t.tabs?.ocr || 'DOC OCR & KYC', icon: FileCheck },
+                  { id: 'openbanking', label: t.tabs?.aa || 'ACCOUNT AGGREGATOR', icon: Landmark },
+                  { id: 'stresstest', label: t.tabs?.stress || 'RBI STRESS TEST', icon: TrendingDown },
                   { id: 'conformal', label: 'CONFORMAL BOUNDS', icon: Gauge },
                   { id: 'causal', label: 'CAUSAL RECOURSE', icon: GitCommit },
                 ].map((tab) => {
+
                   const Icon = tab.icon;
                   return (
                     <button
@@ -1559,6 +1598,7 @@ export default function CustomerPortal() {
         onClose={() => setIsProfileModalOpen(false)}
         profile={userProfile}
         onSave={handleSaveProfile}
+        currentLanguage={uiLang}
       />
 
       {/* Multi-Lingual Regional Voice Guide Modal */}
@@ -1566,8 +1606,13 @@ export default function CustomerPortal() {
         isOpen={isVoiceGuideOpen}
         onClose={() => setIsVoiceGuideOpen(false)}
         applicationResult={result}
-        defaultLanguage={userProfile?.preferred_language || 'hi'}
+        defaultLanguage={uiLang || userProfile?.preferred_language || 'hi'}
+        onLanguageSelect={(selected) => {
+          setUiLang(selected);
+          setUserProfile(prev => ({ ...prev, preferred_language: selected }));
+        }}
       />
+
 
     </motion.div>
   );

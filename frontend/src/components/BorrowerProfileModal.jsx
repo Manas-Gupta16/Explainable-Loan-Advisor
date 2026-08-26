@@ -12,7 +12,97 @@ const formatINR = (val) => {
   return `₹${Number(val).toLocaleString('en-IN')}`;
 };
 
-export default function BorrowerProfileModal({ isOpen, onClose, profile, onSave }) {
+const MODAL_I18N = {
+  hi: {
+    title: "स्थायी उधारकर्ता व किसान प्रोफ़ाइल",
+    subtitle: "यह जानकारी आपके सभी भावी ऋण आवेदनों के लिए सुरक्षित रहेगी।",
+    name_label: "उधारकर्ता का पूरा नाम",
+    phone_label: "मोबाइल नंबर",
+    occ_label: "मुख्य व्यवसाय",
+    land_label: "कृषि भूमि (एकड़ में)",
+    kcc_label: "किसान क्रेडिट कार्ड (KCC 4% ब्याज छूट धारक)",
+    income_label: "मासिक कृषि व शुद्ध आय (₹)",
+    debts_label: "मौजूदा मासिक ऋण किश्तें (₹)",
+    cibil_label: "सिबिल स्कोर",
+    home_label: "मकान का स्वामित्व",
+    lang_label: "पसंदीदा भाषा",
+    save_btn: "प्रोफ़ाइल सुरक्षित करें",
+    saving_btn: "सुरक्षित हो रहा है...",
+    saved_badge: "प्रोफ़ाइल सफलतापूर्वक सुरक्षित हुई!",
+    occupations: {
+      "Farmer / Agriculture": "🌾 किसान / कृषि कार्य",
+      "Rural Self-Employed / Kirana": "🏬 ग्रामीण किराना व व्यापार",
+      "Dairy / Livestock": "🥛 डेयरी व पशुपालन",
+      "Salaried": "💼 वेतनभोगी / सरकारी नौकरी",
+      "Daily Wage / Labor": "🛠️ ग्रामीण कारीगर / श्रमिक"
+    },
+    homes: {
+      "Owned - Ancestral / Pucca": "🏠 पैतृक / पक्का मकान",
+      "Gram Panchayat / Pucca": "🏡 ग्राम पंचायत पट्टा / आवास",
+      "Rented / Semi-Pucca": "🚪 किराए का मकान"
+    }
+  },
+  mr: {
+    title: "कायमस्वरूपी कर्जदार व शेतकरी प्रोफाइल",
+    subtitle: "हा तपशील तुमच्या सर्व भावी कर्ज अर्जांसाठी सुरक्षित राहील.",
+    name_label: "कर्जदाराचे पूर्ण नाव",
+    phone_label: "मोबाईल नंबर",
+    occ_label: "मुख्य व्यवसाय",
+    land_label: "शेती जमीन (एकरमध्ये)",
+    kcc_label: "किसान क्रेडिट कार्ड (KCC 4% सवलत धारक)",
+    income_label: "मासिक शेती व निव्वळ उत्पन्न (₹)",
+    debts_label: "सध्याचे मासिक कर्ज हप्ते (₹)",
+    cibil_label: "सिबिल स्कोअर",
+    home_label: "घराचे स्वामित्व",
+    lang_label: "पसंतीची भाषा",
+    save_btn: "प्रोफाइल जतन करा",
+    saving_btn: "जतन होत आहे...",
+    saved_badge: "प्रोफाइल यशस्वीरीत्या जतन झाली!",
+    occupations: {
+      "Farmer / Agriculture": "🌾 शेतकरी / कृषी व्यवसाय",
+      "Rural Self-Employed / Kirana": "🏬 ग्रामीण किराणा व व्यवसाय",
+      "Dairy / Livestock": "🥛 दुग्धव्यवसाय व पशुपालन",
+      "Salaried": "💼 पगारदार / नोकरदार",
+      "Daily Wage / Labor": "🛠️ ग्रामीण कारागीर / मजूर"
+    },
+    homes: {
+      "Owned - Ancestral / Pucca": "🏠 वडिलोपार्जित / पक्के घर",
+      "Gram Panchayat / Pucca": "🏡 ग्रामपंचायत पट्टा / घर",
+      "Rented / Semi-Pucca": "🚪 भाड्याचे घर"
+    }
+  },
+  en: {
+    title: "Permanent Borrower Profile",
+    subtitle: "Saved permanently across all your future loan applications.",
+    name_label: "Borrower Full Name",
+    phone_label: "Mobile Number",
+    occ_label: "Primary Occupation",
+    land_label: "Agricultural Land Holding (Acres)",
+    kcc_label: "Kisan Credit Card (KCC 4% Subvention Holder)",
+    income_label: "Net Monthly Income (₹)",
+    debts_label: "Existing Monthly Loan EMIs (₹)",
+    cibil_label: "CIBIL Score",
+    home_label: "Residential Home Ownership",
+    lang_label: "Preferred Language",
+    save_btn: "SAVE BORROWER PROFILE",
+    saving_btn: "SAVING PROFILE...",
+    saved_badge: "Profile Saved Successfully!",
+    occupations: {
+      "Farmer / Agriculture": "🌾 Farmer / Agriculture",
+      "Rural Self-Employed / Kirana": "🏬 Village Kirana / Trader",
+      "Dairy / Livestock": "🥛 Dairy & Livestock Development",
+      "Salaried": "💼 Salaried / Govt / Teacher",
+      "Daily Wage / Labor": "🛠️ Rural Artisan / Labor"
+    },
+    homes: {
+      "Owned - Ancestral / Pucca": "🏠 Owned - Ancestral / Pucca House",
+      "Gram Panchayat / Pucca": "🏡 Gram Panchayat Patta / Rural Pucca",
+      "Rented / Semi-Pucca": "🚪 Rented / Semi-Pucca"
+    }
+  }
+};
+
+export default function BorrowerProfileModal({ isOpen, onClose, profile, onSave, currentLanguage = "hi" }) {
   const [formData, setFormData] = useState({
     full_name: profile?.full_name || "Rameshwar Patil",
     employment_type: profile?.employment_type || "Farmer / Agriculture",
@@ -23,12 +113,14 @@ export default function BorrowerProfileModal({ isOpen, onClose, profile, onSave 
     existing_debts_monthly: profile?.existing_debts_monthly || 4500,
     cibil_score: profile?.cibil_score || 695,
     home_ownership: profile?.home_ownership || "Owned - Ancestral / Pucca",
-    preferred_language: profile?.preferred_language || "hi",
+    preferred_language: profile?.preferred_language || currentLanguage || "hi",
     phone_number: profile?.phone_number || "+91 98231 45678"
   });
 
   const [saving, setSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
+
+  const t = MODAL_I18N[currentLanguage] || MODAL_I18N.hi;
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -42,23 +134,15 @@ export default function BorrowerProfileModal({ isOpen, onClose, profile, onSave 
     e.preventDefault();
     setSaving(true);
     try {
-      // Persist to backend user profile
       const res = await axios.put('/api/v1/auth/profile', formData);
       setSavedSuccess(true);
       if (onSave) onSave(res.data);
       setTimeout(() => {
         setSavedSuccess(false);
         onClose();
-      }, 700);
+      }, 1000);
     } catch (err) {
-      console.warn("Backend profile sync note:", err.message);
-      // Fallback local save
-      if (onSave) onSave(formData);
-      setSavedSuccess(true);
-      setTimeout(() => {
-        setSavedSuccess(false);
-        onClose();
-      }, 700);
+      console.error("Failed to update borrower profile:", err);
     } finally {
       setSaving(false);
     }
@@ -70,24 +154,24 @@ export default function BorrowerProfileModal({ isOpen, onClose, profile, onSave 
     <AnimatePresence>
       <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
         <motion.div 
-          initial={{ opacity: 0, scale: 0.95, y: 15 }}
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 15 }}
-          className="bg-[#121824] border border-[#d2ff00]/40 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl p-6 space-y-5"
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          className="bg-[#121824] border border-[#d2ff00]/40 rounded-2xl w-full max-w-2xl shadow-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto"
         >
           
           {/* Header */}
           <div className="flex items-center justify-between border-b border-[#1e2a3d] pb-4">
-            <div className="flex items-center gap-2.5">
-              <div className="w-10 h-10 rounded-xl bg-[#d2ff00]/10 text-[#d2ff00] border border-[#d2ff00]/30 flex items-center justify-center">
-                <Wheat className="w-5 h-5" />
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[#d2ff00] text-black flex items-center justify-center font-bold">
+                <User className="w-5 h-5" />
               </div>
               <div>
                 <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                  Permanent Borrower Profile (स्थायी प्रोफ़ाइल)
+                  {t.title}
                 </h3>
                 <p className="text-xs text-slate-400 font-mono-tech">
-                  Set once during registration. Auto-fills your loan applications.
+                  {t.subtitle}
                 </p>
               </div>
             </div>
@@ -106,7 +190,7 @@ export default function BorrowerProfileModal({ isOpen, onClose, profile, onSave 
             {/* Name & Phone */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="text-slate-300 block mb-1">Borrower Full Name (नाम)</label>
+                <label className="text-slate-300 block mb-1">{t.name_label}</label>
                 <input 
                   type="text"
                   name="full_name"
@@ -119,7 +203,7 @@ export default function BorrowerProfileModal({ isOpen, onClose, profile, onSave 
               </div>
 
               <div>
-                <label className="text-slate-300 block mb-1">Mobile Number (फ़ोन नंबर)</label>
+                <label className="text-slate-300 block mb-1">{t.phone_label}</label>
                 <input 
                   type="text"
                   name="phone_number"
@@ -134,23 +218,23 @@ export default function BorrowerProfileModal({ isOpen, onClose, profile, onSave 
             {/* Occupation & Land Details */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="text-slate-300 block mb-1">Primary Occupation (मुख्य व्यवसाय)</label>
+                <label className="text-slate-300 block mb-1">{t.occ_label}</label>
                 <select
                   name="employment_type"
                   value={formData.employment_type}
                   onChange={handleChange}
                   className="cyber-input text-xs"
                 >
-                  <option value="Farmer / Agriculture">🌾 Farmer / Agriculture (किसान)</option>
-                  <option value="Rural Self-Employed / Kirana">🏬 Village Kirana / Trader (दुकानदार)</option>
-                  <option value="Dairy / Livestock">🥛 Dairy & Livestock (पशुपालन / डेयरी)</option>
-                  <option value="Salaried">💼 Salaried / Govt / Teacher (वेतनभोगी)</option>
-                  <option value="Daily Wage / Labor">🛠️ Rural Artisan / Labor (कारीगर / श्रमिक)</option>
+                  <option value="Farmer / Agriculture">{t.occupations["Farmer / Agriculture"]}</option>
+                  <option value="Rural Self-Employed / Kirana">{t.occupations["Rural Self-Employed / Kirana"]}</option>
+                  <option value="Dairy / Livestock">{t.occupations["Dairy / Livestock"]}</option>
+                  <option value="Salaried">{t.occupations["Salaried"]}</option>
+                  <option value="Daily Wage / Labor">{t.occupations["Daily Wage / Labor"]}</option>
                 </select>
               </div>
 
               <div>
-                <label className="text-slate-300 block mb-1">Agricultural Land Holding (कृषि भूमि)</label>
+                <label className="text-slate-300 block mb-1">{t.land_label}</label>
                 <div className="flex items-center gap-2">
                   <input 
                     type="number"
@@ -160,31 +244,53 @@ export default function BorrowerProfileModal({ isOpen, onClose, profile, onSave 
                     name="agri_land_acres"
                     value={formData.agri_land_acres}
                     onChange={handleChange}
-                    className="cyber-input text-xs"
+                    className="cyber-input text-xs font-bold text-[#d2ff00]"
                   />
-                  <span className="text-slate-400 shrink-0">Acres (एकड़)</span>
+                  <span className="text-slate-400 text-xs shrink-0">Acres</span>
                 </div>
               </div>
             </div>
 
-            {/* Incomes & Debts */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-[#0a0e17] p-3.5 rounded-xl border border-[#1e2a3d]">
+            {/* Kisan Credit Card (KCC) Subvention Toggle */}
+            <div className="p-3 rounded-xl bg-[#0a0e17] border border-[#1e2a3d] flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <Wheat className="w-5 h-5 text-emerald-400" />
+                <div>
+                  <span className="text-xs font-bold text-white block">
+                    {t.kcc_label}
+                  </span>
+                  <span className="text-[11px] text-slate-400 font-light">
+                    {currentLanguage === 'hi' ? '3% त्वरित पुनर्भुगतान छूट के साथ 4.0% प्रभावी ब्याज दर' : currentLanguage === 'mr' ? '3% वेळेवर परतफेड सवलतीसह 4.0% प्रभावी व्याजदर' : 'Net 4.0% effective interest rate with 3% prompt repayment subvention'}
+                  </span>
+                </div>
+              </div>
+
+              <input 
+                type="checkbox"
+                name="kcc_holder"
+                checked={formData.kcc_holder}
+                onChange={handleChange}
+                className="w-5 h-5 accent-[#d2ff00] cursor-pointer rounded"
+              />
+            </div>
+
+            {/* Income & Debts */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="text-slate-400 block mb-1 text-[11px]">Net Monthly Income</label>
+                <label className="text-slate-300 block mb-1">{t.income_label}</label>
                 <input 
                   type="number"
                   step="1000"
                   name="monthly_income"
                   value={formData.monthly_income}
                   onChange={handleChange}
-                  className="cyber-input text-xs font-bold text-[#d2ff00]"
+                  className="cyber-input text-xs font-bold"
                   required
                 />
-                <span className="text-[10px] text-slate-500 block mt-0.5">{formatINR(formData.monthly_income * 12)} / year</span>
               </div>
 
               <div>
-                <label className="text-slate-400 block mb-1 text-[11px]">Existing Monthly Debts</label>
+                <label className="text-slate-300 block mb-1">{t.debts_label}</label>
                 <input 
                   type="number"
                   step="500"
@@ -193,109 +299,81 @@ export default function BorrowerProfileModal({ isOpen, onClose, profile, onSave 
                   onChange={handleChange}
                   className="cyber-input text-xs"
                 />
-                <span className="text-[10px] text-slate-500 block mt-0.5">Active EMIs / dues</span>
-              </div>
-
-              <div>
-                <label className="text-slate-400 block mb-1 text-[11px]">TransUnion CIBIL Score</label>
-                <input 
-                  type="number"
-                  min="300"
-                  max="850"
-                  name="cibil_score"
-                  value={formData.cibil_score}
-                  onChange={handleChange}
-                  className="cyber-input text-xs font-bold text-white"
-                />
-                <span className="text-[10px] text-slate-500 block mt-0.5">
-                  {formData.cibil_score >= 720 ? 'Prime Tier' : formData.cibil_score >= 640 ? 'Near-Prime / KCC' : 'Microfinance Tier'}
-                </span>
               </div>
             </div>
 
-            {/* KCC & Home Ownership */}
+            {/* CIBIL & Home Ownership */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="text-slate-300 block mb-1">House Ownership (घर का स्वामित्व)</label>
+                <label className="text-slate-300 block mb-1">{t.cibil_label}</label>
+                <input 
+                  type="number"
+                  min="300"
+                  max="900"
+                  name="cibil_score"
+                  value={formData.cibil_score}
+                  onChange={handleChange}
+                  className="cyber-input text-xs font-bold text-[#d2ff00]"
+                />
+              </div>
+
+              <div>
+                <label className="text-slate-300 block mb-1">{t.home_label}</label>
                 <select
                   name="home_ownership"
                   value={formData.home_ownership}
                   onChange={handleChange}
                   className="cyber-input text-xs"
                 >
-                  <option value="Owned - Ancestral / Pucca">Owned - Ancestral / Pucca (पैतृक / पक्का मकान)</option>
-                  <option value="Village Gram Panchayat">Village Gram Panchayat House (पंचायत मकान)</option>
-                  <option value="Rented">Rented (किराए का)</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="text-slate-300 block mb-1">Preferred Language (पसंदीदा भाषा)</label>
-                <select
-                  name="preferred_language"
-                  value={formData.preferred_language}
-                  onChange={handleChange}
-                  className="cyber-input text-xs font-bold text-[#d2ff00]"
-                >
-                  <option value="hi">🇮🇳 हिंदी (Hindi)</option>
-                  <option value="mr">🇮🇳 मराठी (Marathi)</option>
-                  <option value="gu">🇮🇳 ગુજરાતી (Gujarati)</option>
-                  <option value="bn">🇮🇳 বাংলা (Bengali)</option>
-                  <option value="ta">🇮🇳 தமிழ் (Tamil)</option>
-                  <option value="te">🇮🇳 తెలుగు (Telugu)</option>
-                  <option value="en">🇬🇧 English</option>
-                  <option value="hinglish">🇮🇳 Hinglish</option>
+                  <option value="Owned - Ancestral / Pucca">{t.homes["Owned - Ancestral / Pucca"]}</option>
+                  <option value="Gram Panchayat / Pucca">{t.homes["Gram Panchayat / Pucca"]}</option>
+                  <option value="Rented / Semi-Pucca">{t.homes["Rented / Semi-Pucca"]}</option>
                 </select>
               </div>
             </div>
 
-            {/* Kisan Credit Card Subvention Benefit Box */}
-            <div className="p-3 bg-[#0a0e17] rounded-xl border border-emerald-500/30 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <input 
-                  type="checkbox"
-                  id="kcc_check"
-                  name="kcc_holder"
-                  checked={formData.kcc_holder}
-                  onChange={handleChange}
-                  className="w-4 h-4 accent-[#d2ff00] cursor-pointer rounded"
-                />
-                <label htmlFor="kcc_check" className="text-xs text-white cursor-pointer select-none">
-                  Kisan Credit Card (KCC) Holder / Crop Farmer
-                </label>
-              </div>
-              <span className="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">
-                4% Subsidized Rate
-              </span>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex gap-3 pt-2">
-              <button
-                type="button"
-                onClick={onClose}
-                className="btn-dark-outline flex-1 justify-center py-2.5 text-xs cursor-pointer"
+            {/* Language Preference */}
+            <div>
+              <label className="text-slate-300 block mb-1">{t.lang_label}</label>
+              <select
+                name="preferred_language"
+                value={formData.preferred_language}
+                onChange={handleChange}
+                className="cyber-input text-xs"
               >
-                Cancel
-              </button>
+                <option value="hi">हिंदी (Hindi)</option>
+                <option value="mr">मराठी (Marathi)</option>
+                <option value="gu">ગુજરાતી (Gujarati)</option>
+                <option value="bn">বাংলা (Bengali)</option>
+                <option value="ta">தமிழ் (Tamil)</option>
+                <option value="te">తెలుగు (Telugu)</option>
+                <option value="en">English</option>
+              </select>
+            </div>
 
-              <button
+            {/* Save Button */}
+            <div className="pt-2">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 type="submit"
                 disabled={saving}
-                className="btn-lime flex-1 justify-center py-2.5 text-xs font-bold cursor-pointer flex items-center gap-2"
+                className="btn-lime w-full justify-center py-3 text-xs font-black tracking-wide cursor-pointer flex items-center gap-2"
               >
-                {saving ? (
-                  <span>Saving Profile...</span>
-                ) : savedSuccess ? (
-                  <span className="flex items-center gap-1.5 text-black">
-                    <CheckCircle2 className="w-4 h-4" /> Profile Updated!
-                  </span>
+                {savedSuccess ? (
+                  <>
+                    <CheckCircle2 className="w-4 h-4 text-black" />
+                    <span>{t.saved_badge}</span>
+                  </>
+                ) : saving ? (
+                  <span>{t.saving_btn}</span>
                 ) : (
-                  <span className="flex items-center gap-1.5">
-                    <Save className="w-4 h-4" /> Save Permanent Profile
-                  </span>
+                  <>
+                    <Save className="w-4 h-4" />
+                    <span>{t.save_btn}</span>
+                  </>
                 )}
-              </button>
+              </motion.button>
             </div>
 
           </form>

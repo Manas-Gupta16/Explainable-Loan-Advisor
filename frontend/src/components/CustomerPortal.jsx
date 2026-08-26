@@ -1604,7 +1604,13 @@ export default function CustomerPortal() {
       {/* Multi-Lingual Regional Voice Guide Modal */}
       <VoiceGuideModal
         isOpen={isVoiceGuideOpen}
-        onClose={() => setIsVoiceGuideOpen(false)}
+        onClose={() => {
+          setIsVoiceGuideOpen(false);
+          if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+          }
+        }}
+
         applicationResult={result}
         defaultLanguage={uiLang || userProfile?.preferred_language || 'hi'}
         onLanguageSelect={(selected) => {

@@ -64,21 +64,55 @@ export default function VoiceGuideModal({ isOpen, onClose, applicationResult, de
 
   const stopAudio = () => {
     if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
+      try {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        audioRef.current.src = "";
+        audioRef.current.load();
+      } catch (e) {
+        console.warn("Error stopping audio:", e);
+      }
+      audioRef.current = null;
     }
-    if ('speechSynthesis' in window) {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
     }
     setIsPlaying(false);
     setIsLoadingAudio(false);
   };
 
+  // Immediate stop whenever modal closes or isOpen changes to false
+  useEffect(() => {
+    if (!isOpen) {
+      stopAudio();
+    }
+  }, [isOpen]);
+
+  // Unmount cleanup
   useEffect(() => {
     return () => {
       stopAudio();
     };
   }, []);
+
+  // Escape key handler to close and stop audio
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        stopAudio();
+        onClose();
+      }
+    };
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
+  const handleClose = () => {
+    stopAudio();
+    onClose();
+  };
 
   const handleTogglePlay = () => {
     if (isPlaying) {
@@ -136,11 +170,15 @@ export default function VoiceGuideModal({ isOpen, onClose, applicationResult, de
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+      <div 
+        className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+        onClick={handleClose}
+      >
         <motion.div 
           initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
+          onClick={(e) => e.stopPropagation()}
           className="bg-[#121824] border border-[#d2ff00]/40 rounded-2xl w-full max-w-xl shadow-2xl p-6 space-y-5"
         >
           
@@ -161,15 +199,13 @@ export default function VoiceGuideModal({ isOpen, onClose, applicationResult, de
             </div>
 
             <button 
-              onClick={() => {
-                stopAudio();
-                onClose();
-              }}
+              onClick={handleClose}
               className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-[#1a2336] transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
+
 
           {/* Regional Language Selector Buttons */}
           <div className="space-y-1.5">

@@ -318,7 +318,7 @@ export default function CustomerPortal() {
   const coachAudioRef = useRef(null);
 
   // 2. Play Coach Voice Audio using backend gTTS stream
-  const handleToggleSpeech = () => {
+  const handleToggleSpeech = async () => {
     if (!coachData?.conversational_audio_script) return;
 
     if (isPlayingAudio) {
@@ -326,9 +326,6 @@ export default function CustomerPortal() {
         coachAudioRef.current.pause();
         coachAudioRef.current.src = "";
         coachAudioRef.current = null;
-      }
-      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
       }
       setIsPlayingAudio(false);
     } else {
@@ -343,26 +340,38 @@ export default function CustomerPortal() {
         'Hinglish': 'hinglish'
       };
       const code = langCodeMap[coachLanguage] || 'hi';
-      const audioUrl = `/api/v1/customer/voice-audio?text=${encodeURIComponent(coachData.conversational_audio_script)}&lang=${code}&t=${Date.now()}`;
-      const audio = new Audio(audioUrl);
-      coachAudioRef.current = audio;
 
-      audio.onplaying = () => setIsPlayingAudio(true);
-      audio.onended = () => setIsPlayingAudio(false);
-      audio.onerror = () => {
-        setIsPlayingAudio(false);
-        if ('speechSynthesis' in window) {
-          const utterance = new SpeechSynthesisUtterance(coachData.conversational_audio_script);
-          window.speechSynthesis.speak(utterance);
-        }
-      };
+      try {
+        const res = await axios.post('/api/v1/customer/voice-audio', {
+          text: coachData.conversational_audio_script,
+          lang: code
+        }, {
+          responseType: 'blob',
+          timeout: 15000
+        });
 
-      audio.play().catch(err => {
+        const blobUrl = URL.createObjectURL(res.data);
+        const audio = new Audio(blobUrl);
+        coachAudioRef.current = audio;
+
+        audio.onplaying = () => setIsPlayingAudio(true);
+        audio.onended = () => {
+          setIsPlayingAudio(false);
+          URL.revokeObjectURL(blobUrl);
+        };
+        audio.onerror = () => {
+          setIsPlayingAudio(false);
+          URL.revokeObjectURL(blobUrl);
+        };
+
+        await audio.play();
+      } catch (err) {
         console.warn("Coach audio error:", err);
         setIsPlayingAudio(false);
-      });
+      }
     }
   };
+
 
 
   // 3. OCR Document Upload Simulation

@@ -616,8 +616,50 @@ def get_sample_account_aggregator_stream(
         monthly_salary=monthly_salary
     )
 
+from pydantic import BaseModel
+from typing import Optional
+
+class VoiceAudioRequest(BaseModel):
+    text: str
+    lang: str = "hi"
+
+def normalize_regional_numbers(text: str, lang: str) -> str:
+    """Replaces raw digits with native language words so TTS doesn't stumble on ASCII numbers."""
+    if lang == "hi":
+        replacements = {
+            "91": "इक्यानवे", "92": "बानवे", "90": "नब्बे", "7": "सात", "3": "तीन", "4": "चार", "8": "आठ"
+        }
+        for k, v in replacements.items():
+            text = text.replace(f"{k}%", f"{v} प्रतिशत").replace(f"{k} %", f"{v} प्रतिशत").replace(f" {k} ", f" {v} ")
+    elif lang == "mr":
+        replacements = {
+            "91": "एक्याण्णव", "92": "ब्याण्णव", "90": "नव्वद", "7": "सात", "3": "तीन", "4": "चार", "8": "आठ"
+        }
+        for k, v in replacements.items():
+            text = text.replace(f"{k}%", f"{v} टक्के").replace(f"{k} %", f"{v} टक्के").replace(f" {k} ", f" {v} ")
+    elif lang == "gu":
+        replacements = {
+            "91": "એકાણું", "92": "બાણું", "90": "નેવું", "7": "સાત", "3": "ત્રણ", "4": "ચાર"
+        }
+        for k, v in replacements.items():
+            text = text.replace(f"{k}%", f"{v} ટકા").replace(f"{k} %", f"{v} ટકા").replace(f" {k} ", f" {v} ")
+    elif lang == "bn":
+        replacements = {
+            "91": "একানব্বই", "92": "বিরানব্বই", "90": "নব্বই", "7": "সাত", "3": "তিন", "4": "চার"
+        }
+        for k, v in replacements.items():
+            text = text.replace(f"{k}%", f"{v} শতাংশ").replace(f"{k} %", f"{v} শতাংশ").replace(f" {k} ", f" {v} ")
+    return text
+
+@router.post("/voice-audio")
+def generate_voice_audio_post(body: VoiceAudioRequest):
+    return generate_voice_audio_response(body.text, body.lang)
+
 @router.get("/voice-audio")
-def stream_voice_audio(text: str, lang: str = "hi"):
+def generate_voice_audio_get(text: str, lang: str = "hi"):
+    return generate_voice_audio_response(text, lang)
+
+def generate_voice_audio_response(text: str, lang: str = "hi"):
     """
     Generates and streams fluent, native MP3 speech audio using gTTS 
     in Indian regional languages (Hindi, Marathi, Gujarati, Bengali, Tamil, Telugu, English).
@@ -636,9 +678,10 @@ def stream_voice_audio(text: str, lang: str = "hi"):
         "en": "en"
     }
     target_lang = supported_langs.get(lang, "hi")
+    clean_text = normalize_regional_numbers(text, target_lang)
 
     fp = io.BytesIO()
-    tts = gTTS(text=text, lang=target_lang, slow=False)
+    tts = gTTS(text=clean_text, lang=target_lang, slow=False)
     tts.write_to_fp(fp)
     content = fp.getvalue()
     
@@ -651,6 +694,7 @@ def stream_voice_audio(text: str, lang: str = "hi"):
             "Cache-Control": "public, max-age=3600"
         }
     )
+
 
 
 

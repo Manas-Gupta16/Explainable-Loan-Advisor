@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Volume2, Play, Pause, X, Radio, AlertCircle
@@ -9,43 +10,43 @@ const REGIONAL_SCRIPTS = {
     name: "हिंदी (Hindi)",
     locale: "hi",
     welcome: "नमस्ते! यह आपका AI ग्रामीण व किसान ऋण मार्गदर्शक है।",
-    script: (app) => `नमस्ते! आपके ऋण आवेदन का विश्लेषण पूरा हो चुका है। आपकी पात्रता संभावना लगभग ${(app?.approval_probability ? app.approval_probability * 100 : 92).toFixed(0)} प्रतिशत है। भारतीय स्टेट बैंक और बैंक ऑफ बड़ौदा की किसान क्रेडिट योजनाओं से आपको 7 प्रतिशत की रियायती ब्याज दर पर कृषि ऋण मिल सकता है। समय पर भुगतान करने पर आपको सरकार की 3 प्रतिशत ब्याज छूट का भी लाभ मिलेगा।`
+    script: (app) => "नमस्ते! आपके ऋण आवेदन का विश्लेषण पूरा हो चुका है। आपकी पात्रता संभावना लगभग इक्यानवे प्रतिशत है। भारतीय स्टेट बैंक और बैंक ऑफ बड़ौदा की किसान क्रेडिट योजनाओं से आपको सात प्रतिशत की रियायती ब्याज दर पर कृषि ऋण मिल सकता है। समय पर भुगतान करने पर आपको सरकार की तीन प्रतिशत ब्याज छूट का भी लाभ मिलेगा।"
   },
   mr: {
     name: "मराठी (Marathi)",
     locale: "mr",
     welcome: "नमस्कार! हा तुमचा AI कृषी व ग्रामीण कर्ज सल्लागार आहे.",
-    script: (app) => `नमस्कार! तुमच्या कर्ज अर्जाचे विश्लेषण पूर्ण झाले आहे. तुमची कर्ज मंजुरीची शक्यता अंदाजे ${(app?.approval_probability ? app.approval_probability * 100 : 92).toFixed(0)} टक्के आहे. स्टेट बँक ऑफ इंडिया आणि बँक ऑफ बडोदाच्या कृषी कर्ज योजनांमधून तुम्हाला 7 टक्के सवलतीच्या दराने कर्ज मिळू शकते. वेळेवर परतफेड केल्यास 3 टक्के शासकीय अनुदान सवलत मिळेल.`
+    script: (app) => "नमस्कार! तुमच्या कर्ज अर्जाचे विश्लेषण पूर्ण झाले आहे. तुमची कर्ज मंजुरीची शक्यता अंदाजे एक्याण्णव टक्के आहे. स्टेट बँक ऑफ इंडिया आणि बँक ऑफ बडोदाच्या कृषी कर्ज योजनांमधून तुम्हाला सात टक्के सवलतीच्या दराने कर्ज मिळू शकते. वेळेवर परतफेड केल्यास तीन टक्के शासकीय अनुदान सवलत मिळेल."
   },
   gu: {
     name: "ગુજરાતી (Gujarati)",
     locale: "gu",
     welcome: "નમસ્તે! આ તમારું AI કિસાન લોન માર્ગદર્શક છે.",
-    script: (app) => `નમસ્તે! તમારી લોન અરજી તપાસવામાં આવી છે. તમારી લોન મંજૂરીની સંભાવના ${(app?.approval_probability ? app.approval_probability * 100 : 92).toFixed(0)} ટકા છે. કિસાન ક્રેડિટ કાર્ડ યોજના દ્વારા તમને 4 ટકા અસરકારક વ્યાજ દરે કૃષિ ધિરાણ મળી શકે છે.`
+    script: (app) => "નમસ્તે! તમારી લોન અરજી તપાસવામાં આવી છે. તમારી લોન મંજૂરીની સંભાવના એકાણું ટકા છે. કિસાન ક્રેડિટ કાર્ડ યોજના દ્વારા તમને ચાર ટકા અસરકારક વ્યાજ દરે કૃષિ ધિરાણ મળી શકે છે."
   },
   bn: {
     name: "বাংলা (Bengali)",
     locale: "bn",
     welcome: "নমস্কার! এটি আপনার এআই গ্রামীণ ও কৃষি ঋণ উপদেষ্টা।",
-    script: (app) => `নমস্কার! আপনার ঋণ আবেদন সফলভাবে বিশ্লেষণ করা হয়েছে। আপনার ঋণ পাওয়ার সম্ভাবনা ${(app?.approval_probability ? app.approval_probability * 100 : 92).toFixed(0)} শতাংশ। কিষাণ ক্রেডিট কার্ড ও গ্রামীण ব্যাংকের মাধ্যমে আপনি সহজ শর্তে ঋণ পেতে পারেন।`
+    script: (app) => "নমস্কার! আপনার ঋণ আবেদন বিশ্লেষণ করা হয়েছে। আপনার ঋণ অনুমোদনের সম্ভাবনা একানব্বই শতাংশ। কিষাণ ক্রেডিট কার্ডের মাধ্যমে আপনি সাত শতাংশ সুদের হারে ঋণ পেতে পারেন। সময়মতো পরিশোধ করলে তিন শতাংশ সরকারি ছাড় পাবেন।"
   },
   ta: {
     name: "தமிழ் (Tamil)",
     locale: "ta",
     welcome: "வணக்கம்! இது உங்கள் AI கிராமப்புற மற்றும் வேளாண் கடன் வழிகாட்டி.",
-    script: (app) => `வணக்கம்! உங்கள் கடன் விண்ணப்பம் வெற்றிகரமாக பரிசீலிக்கப்பட்டது. உங்கள் கடன் ஒப்புதல் வாய்ப்பு ${(app?.approval_probability ? app.approval_probability * 100 : 92).toFixed(0)} சதவீதம். எஸ்பிஐ கிசான் திட்டத்தின் மூலம் குறைந்த வட்டியில் கடன் பெறலாம்.`
+    script: (app) => "வணக்கம்! உங்கள் கடன் விண்ணப்பம் வெற்றிகரமாக பரிசீலிக்கப்பட்டது. உங்கள் கடன் ஒப்புதல் வாய்ப்பு தொண்ணூற்றொரு சதவீதம் ஆகும். எஸ்பிஐ கிசான் திட்டத்தின் மூலம் ஏழு சதவீத மானிய வட்டியில் கடன் பெறலாம். குறித்த காலத்தில் திருப்பிச் செலுத்தினால் மூன்று சதவீத வட்டி தள்ளுபடி கிடைக்கும்."
   },
   te: {
     name: "తెలుగు (Telugu)",
     locale: "te",
     welcome: "నమస్కారం! ఇది మీ AI గ్రామీణ మరియు కిసాన్ రుణ సలహాదారు.",
-    script: (app) => `నమస్కారం! మీ రుణ దరఖాస్తు పరిశీలించబడింది. మీ రుణ ఆమోద సంభావ్యత ${(app?.approval_probability ? app.approval_probability * 100 : 92).toFixed(0)} శాతం. కిసాన్ క్రెడిట్ కార్డు పథకం ద్వారా రాయితీ వడ్డీతో రుణం పొందవచ్చు.`
+    script: (app) => "నమస్కారం! మీ రుణ దరఖాస్తు పరిశీలించబడింది. మీ రుణ ఆమోద సంభావ్యత తొంభై ఒకటి శాతం. కిసాన్ క్రెడిట్ కార్డు పథకం ద్వారా ఏడు శాతం రాయితీ వడ్డీతో రుణం పొందవచ్చు. సకాలంలో చెల్లిస్తే మూడు శాతం వడ్డీ రాయితీ లభిస్తుంది."
   },
   en: {
     name: "English",
     locale: "en",
     welcome: "Hello! This is your Rural & Agricultural AI Financial Advisor.",
-    script: (app) => `Hello! Your loan application has been analyzed. Your approval odds are approximately ${(app?.approval_probability ? app.approval_probability * 100 : 92).toFixed(0)} percent. You are strongly eligible for SBI Kisan Credit Card and Regional Rural Bank schemes at a subsidized 7.0 percent rate with a 3 percent prompt repayment rebate.`
+    script: (app) => "Hello! Your loan application has been analyzed. Your approval odds are approximately ninety-one percent. You are strongly eligible for SBI Kisan Credit Card and Regional Rural Bank schemes at a subsidized seven percent rate with a three percent prompt repayment rebate."
   }
 };
 
@@ -54,6 +55,7 @@ export default function VoiceGuideModal({ isOpen, onClose, applicationResult, de
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoadingAudio, setIsLoadingAudio] = useState(false);
   const audioRef = useRef(null);
+  const audioUrlRef = useRef(null);
 
   const currentLangConfig = REGIONAL_SCRIPTS[lang] || REGIONAL_SCRIPTS.hi;
   const currentText = currentLangConfig.script(applicationResult);
@@ -73,6 +75,12 @@ export default function VoiceGuideModal({ isOpen, onClose, applicationResult, de
         console.warn("Error stopping audio:", e);
       }
       audioRef.current = null;
+    }
+    if (audioUrlRef.current) {
+      try {
+        URL.revokeObjectURL(audioUrlRef.current);
+      } catch (e) {}
+      audioUrlRef.current = null;
     }
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
@@ -114,7 +122,7 @@ export default function VoiceGuideModal({ isOpen, onClose, applicationResult, de
     onClose();
   };
 
-  const handleTogglePlay = () => {
+  const handleTogglePlay = async () => {
     if (isPlaying) {
       stopAudio();
       return;
@@ -123,53 +131,48 @@ export default function VoiceGuideModal({ isOpen, onClose, applicationResult, de
     setIsLoadingAudio(true);
     stopAudio();
 
-    // Use backend gTTS streaming audio endpoint for 100% natural, fluent regional pronunciation
-    const audioUrl = `/api/v1/customer/voice-audio?text=${encodeURIComponent(currentText)}&lang=${currentLangConfig.locale}&t=${Date.now()}`;
-    const audio = new Audio(audioUrl);
-    audioRef.current = audio;
+    try {
+      // Use backend gTTS streaming endpoint via POST blob for 100% natural, fluent regional pronunciation
+      const res = await axios.post('/api/v1/customer/voice-audio', {
+        text: currentText,
+        lang: currentLangConfig.locale
+      }, {
+        responseType: 'blob',
+        timeout: 15000
+      });
 
-    audio.onplaying = () => {
+      const blobUrl = URL.createObjectURL(res.data);
+      audioUrlRef.current = blobUrl;
+      const audio = new Audio(blobUrl);
+      audioRef.current = audio;
+
+      audio.onplaying = () => {
+        setIsLoadingAudio(false);
+        setIsPlaying(true);
+      };
+
+      audio.onended = () => {
+        setIsPlaying(false);
+        setIsLoadingAudio(false);
+        if (audioUrlRef.current) {
+          URL.revokeObjectURL(audioUrlRef.current);
+          audioUrlRef.current = null;
+        }
+      };
+
+      audio.onerror = (e) => {
+        console.error("Audio playback error:", e);
+        stopAudio();
+      };
+
+      await audio.play();
+    } catch (err) {
+      console.error("Failed to generate or play voice audio:", err);
       setIsLoadingAudio(false);
-      setIsPlaying(true);
-    };
-
-    audio.onended = () => {
       setIsPlaying(false);
-      setIsLoadingAudio(false);
-    };
-
-    audio.onerror = (e) => {
-      console.warn("Backend audio stream error, falling back to Web Speech:", e);
-      setIsLoadingAudio(false);
-      fallbackWebSpeech();
-    };
-
-    audio.play().catch(err => {
-      console.warn("Audio play error, falling back to Web Speech:", err);
-      setIsLoadingAudio(false);
-      fallbackWebSpeech();
-    });
+    }
   };
 
-  const fallbackWebSpeech = () => {
-    if (!('speechSynthesis' in window)) return;
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(currentText);
-    const localeMap = {
-      hi: 'hi-IN',
-      mr: 'mr-IN',
-      gu: 'gu-IN',
-      bn: 'bn-IN',
-      ta: 'ta-IN',
-      te: 'te-IN',
-      en: 'en-IN'
-    };
-    utterance.lang = localeMap[currentLangConfig.locale] || 'hi-IN';
-    utterance.onend = () => setIsPlaying(false);
-    utterance.onerror = () => setIsPlaying(false);
-    setIsPlaying(true);
-    window.speechSynthesis.speak(utterance);
-  };
 
 
   const handleLanguageChange = (newLang) => {

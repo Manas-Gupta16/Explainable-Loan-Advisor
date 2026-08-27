@@ -366,8 +366,8 @@ class CausalRecourseResponse(BaseModel):
     projected_cibil_gain: Optional[int] = None
     is_recourse_needed: bool
     horizon_days: Optional[int] = None
-    phases: List[CausalPhase]
-    causal_levers_ranked: List[CausalLever]
+    phases: List[CausalPhase] = []
+    causal_levers_ranked: Optional[List[CausalLever]] = []
     structural_causal_graph: Optional[Dict[str, Any]] = None
     summary: Optional[str] = None
 

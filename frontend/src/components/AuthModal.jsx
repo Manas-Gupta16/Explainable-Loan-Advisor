@@ -219,15 +219,17 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
                 <label className="text-xs text-slate-300 block mb-1 font-bold">
                   {role === 'CUSTOMER' ? 'Full Name (नाम)' : 'Officer Full Name'}
                 </label>
-                <div className="relative">
-                  <User className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                <div className="flex items-center rounded-lg border border-[#1e2a3d] bg-[#0d121c] focus-within:border-[#d2ff00] focus-within:ring-1 focus-within:ring-[#d2ff00]/30 transition-all overflow-hidden">
+                  <div className="pl-3 pr-2 text-slate-400 shrink-0">
+                    <User className="w-4 h-4" />
+                  </div>
                   <input
                     type="text"
                     name="full_name"
                     value={formData.full_name}
                     onChange={handleChange}
                     placeholder={role === 'CUSTOMER' ? 'e.g. Rameshwar Patil' : 'e.g. Officer S. Deshmukh'}
-                    className="cyber-input pl-9 text-xs"
+                    className="w-full bg-transparent border-0 py-2.5 pr-3 text-xs text-white placeholder-slate-500 outline-none focus:ring-0"
                     required
                   />
                 </div>
@@ -236,15 +238,17 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
 
             <div>
               <label className="text-xs text-slate-300 block mb-1 font-bold">Email / Username</label>
-              <div className="relative">
-                <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+              <div className="flex items-center rounded-lg border border-[#1e2a3d] bg-[#0d121c] focus-within:border-[#d2ff00] focus-within:ring-1 focus-within:ring-[#d2ff00]/30 transition-all overflow-hidden">
+                <div className="pl-3 pr-2 text-slate-400 shrink-0">
+                  <Mail className="w-4 h-4" />
+                </div>
                 <input
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
                   placeholder={role === 'CUSTOMER' ? 'farmer@ruralbharat.in' : 'officer@sbi.co.in'}
-                  className="cyber-input pl-9 text-xs"
+                  className="w-full bg-transparent border-0 py-2.5 pr-3 text-xs text-white placeholder-slate-500 outline-none focus:ring-0"
                   required
                 />
               </div>
@@ -252,15 +256,17 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
 
             <div>
               <label className="text-xs text-slate-300 block mb-1 font-bold">Password</label>
-              <div className="relative">
-                <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+              <div className="flex items-center rounded-lg border border-[#1e2a3d] bg-[#0d121c] focus-within:border-[#d2ff00] focus-within:ring-1 focus-within:ring-[#d2ff00]/30 transition-all overflow-hidden">
+                <div className="pl-3 pr-2 text-slate-400 shrink-0">
+                  <Lock className="w-4 h-4" />
+                </div>
                 <input
                   type="password"
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="••••••••"
-                  className="cyber-input pl-9 text-xs"
+                  className="w-full bg-transparent border-0 py-2.5 pr-3 text-xs text-white placeholder-slate-500 outline-none focus:ring-0"
                   required
                 />
               </div>

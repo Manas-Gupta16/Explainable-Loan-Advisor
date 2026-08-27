@@ -303,7 +303,11 @@ export default function CustomerPortal() {
         application_id: curResult?.application_id || null,
         loan_input: currentForm,
         shap_data: curResult?.shap_explanation || null,
-        dice_data: curResult?.dice_roadmap || null
+        dice_data: curResult?.dice_roadmap || null,
+        bank_recommendations: curResult?.bank_recommendations || null,
+        approval_probability: curResult?.approval_probability || null,
+        risk_tier: curResult?.risk_tier || null,
+        status: curResult?.status || null
       };
       const res = await axios.post('/api/v1/customer/coach-advice', payload);
       setCoachData(res.data);
@@ -1657,7 +1661,7 @@ export default function CustomerPortal() {
         currentLanguage={uiLang}
       />
 
-      {/* Multi-Lingual Regional Voice Guide Modal */}
+      {/* Multi-Lingual Regional Voice Guide Modal (100% Real-Time Data Driven) */}
       <VoiceGuideModal
         isOpen={isVoiceGuideOpen}
         onClose={() => {
@@ -1666,8 +1670,10 @@ export default function CustomerPortal() {
             window.speechSynthesis.cancel();
           }
         }}
-
         applicationResult={result}
+        formData={formData}
+        userProfile={userProfile}
+        coachData={coachData}
         defaultLanguage={uiLang || userProfile?.preferred_language || 'hi'}
         onLanguageSelect={(selected) => {
           setUiLang(selected);

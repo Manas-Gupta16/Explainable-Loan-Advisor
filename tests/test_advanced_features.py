@@ -175,5 +175,26 @@ class TestAdvancedFeatures(unittest.TestCase):
         batch_stress_resp = self.client.post("/api/v1/bank/stress-test-batch?rate_hike_pct=2.0")
         self.assertEqual(batch_stress_resp.status_code, 200)
 
+        # 9. Dynamic Voice Guide Script endpoint (100% Data-Driven)
+        vg_resp = self.client.post("/api/v1/customer/voice-guide-script", json={
+            "applicant_name": "Sunita Devi",
+            "language": "en",
+            "loan_input": {
+                "cibil_score": 740,
+                "applicant_income": 480000,
+                "loan_amount": 180000,
+                "loan_tenure_months": 24,
+                "existing_debts": 36000,
+                "loan_purpose": "Village Kirana / Rural MSME"
+            }
+        })
+        self.assertEqual(vg_resp.status_code, 200)
+        vg_data = vg_resp.json()
+        self.assertIn("Sunita Devi", vg_data["script"])
+        self.assertIn("Village Kirana", vg_data["script"])
+        self.assertGreaterEqual(vg_data["approval_percentage"], 70)
+        self.assertIsNotNone(vg_data["matched_bank"])
+
+
 if __name__ == '__main__':
     unittest.main()

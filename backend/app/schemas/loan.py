@@ -122,14 +122,33 @@ class DecisionUpdate(BaseModel):
     status: str  # APPROVED, REJECTED
     officer_notes: Optional[str] = None
 
-# --- AI Conversational Coach Schemas ---
+# --- AI Conversational Coach & Voice Guide Schemas ---
 class CoachAdviceRequest(BaseModel):
     application_id: Optional[int] = None
     applicant_name: Optional[str] = "Applicant"
-    language: str = "en"  # "en", "es", "hi"
+    language: str = "en"  # "en", "hi", "mr", "gu", "bn", "ta", "te", "hinglish"
     loan_input: Optional[LoanApplicationCreate] = None
     shap_data: Optional[Dict[str, Any]] = None
     dice_data: Optional[Dict[str, Any]] = None
+    bank_recommendations: Optional[List[Dict[str, Any]]] = None
+    approval_probability: Optional[float] = None
+    risk_tier: Optional[str] = None
+    status: Optional[str] = None
+
+class VoiceGuideScriptRequest(BaseModel):
+    applicant_name: Optional[str] = "Valued Borrower"
+    language: str = "hi"
+    loan_input: Optional[Dict[str, Any]] = None
+    application_result: Optional[Dict[str, Any]] = None
+
+class VoiceGuideScriptResponse(BaseModel):
+    script: str
+    headline: str
+    approval_percentage: int
+    matched_bank: str
+    interest_rate: float
+    status: str
+
 
 class ActionMilestone(BaseModel):
     phase: str  # "30_DAYS", "90_DAYS", "180_DAYS"

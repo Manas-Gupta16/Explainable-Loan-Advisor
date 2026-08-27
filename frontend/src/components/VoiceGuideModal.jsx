@@ -219,6 +219,40 @@ export default function VoiceGuideModal({
   const currentConfig = REGIONAL_METADATA[lang] || REGIONAL_METADATA.hi;
   const currentText = backendScript || buildDataDrivenScript(lang);
 
+  const preloadedBlobUrlRef = useRef(null);
+
+  // Background Audio Pre-buffering for Instant Zero-Latency Playback
+  useEffect(() => {
+    if (!isOpen || !currentText) return;
+    let isCancelled = false;
+
+    const prefetchAudio = async () => {
+      try {
+        const res = await axios.post('/api/v1/customer/voice-audio', {
+          text: currentText,
+          lang: currentConfig.locale
+        }, {
+          responseType: 'blob',
+          timeout: 12000
+        });
+
+        if (!isCancelled) {
+          if (preloadedBlobUrlRef.current) {
+            try { URL.revokeObjectURL(preloadedBlobUrlRef.current); } catch (e) {}
+          }
+          preloadedBlobUrlRef.current = URL.createObjectURL(res.data);
+        }
+      } catch (err) {
+        console.warn("Audio prefetch notice:", err);
+      }
+    };
+
+    prefetchAudio();
+    return () => {
+      isCancelled = true;
+    };
+  }, [isOpen, currentText, currentConfig.locale]);
+
   const stopAudio = () => {
     if (audioRef.current) {
       try {
@@ -248,11 +282,21 @@ export default function VoiceGuideModal({
   useEffect(() => {
     if (!isOpen) {
       stopAudio();
+      if (preloadedBlobUrlRef.current) {
+        try { URL.revokeObjectURL(preloadedBlobUrlRef.current); } catch (e) {}
+        preloadedBlobUrlRef.current = null;
+      }
     }
   }, [isOpen]);
 
   useEffect(() => {
-    return () => stopAudio();
+    return () => {
+      stopAudio();
+      if (preloadedBlobUrlRef.current) {
+        try { URL.revokeObjectURL(preloadedBlobUrlRef.current); } catch (e) {}
+        preloadedBlobUrlRef.current = null;
+      }
+    };
   }, []);
 
   // Escape key closes modal & stops audio
@@ -284,16 +328,19 @@ export default function VoiceGuideModal({
     stopAudio();
 
     try {
-      // Stream natural, native regional pronunciation using POST blob
-      const res = await axios.post('/api/v1/customer/voice-audio', {
-        text: currentText,
-        lang: currentConfig.locale
-      }, {
-        responseType: 'blob',
-        timeout: 15000
-      });
+      // Use preloaded audio blob if ready for instant 0ms startup
+      let blobUrl = preloadedBlobUrlRef.current;
+      if (!blobUrl) {
+        const res = await axios.post('/api/v1/customer/voice-audio', {
+          text: currentText,
+          lang: currentConfig.locale
+        }, {
+          responseType: 'blob',
+          timeout: 15000
+        });
+        blobUrl = URL.createObjectURL(res.data);
+      }
 
-      const blobUrl = URL.createObjectURL(res.data);
       audioUrlRef.current = blobUrl;
       const audio = new Audio(blobUrl);
       audioRef.current = audio;
@@ -306,10 +353,6 @@ export default function VoiceGuideModal({
       audio.onended = () => {
         setIsPlaying(false);
         setIsLoadingAudio(false);
-        if (audioUrlRef.current) {
-          URL.revokeObjectURL(audioUrlRef.current);
-          audioUrlRef.current = null;
-        }
       };
 
       audio.onerror = () => {
@@ -328,6 +371,10 @@ export default function VoiceGuideModal({
 
   const handleLanguageChange = (newLang) => {
     stopAudio();
+    if (preloadedBlobUrlRef.current) {
+      try { URL.revokeObjectURL(preloadedBlobUrlRef.current); } catch (e) {}
+      preloadedBlobUrlRef.current = null;
+    }
     setLang(newLang);
     setBackendScript(null); // Clear cached script to re-trigger dynamic synthesis
     if (onLanguageSelect) onLanguageSelect(newLang);
@@ -373,25 +420,6 @@ export default function VoiceGuideModal({
             </button>
           </div>
 
-          {/* Live Data Context Pills (Confirms 100% Data-Driven Output) */}
-          <div className="bg-[#0a0e17] p-2.5 rounded-xl border border-[#1e2a3d] flex flex-wrap items-center gap-2 text-[10px] font-mono-tech">
-            <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-bold border border-slate-700">
-              👤 {borrowerName}
-            </span>
-            <span className="px-2 py-0.5 rounded bg-[#d2ff00]/10 text-[#d2ff00] font-bold border border-[#d2ff00]/30">
-              ₹{loanAmount.toLocaleString('en-IN')} ({loanPurposeKey})
-            </span>
-            <span className={`px-2 py-0.5 rounded font-bold border ${
-              probPct >= 70 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' :
-              probPct >= 45 ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' :
-              'bg-rose-500/10 text-rose-400 border-rose-500/30'
-            }`}>
-              📊 {probPct}% ({riskTier})
-            </span>
-            <span className="px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-300 font-bold border border-cyan-500/30">
-              🏦 {topBank.bank_name.split(' ')[0]} @ {topBank.base_interest_rate}%
-            </span>
-          </div>
 
           {/* Regional Language Selector Buttons */}
           <div className="space-y-1.5">

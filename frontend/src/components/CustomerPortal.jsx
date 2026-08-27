@@ -25,99 +25,25 @@ const formatMonthlyINR = (annualVal) => {
   return `₹${monthly.toLocaleString('en-IN')}/mo`;
 };
 
-const PRESETS = [
-  {
-    name: "🌾 Rameshwar Patil (Farmer)",
-    badge: "KCC 4% SUBVENTION",
-    badgeColor: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30",
-    description: "3.5 Acres Agri land, Cotton/Soybean, Kisan Credit Card",
-    data: {
-      cibil_score: 695,
-      applicant_income: 456000, // ₹38k/mo
-      coapplicant_income: 0,
-      loan_amount: 180000, // ₹1.8 Lakhs
-      loan_tenure_months: 12,
-      existing_debts: 54000, // ₹4.5k/mo
-      credit_card_utilization: 0.15,
-      delinquent_lines_2yrs: 0,
-      credit_history_years: 4.5,
-      employment_status: 'Farmer / Agriculture',
-      education: 'Undergraduate',
-      home_ownership: 'OWN',
-      loan_purpose: 'Kisan Agri Crop / Seeds',
-      repayment_cycle: 'HARVEST_BIANNUAL_BULLET'
-    }
-  },
-  {
-    name: "🥛 Sunita Devi (Dairy Co-op)",
-    badge: "DAIRY / LIVESTOCK",
-    badgeColor: "text-[#d2ff00] bg-[#d2ff00]/10 border-[#d2ff00]/30",
-    description: "6 Milking Cows, Daily Milk Co-op Pouring, Women JLG",
-    data: {
-      cibil_score: 710,
-      applicant_income: 504000, // ₹42k/mo
-      coapplicant_income: 180000, // ₹15k/mo
-      loan_amount: 250000, // ₹2.5 Lakhs
-      loan_tenure_months: 36,
-      existing_debts: 60000, // ₹5k/mo
-      credit_card_utilization: 0.20,
-      delinquent_lines_2yrs: 0,
-      credit_history_years: 3.5,
-      employment_status: 'Dairy / Livestock',
-      education: 'High School',
-      home_ownership: 'OWN',
-      loan_purpose: 'Dairy & Livestock',
-      repayment_cycle: 'MONTHLY_EMI'
-    }
-  },
-  {
-    name: "🏬 Gopal Sharma (Kirana Store)",
-    badge: "RURAL MSME / KIRANA",
-    badgeColor: "text-amber-400 bg-amber-500/10 border-amber-500/30",
-    description: "General Store & Agri Inputs, UPI QR Payments, Bandhan Bank",
-    data: {
-      cibil_score: 725,
-      applicant_income: 660000, // ₹55k/mo
-      coapplicant_income: 0,
-      loan_amount: 400000, // ₹4.0 Lakhs
-      loan_tenure_months: 48,
-      existing_debts: 96000, // ₹8k/mo
-      credit_card_utilization: 0.32,
-      delinquent_lines_2yrs: 0,
-      credit_history_years: 5.0,
-      employment_status: 'Rural Self-Employed / Kirana',
-      education: 'Graduate',
-      home_ownership: 'OWN',
-      loan_purpose: 'Village Kirana / Rural MSME',
-      repayment_cycle: 'MONTHLY_EMI'
-    }
-  },
-  {
-    name: "⚠️ Sahukar Debt Relief",
-    badge: "MONELEYNDER DEBT SWAP",
-    badgeColor: "text-rose-400 bg-rose-500/10 border-rose-500/30",
-    description: "48% p.a. Informal Sahukar Loan -> Swap with Bank Credit",
-    data: {
-      cibil_score: 590,
-      applicant_income: 336000, // ₹28k/mo
-      coapplicant_income: 0,
-      loan_amount: 120000, // ₹1.2 Lakhs
-      loan_tenure_months: 24,
-      existing_debts: 168000, // ₹14k/mo exploitative debt
-      credit_card_utilization: 0.70,
-      delinquent_lines_2yrs: 1,
-      credit_history_years: 2.0,
-      employment_status: 'Daily Wage / Labor',
-      education: 'Undergraduate',
-      home_ownership: 'RENT',
-      loan_purpose: 'Informal Moneylender Debt-Swap',
-      repayment_cycle: 'MONTHLY_EMI'
-    }
-  }
-];
+const DEFAULT_INITIAL_LOAN = {
+  cibil_score: 710,
+  applicant_income: 456000, // ₹38k/mo
+  coapplicant_income: 0,
+  loan_amount: 250000, // ₹2.5 Lakhs
+  loan_tenure_months: 24,
+  existing_debts: 48000, // ₹4.0k/mo
+  credit_card_utilization: 0.18,
+  delinquent_lines_2yrs: 0,
+  credit_history_years: 4.0,
+  employment_status: 'Farmer / Agriculture',
+  education: 'Undergraduate',
+  home_ownership: 'OWN',
+  loan_purpose: 'Kisan Agri Crop / Seeds',
+  repayment_cycle: 'HARVEST_BIANNUAL_BULLET'
+};
 
-export default function CustomerPortal() {
-  const [formData, setFormData] = useState(PRESETS[0].data);
+export default function CustomerPortal({ currentUser, onOpenProfile }) {
+  const [formData, setFormData] = useState(DEFAULT_INITIAL_LOAN);
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
@@ -132,16 +58,16 @@ export default function CustomerPortal() {
   const [isVoiceGuideOpen, setIsVoiceGuideOpen] = useState(false);
   const [showOverrides, setShowOverrides] = useState(false);
   const [userProfile, setUserProfile] = useState({
-    full_name: "Rameshwar Patil",
-    employment_type: "Farmer / Agriculture",
-    agri_land_acres: 3.5,
+    full_name: currentUser?.full_name || "Rameshwar Patil",
+    monthly_income: currentUser?.monthly_income || 38000,
+    employment_type: currentUser?.employment_type || "Farmer / Agriculture",
+    agri_land_acres: currentUser?.agri_land_acres || 3.5,
     kcc_holder: true,
-    monthly_income: 38000,
     coapplicant_income: 0,
     existing_debts_monthly: 4500,
-    cibil_score: 695,
+    cibil_score: 710,
     home_ownership: "Owned - Ancestral / Pucca",
-    preferred_language: "hi",
+    preferred_language: currentUser?.preferred_language || "hi",
     phone_number: "+91 98231 45678"
   });
 
@@ -205,12 +131,6 @@ export default function CustomerPortal() {
     }));
   };
 
-  const handleApplyPreset = (preset) => {
-    setFormData(preset.data);
-    setDeclaredIncome(preset.data.applicant_income / 12);
-    evaluateApplication(preset.data);
-  };
-
   const evaluateApplication = async (dataToSubmit = formData, isRetry = false) => {
     setLoading(true);
     setError(null);
@@ -223,7 +143,6 @@ export default function CustomerPortal() {
       fetchConformal(response.data, dataToSubmit);
     } catch (err) {
       console.error("Evaluation error:", err);
-      // If initial auto-evaluation on mount fails because the backend was just booting up, auto-retry once after 1.5s
       if (!isRetry) {
         setTimeout(() => {
           evaluateApplication(dataToSubmit, true);
@@ -237,11 +156,29 @@ export default function CustomerPortal() {
     }
   };
 
-
   const handleSubmit = (e) => {
     if (e) e.preventDefault();
     evaluateApplication(formData);
   };
+
+  // Update profile and form when currentUser changes
+  useEffect(() => {
+    if (currentUser) {
+      setUserProfile(prev => ({
+        ...prev,
+        full_name: currentUser.full_name || prev.full_name,
+        monthly_income: currentUser.monthly_income || prev.monthly_income,
+        employment_type: currentUser.employment_type || prev.employment_type,
+        agri_land_acres: currentUser.agri_land_acres !== undefined ? currentUser.agri_land_acres : prev.agri_land_acres,
+        preferred_language: currentUser.preferred_language || prev.preferred_language
+      }));
+      setFormData(prev => ({
+        ...prev,
+        applicant_income: (currentUser.monthly_income || 38000) * 12,
+        employment_status: currentUser.employment_type || prev.employment_status,
+      }));
+    }
+  }, [currentUser]);
 
   // Initial mount auto-evaluation & profile fetch
   useEffect(() => {
@@ -264,7 +201,7 @@ export default function CustomerPortal() {
       }
     };
     fetchProfile();
-    evaluateApplication(PRESETS[0].data);
+    evaluateApplication(DEFAULT_INITIAL_LOAN);
   }, []);
 
   const handleSaveProfile = (newProfile) => {
@@ -587,35 +524,7 @@ export default function CustomerPortal() {
         </div>
       </div>
 
-      {/* Demo Preset Selector Bar */}
-      <div className="bg-[#121824] border border-[#1e2a3d] p-3 rounded-2xl">
 
-        <div className="flex items-center justify-between mb-2 px-2">
-          <span className="text-[11px] font-mono-tech text-slate-400 flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-[#d2ff00]" /> {t.demo_profiles_label}
-          </span>
-          <span className="text-[10px] font-mono-tech text-[#d2ff00]">{t.demo_sub_badge}</span>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
-          {PRESETS.map((p, idx) => (
-            <button
-              key={idx}
-              onClick={() => handleApplyPreset(p)}
-              className="bg-[#0a0e17] hover:bg-[#162030] p-2.5 rounded-xl border border-[#1e2a3d] hover:border-[#d2ff00]/40 transition-all text-left group cursor-pointer"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-white group-hover:text-[#d2ff00] transition-colors">{p.name}</span>
-              </div>
-              <div className="flex items-center justify-between mt-1">
-                <span className="text-[10px] font-mono-tech text-slate-400">
-                  CIBIL {p.data.cibil_score} | {formatINR(p.data.loan_amount)}
-                </span>
-                <span className={`text-[9px] font-mono-tech px-1.5 py-0.5 rounded border ${p.badgeColor}`}>{p.badge}</span>
-              </div>
-            </button>
-          ))}
-        </div>
-      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
@@ -647,7 +556,7 @@ export default function CustomerPortal() {
 
                 <button
                   type="button"
-                  onClick={() => setIsProfileModalOpen(true)}
+                  onClick={() => onOpenProfile ? onOpenProfile() : setIsProfileModalOpen(true)}
                   className="px-2.5 py-1 rounded bg-[#162030] hover:bg-[#1f2c42] text-[#d2ff00] text-[10px] font-mono-tech font-bold border border-[#d2ff00]/30 transition-all flex items-center gap-1 cursor-pointer"
                 >
                   <Edit3 className="w-3 h-3" /> {t.edit_profile}
@@ -939,6 +848,46 @@ export default function CustomerPortal() {
                     }`}
                   />
                 </div>
+
+                {/* Instant Top Matched Lenders Quick Grid (Visible directly at the top with NO scrolling!) */}
+                {result.bank_recommendations && result.bank_recommendations.length > 0 && (
+                  <div className="mt-5 pt-4 border-t border-[#1e2a3d]/80">
+                    <div className="flex items-center justify-between mb-2.5">
+                      <span className="text-[11px] font-mono-tech text-[#d2ff00] font-bold flex items-center gap-1.5">
+                        <Landmark className="w-3.5 h-3.5" /> TOP MATCHED LENDERS (INSTANT OFFERS):
+                      </span>
+                      <span className="text-[10px] font-mono-tech text-slate-400">
+                        {result.bank_recommendations.length} Schemes Evaluated
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                      {result.bank_recommendations.slice(0, 3).map((bank, idx) => (
+                        <div 
+                          key={idx}
+                          className="bg-[#0a0e17] p-3 rounded-xl border border-[#1e2a3d] hover:border-[#d2ff00]/40 transition-all space-y-1"
+                        >
+                          <div className="flex items-start justify-between gap-1">
+                            <span className="text-xs font-bold text-white truncate" title={bank.bank_name}>
+                              {bank.bank_name.split('(')[0]}
+                            </span>
+                            <span className="text-[9px] font-mono-tech px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 shrink-0">
+                              {bank.match_score}%
+                            </span>
+                          </div>
+                          <div className="text-[11px] font-mono-tech flex justify-between text-slate-300">
+                            <span className="text-slate-400">Rate:</span>
+                            <strong className="text-emerald-400">{bank.base_interest_rate}% APR</strong>
+                          </div>
+                          <div className="text-[11px] font-mono-tech flex justify-between text-slate-300">
+                            <span className="text-slate-400">Monthly EMI:</span>
+                            <strong className="text-[#d2ff00]">₹{Math.round(bank.estimated_monthly_emi).toLocaleString('en-IN')}/mo</strong>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Navigation Sub-Tabs */}

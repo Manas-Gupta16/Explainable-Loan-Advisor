@@ -719,6 +719,10 @@ def normalize_regional_numbers(text: str, lang: str) -> str:
             text = text.replace(f"{k}%", f"{v} শতাংশ").replace(f"{k} %", f"{v} শতাংশ").replace(f" {k} ", f" {v} ")
     return text
 
+import hashlib
+
+AUDIO_CACHE: Dict[str, bytes] = {}
+
 @router.post("/voice-audio")
 def generate_voice_audio_post(body: VoiceAudioRequest):
     return generate_voice_audio_response(body.text, body.lang)
@@ -730,7 +734,7 @@ def generate_voice_audio_get(text: str, lang: str = "hi"):
 def generate_voice_audio_response(text: str, lang: str = "hi"):
     """
     Generates and streams fluent, native MP3 speech audio using gTTS 
-    in Indian regional languages (Hindi, Marathi, Gujarati, Bengali, Tamil, Telugu, English).
+    with in-memory MD5 caching for instantaneous zero-latency playback.
     """
     from fastapi.responses import Response
     import io
@@ -748,10 +752,29 @@ def generate_voice_audio_response(text: str, lang: str = "hi"):
     target_lang = supported_langs.get(lang, "hi")
     clean_text = normalize_regional_numbers(text, target_lang)
 
+    cache_key = hashlib.md5(f"{target_lang}_{clean_text}".encode('utf-8')).hexdigest()
+    if cache_key in AUDIO_CACHE:
+        content = AUDIO_CACHE[cache_key]
+        return Response(
+            content=content,
+            media_type="audio/mpeg",
+            headers={
+                "Content-Length": str(len(content)),
+                "Accept-Ranges": "bytes",
+                "Cache-Control": "public, max-age=86400",
+                "X-Audio-Cache": "HIT"
+            }
+        )
+
     fp = io.BytesIO()
     tts = gTTS(text=clean_text, lang=target_lang, slow=False)
     tts.write_to_fp(fp)
     content = fp.getvalue()
+    
+    # Store in cache (limit cache size to 200 items to keep RAM minimal)
+    if len(AUDIO_CACHE) > 200:
+        AUDIO_CACHE.clear()
+    AUDIO_CACHE[cache_key] = content
     
     return Response(
         content=content,
@@ -759,9 +782,11 @@ def generate_voice_audio_response(text: str, lang: str = "hi"):
         headers={
             "Content-Length": str(len(content)),
             "Accept-Ranges": "bytes",
-            "Cache-Control": "public, max-age=3600"
+            "Cache-Control": "public, max-age=86400",
+            "X-Audio-Cache": "MISS"
         }
     )
+
 
 
 

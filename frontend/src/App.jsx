@@ -8,7 +8,7 @@ import AuthModal from './components/AuthModal';
 import BorrowerProfileModal from './components/BorrowerProfileModal';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('customer'); // Default directly to Farmer/Borrower portal
+  const [activeTab, setActiveTab] = useState('landing'); // Opens Landing Hero Page by default
   const [currentUser, setCurrentUser] = useState(() => {
     try {
       const saved = localStorage.getItem('loaniq_user');

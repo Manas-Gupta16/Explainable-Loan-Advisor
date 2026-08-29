@@ -545,7 +545,7 @@ export default function CustomerPortal({ currentUser, onOpenProfile }) {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-7 h-7 rounded-lg bg-[#d2ff00]/10 text-[#d2ff00] border border-[#d2ff00]/30 flex items-center justify-center text-xs font-bold">
-                    🌾
+                    <User className="w-4 h-4" />
                   </div>
                   <div>
                     <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
@@ -613,13 +613,13 @@ export default function CustomerPortal({ currentUser, onOpenProfile }) {
                 onChange={handleChange}
                 className="cyber-input text-xs"
               >
-                <option value="Kisan Agri Crop / Seeds">🌾 {t.purposes["Kisan Agri Crop / Seeds"]}</option>
-                <option value="Tractor & Farm Equipment">🚜 {t.purposes["Tractor & Farm Equipment"]}</option>
-                <option value="Dairy & Livestock">🥛 {t.purposes["Dairy & Livestock"]}</option>
-                <option value="Village Kirana / Rural MSME">🏬 {t.purposes["Village Kirana / Rural MSME"]}</option>
-                <option value="Rural Housing (PMAY-G)">🏠 {t.purposes["Rural Housing (PMAY-G)"]}</option>
-                <option value="Informal Moneylender Debt-Swap">⚠️ {t.purposes["Informal Moneylender Debt-Swap"]}</option>
-                <option value="Personal">💼 {t.purposes["Personal"]}</option>
+                <option value="Kisan Agri Crop / Seeds">{t.purposes["Kisan Agri Crop / Seeds"]}</option>
+                <option value="Tractor & Farm Equipment">{t.purposes["Tractor & Farm Equipment"]}</option>
+                <option value="Dairy & Livestock">{t.purposes["Dairy & Livestock"]}</option>
+                <option value="Village Kirana / Rural MSME">{t.purposes["Village Kirana / Rural MSME"]}</option>
+                <option value="Rural Housing (PMAY-G)">{t.purposes["Rural Housing (PMAY-G)"]}</option>
+                <option value="Informal Moneylender Debt-Swap">{t.purposes["Informal Moneylender Debt-Swap"]}</option>
+                <option value="Personal">{t.purposes["Personal"]}</option>
               </select>
             </div>
 
@@ -825,13 +825,19 @@ export default function CustomerPortal({ currentUser, onOpenProfile }) {
                   <div className="text-left sm:text-right space-y-2">
                     <div>
                       <span className={`inline-block px-3 py-1 rounded-md text-xs font-mono-tech font-bold border ${
+                        result.fraud_flag ? 'bg-rose-900/40 text-rose-300 border-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.3)] animate-pulse' :
                         result.status === 'APPROVED' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' :
                         result.status === 'PENDING' ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' :
                         'bg-rose-500/10 text-rose-400 border-rose-500/30'
                       }`}>
-                        {result.risk_tier} — {result.status}
+                        {result.fraud_flag ? "CRITICAL FRAUD ANOMALY" : `${result.risk_tier} — ${result.status}`}
                       </span>
                     </div>
+                    {result.climate_risk_data && result.climate_risk_data.climate_risk_penalty > 0 && (
+                      <div className="text-[10px] font-mono-tech px-2 py-1 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30 inline-block">
+                        CLIMATE PENALTY APPLIED: {result.climate_risk_data.condition}
+                      </div>
+                    )}
                     <div className="text-[11px] font-mono-tech text-slate-400">
                       Application ID: <strong className="text-[#d2ff00]">#{result.application_id}</strong>
                     </div>

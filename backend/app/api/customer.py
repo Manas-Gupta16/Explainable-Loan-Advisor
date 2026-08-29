@@ -26,17 +26,35 @@ from backend.app.schemas.loan import (
 
 from backend.app.services.ml_service import ml_service
 from backend.app.services.bank_service import evaluate_bank_recommendations
+from backend.app.services.climate_risk_service import ClimateRiskService
 
 router = APIRouter(prefix="/customer", tags=["Customer Portal"])
 
 @router.post("/apply", response_model=Dict[str, Any])
-def submit_application(app_in: LoanApplicationCreate, user_id: int = 1, db: Session = Depends(get_db)):
+async def submit_application(app_in: LoanApplicationCreate, user_id: int = 1, db: Session = Depends(get_db)):
     input_dict = app_in.model_dump()
 
-    # 1. Run ML Inference
+    # 1. Run ML Inference (Base Probability)
     prob, risk_tier, status = ml_service.predict_risk(input_dict)
+    
+    # 2. Fraud & Anomaly Detection
+    is_fraud = ml_service.predict_fraud(input_dict)
+    
+    # 3. Live Climate Risk Integration (Open-Meteo)
+    # Default to MH (Maharashtra) for rural agriculture simulation
+    climate_data = await ClimateRiskService.get_climate_risk("MH")
+    
+    # Apply climate risk penalty to base probability
+    if climate_data.get("climate_risk_penalty", 0) > 0:
+        prob = max(0.01, prob - climate_data["climate_risk_penalty"])
+        
+    # If fraud detected, automatically reject regardless of ML score
+    if is_fraud:
+        prob = 0.01
+        risk_tier = "CRITICAL_FRAUD"
+        status = "REJECTED"
 
-    # 2. Get Bank Recommendations
+    # 4. Get Bank Recommendations
     bank_recs = evaluate_bank_recommendations(input_dict, prob)
     top_bank = bank_recs[0].bank_name if bank_recs else "Apex National Bank"
 
@@ -70,6 +88,8 @@ def submit_application(app_in: LoanApplicationCreate, user_id: int = 1, db: Sess
         "approval_probability": prob,
         "risk_tier": risk_tier,
         "status": status,
+        "fraud_flag": is_fraud,
+        "climate_risk_data": climate_data,
         "bank_recommendations": bank_recs,
         "shap_explanation": shap_data,
         "dice_roadmap": dice_data

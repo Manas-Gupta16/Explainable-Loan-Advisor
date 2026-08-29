@@ -23,21 +23,38 @@ class MLInferenceService:
         print("Initializing MLInferenceService...")
         self.model_path = settings.MODEL_PATH
         self.preprocessor_path = settings.PREPROCESSOR_PATH
+        self.fraud_model_path = os.path.join(settings.BASE_DIR, "ml_engine", "artifacts", "fraud_iso_forest.joblib")
 
         if not os.path.exists(self.model_path) or not os.path.exists(self.preprocessor_path):
             print("Model artifacts not found. Training model first...")
             from ml_engine.train import train_model
             train_model()
 
+        if not os.path.exists(self.fraud_model_path):
+            print("Fraud model not found. Training fraud model...")
+            from ml_engine.fraud_detection import train_fraud_model
+            train_fraud_model()
+
         self.model = joblib.load(self.model_path)
         self.preprocessor = LoanPreprocessor.load(self.preprocessor_path)
+        self.fraud_model = joblib.load(self.fraud_model_path)
         self.xai_manager = XAIExplainerManager(self.model_path, self.preprocessor_path)
 
     def reload(self):
         """Reloads serialized model artifacts into memory."""
         self.model = joblib.load(self.model_path)
         self.preprocessor = LoanPreprocessor.load(self.preprocessor_path)
+        self.fraud_model = joblib.load(self.fraud_model_path)
         self.xai_manager = XAIExplainerManager(self.model_path, self.preprocessor_path)
+
+    def predict_fraud(self, input_dict: Dict[str, Any]) -> bool:
+        """
+        Returns True if the application is flagged as highly anomalous (fraudulent).
+        """
+        X_df = self.preprocessor.transform_single(input_dict)
+        # IsolationForest returns -1 for anomalies (outliers) and 1 for inliers
+        prediction = self.fraud_model.predict(X_df)[0]
+        return prediction == -1
 
     def predict_risk(self, input_dict: Dict[str, Any]) -> Tuple[float, str, str]:
         """

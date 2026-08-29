@@ -112,6 +112,8 @@ class LoanApplicationResponse(BaseModel):
     approval_probability: Optional[float] = None
     risk_tier: Optional[str] = None
     status: str
+    fraud_flag: Optional[bool] = False
+    climate_risk_data: Optional[Dict[str, Any]] = None
     recommended_bank: Optional[str] = None
     officer_notes: Optional[str] = None
     created_at: datetime

@@ -58,17 +58,17 @@ export default function CustomerPortal({ currentUser, onOpenProfile }) {
   const [isVoiceGuideOpen, setIsVoiceGuideOpen] = useState(false);
   const [showOverrides, setShowOverrides] = useState(false);
   const [userProfile, setUserProfile] = useState({
-    full_name: currentUser?.full_name || "Rameshwar Patil",
-    monthly_income: currentUser?.monthly_income || 38000,
+    full_name: currentUser?.full_name || (uiLang === 'hi' ? "नया आवेदक / किसान" : "New Applicant / Farmer"),
+    monthly_income: currentUser?.monthly_income || 35000,
     employment_type: currentUser?.employment_type || "Farmer / Agriculture",
-    agri_land_acres: currentUser?.agri_land_acres || 3.5,
+    agri_land_acres: currentUser?.agri_land_acres || 3.0,
     kcc_holder: true,
     coapplicant_income: 0,
     existing_debts_monthly: 4500,
-    cibil_score: 710,
+    cibil_score: 700,
     home_ownership: "Owned - Ancestral / Pucca",
     preferred_language: currentUser?.preferred_language || "hi",
-    phone_number: "+91 98231 45678"
+    phone_number: currentUser?.phone_number || ""
   });
 
   // AI Coach state
@@ -180,29 +180,32 @@ export default function CustomerPortal({ currentUser, onOpenProfile }) {
     }
   }, [currentUser]);
 
-  // Initial mount auto-evaluation & profile fetch
+  // Initial mount auto-evaluation & conditional profile fetch
   useEffect(() => {
     const fetchProfile = async () => {
-      try {
-        const res = await axios.get('/api/v1/auth/profile');
-        if (res.data) {
-          setUserProfile(res.data);
-          setFormData(prev => ({
-            ...prev,
-            cibil_score: res.data.cibil_score,
-            applicant_income: res.data.monthly_income * 12,
-            coapplicant_income: (res.data.coapplicant_income || 0) * 12,
-            existing_debts: (res.data.existing_debts_monthly || 0) * 12,
-            employment_status: res.data.employment_type
-          }));
+      const token = localStorage.getItem('loaniq_token');
+      if (token && currentUser) {
+        try {
+          const res = await axios.get('/api/v1/auth/profile');
+          if (res.data) {
+            setUserProfile(res.data);
+            setFormData(prev => ({
+              ...prev,
+              cibil_score: res.data.cibil_score,
+              applicant_income: res.data.monthly_income * 12,
+              coapplicant_income: (res.data.coapplicant_income || 0) * 12,
+              existing_debts: (res.data.existing_debts_monthly || 0) * 12,
+              employment_status: res.data.employment_type
+            }));
+          }
+        } catch (err) {
+          console.log("Profile fetch notice:", err.message);
         }
-      } catch (err) {
-        console.log("Using default rural profile:", err.message);
       }
     };
     fetchProfile();
     evaluateApplication(DEFAULT_INITIAL_LOAN);
-  }, []);
+  }, [currentUser]);
 
   const handleSaveProfile = (newProfile) => {
     setUserProfile(newProfile);

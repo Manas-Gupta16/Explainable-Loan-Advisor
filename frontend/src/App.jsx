@@ -12,15 +12,7 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState(() => {
     try {
       const saved = localStorage.getItem('loaniq_user');
-      return saved ? JSON.parse(saved) : {
-        id: 1,
-        full_name: 'Rameshwar Patil',
-        email: 'rameshwar.patil@ruralbharat.in',
-        role: 'CUSTOMER',
-        monthly_income: 38000.0,
-        agri_land_acres: 3.5,
-        preferred_language: 'hi'
-      };
+      return saved ? JSON.parse(saved) : null;
     } catch (e) {
       return null;
     }

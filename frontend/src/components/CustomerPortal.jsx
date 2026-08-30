@@ -6,7 +6,7 @@ import {
   RefreshCw, Layers, MapPin, PieChart, Sparkles,
   FileText, Download, Play, Pause, Volume2, Landmark,
   TrendingDown, Gauge, FileCheck, BrainCircuit, GitCommit, UserCheck, CheckCircle2,
-  Wheat, Edit3, ChevronDown, ChevronUp, Radio, HelpCircle, ArrowRight, Sliders, Globe
+  Wheat, Edit3, ChevronDown, ChevronUp, Radio, HelpCircle, ArrowRight, Sliders, Globe, User
 } from 'lucide-react';
 import BorrowerProfileModal from './BorrowerProfileModal';
 import VoiceGuideModal from './VoiceGuideModal';

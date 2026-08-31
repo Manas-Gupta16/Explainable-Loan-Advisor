@@ -1,6 +1,15 @@
 import re
 from typing import Dict, Any, Optional
 
+import io
+import numpy as np
+try:
+    import cv2
+    import easyocr
+    HAS_EASYOCR = True
+except ImportError:
+    HAS_EASYOCR = False
+
 class DocumentOCRService:
     """
     Automated Indian Document OCR & Discrepancy Fraud Detection Engine.
@@ -8,7 +17,29 @@ class DocumentOCRService:
     PAN Cards, and Bank Statements, cross-checking them against self-reported loan parameters.
     """
     def __init__(self):
-        pass
+        self.reader = None
+        if HAS_EASYOCR:
+            print("Initializing EasyOCR reader (this may take a few seconds)...")
+            try:
+                self.reader = easyocr.Reader(['en', 'hi'], gpu=False)
+            except Exception as e:
+                print(f"Failed to initialize EasyOCR: {e}")
+
+    def extract_text_from_image(self, image_bytes: bytes) -> str:
+        """Runs EasyOCR on image bytes and returns concatenated string of all detected text."""
+        if not HAS_EASYOCR or not self.reader:
+            print("Warning: EasyOCR not installed or initialized. Returning empty text.")
+            return ""
+            
+        try:
+            nparr = np.frombuffer(image_bytes, np.uint8)
+            img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+            result = self.reader.readtext(img, detail=0)
+            raw_text = " ".join(result)
+            return raw_text
+        except Exception as e:
+            print(f"OCR Inference Error: {e}")
+            return ""
 
     def extract_and_verify(
         self,

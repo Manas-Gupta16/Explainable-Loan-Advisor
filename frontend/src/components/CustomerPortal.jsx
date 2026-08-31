@@ -85,6 +85,7 @@ export default function CustomerPortal({ currentUser, onOpenProfile }) {
   const [declaredIncome, setDeclaredIncome] = useState(formData.applicant_income / 12);
   const [ocrResult, setOcrResult] = useState(null);
   const [ocrLoading, setOcrLoading] = useState(false);
+  const [ocrFile, setOcrFile] = useState(null);
 
   // Account Aggregator (AA) state
   const [selectedBank, setSelectedBank] = useState('State Bank of India (SBI)');
@@ -318,20 +319,29 @@ export default function CustomerPortal({ currentUser, onOpenProfile }) {
 
 
 
-  // 3. OCR Document Upload Simulation
+  // 3. OCR Document Upload Simulation -> Real OCR
   const handleUploadDocument = async () => {
+    if (!ocrFile) {
+      alert("Please upload an image (PNG/JPG) of the document first.");
+      return;
+    }
+    
     setOcrLoading(true);
     try {
       const appId = result?.application_id || 1;
-      const res = await axios.post(`/api/v1/customer/upload-documents/${appId}`, {
-        document_type: docType,
-        file_name: docFileName,
-        declared_monthly_income: declaredIncome || formData.applicant_income / 12,
-        raw_text_content: `Employer: Tata Consultancy Services Ltd. Gross Salary: ₹${Math.round((formData.applicant_income / 12) * 1.15)}. Net Take Home Pay: ₹${Math.round((formData.applicant_income / 12))}. PAN: ABCDE1234F. EPFO Ref: 10092819281. Form 16 Verified with TRACES.`
+      const formDataUpload = new FormData();
+      formDataUpload.append('document_type', docType);
+      formDataUpload.append('file', ocrFile);
+
+      const res = await axios.post(`/api/v1/customer/upload-document-image/${appId}`, formDataUpload, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
       });
       setOcrResult(res.data);
     } catch (err) {
       console.error("OCR Document verification error:", err);
+      alert("Error processing document. Ensure backend is running and EasyOCR models are downloaded.");
     } finally {
       setOcrLoading(false);
     }
@@ -1212,16 +1222,14 @@ export default function CustomerPortal({ currentUser, onOpenProfile }) {
                       </div>
 
                       <div>
-                        <label className="text-[11px] text-slate-400 block mb-1">Sample Document</label>
-                        <select
-                          value={docFileName}
-                          onChange={(e) => setDocFileName(e.target.value)}
-                          className="cyber-input text-xs"
-                        >
-                          <option value="TCS_Salary_Slip_Form16.pdf">TCS Ltd Salary Slip (Verified)</option>
-                          <option value="Infosys_Paystub_Mismatch.pdf">Infosys Paystub (15% Variance)</option>
-                          <option value="Altered_Fraud_Statement.pdf">Fabricated PDF (Critical Fraud Flag)</option>
-                        </select>
+                        <label className="text-[11px] text-slate-400 block mb-1">Upload Document Image</label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => setOcrFile(e.target.files[0])}
+                          className="cyber-input text-xs w-full cursor-pointer file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-[#d2ff00] file:text-black hover:file:bg-[#b5db00]"
+                        />
+                        {ocrFile && <span className="text-[10px] text-emerald-400 mt-1 block truncate">Selected: {ocrFile.name}</span>}
                       </div>
 
                       <div>

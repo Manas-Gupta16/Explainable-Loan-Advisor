@@ -1,7 +1,8 @@
 import json
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, File, UploadFile
 from sqlalchemy.orm import Session
 from typing import List, Dict, Any
+from backend.app.services.ocr_service import ocr_service
 
 from backend.app.db.database import get_db
 from backend.app.db.models import LoanApplication, XAILog, StressTestLog
@@ -264,6 +265,69 @@ def upload_verification_document(
         application_id=app_id,
         document_type=doc_in.document_type,
         file_name=doc_in.file_name,
+        extracted_monthly_income=ocr_result['extracted_monthly_income'],
+        declared_monthly_income=declared_income,
+        extracted_employer=ocr_result['extracted_employer'],
+        extracted_tax_id=ocr_result['extracted_tax_id'],
+        discrepancy_ratio=ocr_result['discrepancy_ratio'],
+        verification_status=ocr_result['verification_status'],
+        fraud_risk_score=ocr_result['fraud_risk_score'],
+        audit_notes=ocr_result['audit_notes']
+    )
+    db.add(db_doc)
+    db.commit()
+    db.refresh(db_doc)
+
+    return DocumentVerificationResponse(
+        id=db_doc.id,
+        application_id=app_id,
+        document_type=db_doc.document_type,
+        file_name=db_doc.file_name,
+        extracted_monthly_income=db_doc.extracted_monthly_income,
+        declared_monthly_income=db_doc.declared_monthly_income,
+        extracted_employer=db_doc.extracted_employer,
+        extracted_tax_id=db_doc.extracted_tax_id,
+        discrepancy_ratio=db_doc.discrepancy_ratio,
+        discrepancy_percentage=ocr_result['discrepancy_percentage'],
+        verification_status=db_doc.verification_status,
+        fraud_risk_score=db_doc.fraud_risk_score,
+        audit_notes=db_doc.audit_notes or ""
+    )
+
+@router.post("/upload-document-image/{app_id}", response_model=DocumentVerificationResponse)
+async def upload_document_image(
+    app_id: int,
+    document_type: str,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db)
+):
+    """
+    Real OCR image processing using EasyOCR.
+    """
+    app_obj = db.query(LoanApplication).filter(LoanApplication.id == app_id).first()
+    if not app_obj:
+        raise HTTPException(status_code=404, detail="Application not found")
+
+    declared_income = app_obj.applicant_income / 12.0
+    
+    # Read image bytes
+    image_bytes = await file.read()
+    
+    # Extract text via EasyOCR
+    raw_text = ocr_service.extract_text_from_image(image_bytes)
+    
+    # Run the existing verification logic using the dynamically extracted text
+    ocr_result = ocr_service.extract_and_verify(
+        file_name=file.filename,
+        document_type=document_type,
+        declared_monthly_income=declared_income,
+        raw_text=raw_text
+    )
+
+    db_doc = DocumentVerification(
+        application_id=app_id,
+        document_type=document_type,
+        file_name=file.filename,
         extracted_monthly_income=ocr_result['extracted_monthly_income'],
         declared_monthly_income=declared_income,
         extracted_employer=ocr_result['extracted_employer'],

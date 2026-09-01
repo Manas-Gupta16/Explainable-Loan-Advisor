@@ -26,8 +26,8 @@ class LLMManagerService:
         if HAS_GEMINI and self.api_key:
             try:
                 genai.configure(api_key=self.api_key)
-                # Using Gemini 1.5 Flash for fast textual reasoning
-                self.model = genai.GenerativeModel('gemini-1.5-flash')
+                # Using Gemini 3.5 Flash for fast textual reasoning
+                self.model = genai.GenerativeModel('gemini-3.5-flash')
                 self.is_configured = True
                 print("LLM Manager Service: Gemini initialized successfully.")
             except Exception as e:

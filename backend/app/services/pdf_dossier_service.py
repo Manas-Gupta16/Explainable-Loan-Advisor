@@ -4,6 +4,8 @@ import hashlib
 from datetime import datetime, timezone
 from typing import Dict, Any, Optional
 
+from backend.app.services.llm_manager_service import llm_manager_service
+
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -218,10 +220,33 @@ class PDFComplianceDossierService:
             ('RIGHTPADDING', (0, 0), (-1, -1), 8),
         ]))
         story.append(exec_table)
+        story.append(Spacer(1, 15))
+
+        # ── 2.5 AI AGENTIC UNDERWRITER MEMO (LLM) ──────────────────────
+        story.append(Paragraph("2. AI Underwriter Executive Summary (Gemini)", self.section_heading))
+        
+        # Merge all data into a payload for the LLM
+        full_app_data = dict(application_data)
+        if shap_data:
+            full_app_data['shap_explanation'] = shap_data
+            
+        import re
+        memo_text = llm_manager_service.generate_credit_memo(full_app_data)
+        
+        # Parse basic markdown for reportlab (e.g. **bold**)
+        memo_text = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', memo_text)
+        
+        memo_paragraphs = memo_text.split('\n\n')
+        for para in memo_paragraphs:
+            para = para.strip()
+            if para:
+                story.append(Paragraph(para, self.body_style))
+                story.append(Spacer(1, 6))
+        
         story.append(Spacer(1, 10))
 
         # ── 3. APPLICANT UNDERWRITING ATTRIBUTES ───────────────────────
-        story.append(Paragraph("2. Verified Applicant Financial & Underwriting Profile (INR)", self.section_heading))
+        story.append(Paragraph("3. Verified Applicant Financial & Underwriting Profile (INR)", self.section_heading))
         
         income = application_data.get('applicant_income', 0)
         co_income = application_data.get('coapplicant_income', 0)
